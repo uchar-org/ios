@@ -11525,17 +11525,17 @@ open class LazyTimelineItemProviderSDKMock: MatrixRustSDK.LazyTimelineItemProvid
         }
     }
 
-    //MARK: - latestJson
+    //MARK: - latestContentRaw
 
-    open var latestJsonUnderlyingCallsCount = 0
-    open var latestJsonCallsCount: Int {
+    open var latestContentRawUnderlyingCallsCount = 0
+    open var latestContentRawCallsCount: Int {
         get {
             if Thread.isMainThread {
-                return latestJsonUnderlyingCallsCount
+                return latestContentRawUnderlyingCallsCount
             } else {
                 var returnValue: Int? = nil
                 DispatchQueue.main.sync {
-                    returnValue = latestJsonUnderlyingCallsCount
+                    returnValue = latestContentRawUnderlyingCallsCount
                 }
 
                 return returnValue!
@@ -11543,27 +11543,27 @@ open class LazyTimelineItemProviderSDKMock: MatrixRustSDK.LazyTimelineItemProvid
         }
         set {
             if Thread.isMainThread {
-                latestJsonUnderlyingCallsCount = newValue
+                latestContentRawUnderlyingCallsCount = newValue
             } else {
                 DispatchQueue.main.sync {
-                    latestJsonUnderlyingCallsCount = newValue
+                    latestContentRawUnderlyingCallsCount = newValue
                 }
             }
         }
     }
-    open var latestJsonCalled: Bool {
-        return latestJsonCallsCount > 0
+    open var latestContentRawCalled: Bool {
+        return latestContentRawCallsCount > 0
     }
 
-    open var latestJsonUnderlyingReturnValue: String?
-    open var latestJsonReturnValue: String? {
+    open var latestContentRawUnderlyingReturnValue: String?
+    open var latestContentRawReturnValue: String? {
         get {
             if Thread.isMainThread {
-                return latestJsonUnderlyingReturnValue
+                return latestContentRawUnderlyingReturnValue
             } else {
                 var returnValue: String?? = nil
                 DispatchQueue.main.sync {
-                    returnValue = latestJsonUnderlyingReturnValue
+                    returnValue = latestContentRawUnderlyingReturnValue
                 }
 
                 return returnValue!
@@ -11571,22 +11571,22 @@ open class LazyTimelineItemProviderSDKMock: MatrixRustSDK.LazyTimelineItemProvid
         }
         set {
             if Thread.isMainThread {
-                latestJsonUnderlyingReturnValue = newValue
+                latestContentRawUnderlyingReturnValue = newValue
             } else {
                 DispatchQueue.main.sync {
-                    latestJsonUnderlyingReturnValue = newValue
+                    latestContentRawUnderlyingReturnValue = newValue
                 }
             }
         }
     }
-    open var latestJsonClosure: (() -> String?)?
+    open var latestContentRawClosure: (() -> String?)?
 
-    open override func latestJson() -> String? {
-        latestJsonCallsCount += 1
-        if let latestJsonClosure = latestJsonClosure {
-            return latestJsonClosure()
+    open override func latestContentRaw() -> String? {
+        latestContentRawCallsCount += 1
+        if let latestContentRawClosure = latestContentRawClosure {
+            return latestContentRawClosure()
         } else {
-            return latestJsonReturnValue
+            return latestContentRawReturnValue
         }
     }
 }
@@ -23138,89 +23138,6 @@ open class SecretsBundleSDKMock: MatrixRustSDK.SecretsBundle, @unchecked Sendabl
         set(value) { underlyingHandle = value }
     }
     fileprivate var underlyingHandle: UInt64!
-}
-open class SecretsBundleWithUserIdSDKMock: MatrixRustSDK.SecretsBundleWithUserId, @unchecked Sendable {
-    public init() {
-        super.init(noHandle: .init())
-    }
-
-    public required init(unsafeFromHandle handle: UInt64) {
-        fatalError("init(unsafeFromHandle:) has not been implemented")
-    }
-
-    fileprivate var handle: UInt64 {
-        get { return underlyingHandle }
-        set(value) { underlyingHandle = value }
-    }
-    fileprivate var underlyingHandle: UInt64!
-    static func reset()
-    {
-    }
-
-    //MARK: - containsBackupKey
-
-    open var containsBackupKeyUnderlyingCallsCount = 0
-    open var containsBackupKeyCallsCount: Int {
-        get {
-            if Thread.isMainThread {
-                return containsBackupKeyUnderlyingCallsCount
-            } else {
-                var returnValue: Int? = nil
-                DispatchQueue.main.sync {
-                    returnValue = containsBackupKeyUnderlyingCallsCount
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                containsBackupKeyUnderlyingCallsCount = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    containsBackupKeyUnderlyingCallsCount = newValue
-                }
-            }
-        }
-    }
-    open var containsBackupKeyCalled: Bool {
-        return containsBackupKeyCallsCount > 0
-    }
-
-    open var containsBackupKeyUnderlyingReturnValue: Bool!
-    open var containsBackupKeyReturnValue: Bool! {
-        get {
-            if Thread.isMainThread {
-                return containsBackupKeyUnderlyingReturnValue
-            } else {
-                var returnValue: Bool? = nil
-                DispatchQueue.main.sync {
-                    returnValue = containsBackupKeyUnderlyingReturnValue
-                }
-
-                return returnValue!
-            }
-        }
-        set {
-            if Thread.isMainThread {
-                containsBackupKeyUnderlyingReturnValue = newValue
-            } else {
-                DispatchQueue.main.sync {
-                    containsBackupKeyUnderlyingReturnValue = newValue
-                }
-            }
-        }
-    }
-    open var containsBackupKeyClosure: (() -> Bool)?
-
-    open override func containsBackupKey() -> Bool {
-        containsBackupKeyCallsCount += 1
-        if let containsBackupKeyClosure = containsBackupKeyClosure {
-            return containsBackupKeyClosure()
-        } else {
-            return containsBackupKeyReturnValue
-        }
-    }
 }
 open class SendAttachmentJoinHandleSDKMock: MatrixRustSDK.SendAttachmentJoinHandle, @unchecked Sendable {
     public init() {
