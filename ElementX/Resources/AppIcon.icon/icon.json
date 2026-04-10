@@ -5,8 +5,9 @@
       "layers" : [
         {
           "glass" : false,
-          "image-name" : "AppIcon.png",
-          "name" : "AppIcon"
+          "hidden" : false,
+          "image-name" : "1024-mac.png",
+          "name" : "1024-mac"
         }
       ],
       "name" : "Background",
