@@ -20,7 +20,7 @@ enum UserSessionFlowCoordinatorAction {
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
-    enum HomeTab: Hashable { case chats, spaces }
+    enum HomeTab: Hashable { case chats, spaces, settings }
     
     private let navigationRootCoordinator: NavigationRootCoordinator
     private let navigationTabCoordinator: NavigationTabCoordinator<HomeTab>
@@ -37,6 +37,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     private let chatsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     private let spacesTabFlowCoordinator: SpacesTabFlowCoordinator
     private let spacesTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+    private let settingsTabStackCoordinator: NavigationStackCoordinator
+    private let settingsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
     
     // periphery:ignore - retaining purpose
     private var settingsFlowCoordinator: SettingsFlowCoordinator?
@@ -92,6 +94,18 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         spacesTabDetails = .init(tag: HomeTab.spaces, title: L10n.screenHomeTabSpaces, icon: \.space, selectedIcon: \.spaceSolid)
         spacesTabDetails.navigationSplitCoordinator = spacesSplitCoordinator
         
+        let settingsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.appSettings.hideBrandChrome))
+
+        settingsTabStackCoordinator = NavigationStackCoordinator()
+
+        settingsTabDetails = .init(tag: HomeTab.settings,
+                                   title: L10n.commonSettings,
+                                   icon: \.settings,
+                                   selectedIcon: \.settingsSolid)
+        settingsTabDetails.navigationSplitCoordinator = settingsSplitCoordinator
+
+        settingsSplitCoordinator.setSidebarCoordinator(settingsTabStackCoordinator)
+        
         onboardingStackCoordinator = NavigationStackCoordinator()
         onboardingFlowCoordinator = OnboardingFlowCoordinator(isNewLogin: isNewLogin,
                                                               appLockService: appLockService,
@@ -100,7 +114,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         
         navigationTabCoordinator.setTabs([
             .init(coordinator: chatsSplitCoordinator, details: chatsTabDetails),
-            .init(coordinator: spacesSplitCoordinator, details: spacesTabDetails)
+            .init(coordinator: spacesSplitCoordinator, details: spacesTabDetails),
+            .init(coordinator: settingsSplitCoordinator, details: settingsTabDetails)
         ])
         
         stateMachine = flowParameters.stateMachineFactory.makeUserSessionFlowStateMachine(state: .initial)
@@ -125,9 +140,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             if ProcessInfo.processInfo.isiOSAppOnMac {
                 startSettingsFlow(detached: true)
             } else {
-                if stateMachine.state != .settingsScreen {
-                    stateMachine.tryEvent(.showSettingsScreen)
-                }
+                navigationTabCoordinator.selectedTab = .settings
                 settingsFlowCoordinator?.handleAppRoute(appRoute, animated: animated)
             }
         case .call(let roomID, let isVoiceCall):
@@ -179,6 +192,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
             
             chatsTabFlowCoordinator.start()
             spacesTabFlowCoordinator.start()
+            startSettingsTab()
             attemptStartingOnboarding()
         }
         
@@ -192,6 +206,30 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         stateMachine.addErrorHandler { context in
             fatalError("Unexpected transition: \(context)")
         }
+    }
+    
+    private func startSettingsTab() {
+        let coordinator = SettingsFlowCoordinator(appLockService: appLockService,
+                                                  navigationStackCoordinator: settingsTabStackCoordinator,
+                                                  flowParameters: flowParameters)
+        
+        coordinator.actions.sink { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .dismiss:
+                break
+            case .clearCache:
+                actionsSubject.send(.clearCache)
+            case .runLogoutFlow:
+                Task { await self.runLogoutFlow() }
+            case .forceLogout:
+                actionsSubject.send(.forceLogout)
+            }
+        }
+        .store(in: &cancellables)
+        
+        coordinator.handleAppRoute(.settings, animated: false)
+        settingsFlowCoordinator = coordinator
     }
     
     private func setupObservers() {
