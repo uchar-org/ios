@@ -1,10 +1,13 @@
+---
 name: Uchar
 attributes:
   ORGANIZATIONNAME: Uzinfocom
   LastUpgradeCheck: "1620"
+  
 fileGroups:
 - project.yml
 - app.yml
+
 options:
   groupSortPosition: bottom
   createIntermediateGroups: true
@@ -42,16 +45,18 @@ options:
     - AccessibilityTests
   fileTypes:
     icon:
-      file: true
+      file: true # https://github.com/yonaskolb/XcodeGen/issues/1556
   postGenCommand: cd Tools/XcodeGen && sh postGenCommand.sh
+
 settings:
   CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: true
   ENABLE_BITCODE: false
-  APP_NAME: Uchar
+  APP_NAME: ElementX
   KEYCHAIN_ACCESS_GROUP_IDENTIFIER: "$(DEVELOPMENT_TEAM).$(BASE_BUNDLE_IDENTIFIER)"
   MARKETING_VERSION: 26.04.1
   CURRENT_PROJECT_VERSION: 1
   SUPPORTS_MACCATALYST: false
+
 include:
 - path: app.yml
 - path: ElementX/SupportingFiles/target.yml
@@ -63,26 +68,38 @@ include:
 - path: UITests/SupportingFiles/target.yml
 - path: IntegrationTests/SupportingFiles/target.yml
 - path: AccessibilityTests/SupportingFiles/target.yml
+# - path: MyAppVariant/override.yml
+
 packages:
+  # Element/Matrix dependencies
   MatrixRustSDK:
-    path: ../matrix-rust-sdk
+    url: https://github.com/element-hq/matrix-rust-components-swift
+    exactVersion: 26.04.09
+    # path: ../matrix-rust-sdk
   Compound:
     path: compound-ios
   AnalyticsEvents:
     url: https://github.com/matrix-org/matrix-analytics-events
     minorVersion: 0.30.0
+    # path: ../matrix-analytics-events
   EmbeddedElementCall:
     url: https://github.com/element-hq/element-call-swift
     exactVersion: 0.17.0
   Emojibase:
     url: https://github.com/matrix-org/emojibase-bindings
-    minorVersion: 1.5.0
+    revision: 60bc01f2e3b31445dc723f5af1a777b63d18e6c2 # pinned due to https://github.com/matrix-org/emojibase-bindings/issues/59
+    # minorVersion: 1.5.0
+    # path: ../emojibase-bindings
   SwiftOGG:
     url: https://github.com/element-hq/swift-ogg
     minorVersion: 0.0.3
+    # path: ../swift-ogg
   WysiwygComposer:
     url: https://github.com/element-hq/matrix-rich-text-editor-swift
     exactVersion: 2.41.0
+    # path: ../matrix-rich-text-editor/platforms/ios/lib/WysiwygComposer
+  
+  # External dependencies
   Algorithms:
     url: https://github.com/apple/swift-algorithms
     minorVersion: 1.2.1
@@ -146,6 +163,7 @@ packages:
   Version:
     url: https://github.com/mxcl/Version
     minorVersion: 2.2.0
+
 aggregateTargets:
   Periphery:
     buildScripts:

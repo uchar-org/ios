@@ -11581,7 +11581,7 @@ open class LazyTimelineItemProviderSDKMock: MatrixRustSDK.LazyTimelineItemProvid
     }
     open var latestContentRawClosure: (() -> String?)?
 
-    open override func latestContentRaw() -> String? {
+    open func latestContentRaw() -> String? {
         latestContentRawCallsCount += 1
         if let latestContentRawClosure = latestContentRawClosure {
             return latestContentRawClosure()
