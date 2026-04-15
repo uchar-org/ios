@@ -100,7 +100,7 @@ private struct AuthenticationBrandLogoModifier: ViewModifier {
                             y: 6.28571 * scale)
                     .blendMode(.overlay)
             }
-            .padding(24 * scale)
+            .padding(16 * scale)
             .background {
                 Color.white
                     .opacity(isLight ? 0.23 : isOnGradient ? 0.05 : 0.13)

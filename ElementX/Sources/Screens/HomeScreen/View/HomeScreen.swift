@@ -52,10 +52,10 @@ struct HomeScreen: View {
         
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            settingsButton
-                .buttonStyle(.borderless)
-        }
+//        ToolbarItem(placement: .navigationBarLeading) {
+//            settingsButton
+//                .buttonStyle(.borderless)
+//        }
         
         ToolbarItem(placement: .primaryAction) {
             if #available(iOS 26, *) {

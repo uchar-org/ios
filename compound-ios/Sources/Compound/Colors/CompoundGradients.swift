@@ -27,12 +27,11 @@ public struct CompoundGradients {
     }
 
     public var subtle: Gradient {
-        .init(colors: [.compound.gradientSubtleStop1,
-                       .compound.gradientSubtleStop2,
-                       .compound.gradientSubtleStop3,
-                       .compound.gradientSubtleStop4,
-                       .compound.gradientSubtleStop5,
-                       .compound.gradientSubtleStop6])
+        .init(colors: [.blue,
+                       .blue.opacity(0.700),
+                       .blue.opacity(0.500),
+                       .blue.opacity(0.300),
+                       .clear])
     }
 
     public var info: Gradient {
