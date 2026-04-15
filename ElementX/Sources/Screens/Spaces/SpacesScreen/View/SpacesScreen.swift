@@ -96,21 +96,21 @@ struct SpacesScreen: View {
     
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarLeading) {
-            Button {
-                context.send(viewAction: .showSettings)
-            } label: {
-                LoadableAvatarImage(url: context.viewState.userAvatarURL,
-                                    name: context.viewState.userDisplayName,
-                                    contentID: context.viewState.userID,
-                                    avatarSize: .user(on: .spaces),
-                                    mediaProvider: context.mediaProvider)
-                    .accessibilityIdentifier(A11yIdentifiers.homeScreen.userAvatar)
-                    .compositingGroup()
-            }
-            .buttonStyle(.borderless)
-            .accessibilityLabel(L10n.commonSettings)
-        }
+//        ToolbarItem(placement: .navigationBarLeading) {
+//            Button {
+//                context.send(viewAction: .showSettings)
+//            } label: {
+//                LoadableAvatarImage(url: context.viewState.userAvatarURL,
+//                                    name: context.viewState.userDisplayName,
+//                                    contentID: context.viewState.userID,
+//                                    avatarSize: .user(on: .spaces),
+//                                    mediaProvider: context.mediaProvider)
+//                    .accessibilityIdentifier(A11yIdentifiers.homeScreen.userAvatar)
+//                    .compositingGroup()
+//            }
+//            .buttonStyle(.borderless)
+//            .accessibilityLabel(L10n.commonSettings)
+//        }
         
         ToolbarItem(placement: .principal) {
             // Hides the navigationTitle (which is set for the navigation stack label).
