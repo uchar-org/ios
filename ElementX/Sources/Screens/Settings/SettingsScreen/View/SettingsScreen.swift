@@ -41,7 +41,7 @@ struct SettingsScreen: View {
         .navigationTitle(L10n.commonSettings)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarVisibility(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic, for: .navigationBar)
-        .toolbar { toolbar }
+//        .toolbar { toolbar }
     }
     
     private var userSection: some View {
