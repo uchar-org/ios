@@ -21,7 +21,7 @@ import SwiftUI
     @Observable class TabDetails {
         /// A unique tab that identifies the tab for selection.
         let tag: Tag
-        let title: String
+        var title: String
         let icon: KeyPath<CompoundIcons, Image>
         let selectedIcon: KeyPath<CompoundIcons, Image>
         var badgeCount = 0

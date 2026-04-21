@@ -126,6 +126,7 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     
     func start(animated: Bool) {
         stateMachine.tryEvent(.start)
+        observeLanguageChanges()
     }
     
     func stop() {
@@ -185,6 +186,21 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     // MARK: - Private
+
+    private func observeLanguageChanges() {
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateTabTitles()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func updateTabTitles() {
+        chatsTabDetails.title = L10n.screenHomeTabChats
+        spacesTabDetails.title = L10n.screenHomeTabSpaces
+        settingsTabDetails.title = L10n.commonSettings
+    }
     
     private func configureStateMachine() {
         stateMachine.addRoutes(event: .start, transitions: [.initial => .tabBar]) { [weak self] _ in
