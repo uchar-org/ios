@@ -15,6 +15,8 @@ struct Application: App {
     @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     
+    @State private var languageManager = LanguageManager()
+
     private var appCoordinator: AppCoordinatorProtocol!
 
     init() {
@@ -41,7 +43,9 @@ struct Application: App {
                         Divider().ignoresSafeArea()
                     }
                 }
-                .environment(\.openURL, openURLAction(appCoordinator: appCoordinator, windowType: nil))
+                .id(languageManager.selectedLanguage)
+                .environment(\.locale, languageManager.locale)
+                .environment(languageManager)
                 .onOpenURL { url in
                     openURL(url, isExternalURL: true)
                 }

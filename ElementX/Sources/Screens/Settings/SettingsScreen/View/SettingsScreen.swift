@@ -19,12 +19,21 @@ struct SettingsScreen: View {
             !context.viewState.showLinkNewDeviceButton
     }
     
+    @Environment(LanguageManager.self) var languageManager
+
     var body: some View {
         Form {
             userSection
             
             if !shouldHideManageAccountSection {
                 manageAccountSection
+            }
+            
+            List {
+                Button("English") { languageManager.selectedLanguage = "en" }
+                Button("French") { languageManager.selectedLanguage = "fr" }
+                Button("Spanish") { languageManager.selectedLanguage = "es" }
+                Button("Russian") { languageManager.selectedLanguage = "ru" }
             }
             
             manageMyAppSection
