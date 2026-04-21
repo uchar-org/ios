@@ -25,8 +25,4 @@ class LanguageManager {
         selectedLanguage = UserDefaults.standard.string(forKey: "selected_language") ?? "en"
         Bundle.overrideLocalizations = [selectedLanguage]
     }
-    
-    var locale: Locale {
-        Locale(identifier: selectedLanguage)
-    }
 }

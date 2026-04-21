@@ -44,7 +44,6 @@ struct Application: App {
                     }
                 }
                 .id(languageManager.selectedLanguage)
-                .environment(\.locale, languageManager.locale)
                 .environment(languageManager)
                 .onOpenURL { url in
                     openURL(url, isExternalURL: true)
