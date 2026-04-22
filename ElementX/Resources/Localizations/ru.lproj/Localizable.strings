@@ -1581,3 +1581,4 @@
 "screen_chat_backup_recovery_action_setup" = "Получить ключ восстановления";
 "screen_signout_confirmation_dialog_submit" = "Удалить это устройство";
 "screen_signout_confirmation_dialog_title" = "Удалить это устройство";
+"language" = "Язык";
