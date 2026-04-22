@@ -115,6 +115,8 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             actionsSubject.send(.logout)
         case .secureBackup:
             actionsSubject.send(.secureBackup)
+        case .language:
+            actionsSubject.send(.language)
         case .notifications:
             actionsSubject.send(.notifications)
         case .advancedSettings:
