@@ -90,7 +90,7 @@ struct SettingsScreen: View {
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.notifications)
             
             ListRow(label: .default(title: L10n.language,
-                                    icon: \.advancedSettings),
+                                    icon: Image(systemName: "globe")),
                     kind: .navigationLink {
                         context.send(viewAction: .language)
                     })
