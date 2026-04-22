@@ -238,7 +238,7 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
     private func presenetLanguageSettings() {
         let coordinator = LanguageScreenCoordinator()
         navigationStackCoordinator.push(coordinator)
-     }
+    }
         
     private func presentNotificationSettings() {
         let notificationParameters = NotificationSettingsScreenCoordinatorParameters(navigationStackCoordinator: navigationStackCoordinator,
