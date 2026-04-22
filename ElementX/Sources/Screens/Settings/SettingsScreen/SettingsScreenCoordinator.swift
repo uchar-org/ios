@@ -27,6 +27,7 @@ enum SettingsScreenCoordinatorAction {
     case blockedUsers
     case linkNewDevice
     case manageAccount(url: URL)
+    case language
     case notifications
     case advancedSettings
     case labs
@@ -76,6 +77,8 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.blockedUsers)
                 case .secureBackup:
                     actionsSubject.send(.secureBackup)
+                case .language:
+                    actionsSubject.send(.language)
                 case .notifications:
                     actionsSubject.send(.notifications)
                 case .advancedSettings:

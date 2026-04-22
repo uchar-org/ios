@@ -29,13 +29,6 @@ struct SettingsScreen: View {
                 manageAccountSection
             }
             
-            List {
-                Button("English") { languageManager.selectedLanguage = "en" }
-                Button("French") { languageManager.selectedLanguage = "fr" }
-                Button("Spanish") { languageManager.selectedLanguage = "es" }
-                Button("Russian") { languageManager.selectedLanguage = "ru" }
-            }
-            
             manageMyAppSection
             
             generalSection
@@ -95,6 +88,13 @@ struct SettingsScreen: View {
                         context.send(viewAction: .notifications)
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.notifications)
+            
+            ListRow(label: .default(title: "Language",
+                                    icon: \.advancedSettings),
+                    kind: .navigationLink {
+                        context.send(viewAction: .language)
+                    })
+                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.language)
             
             ListRow(label: .default(title: L10n.commonScreenLock,
                                     icon: \.lock),

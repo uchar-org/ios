@@ -247,6 +247,7 @@ enum A11yIdentifiers {
         let done = "settings-done"
         let account = "settings-account"
         let secureBackup = "settings-secure_backup"
+        let language = "settings-language"
         let notifications = "settings-notifications"
         let analytics = "settings-analytics"
         let screenLock = "settings-screen_lock"

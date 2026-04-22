@@ -26,3 +26,18 @@ class LanguageManager {
         Bundle.overrideLocalizations = [selectedLanguage]
     }
 }
+
+enum AvailableLanguage: String, CaseIterable {
+    case en, uz, ru, fr, es, ja
+    
+    var languageName: String {
+        switch self {
+        case .en: return "English"
+        case .uz: return "O'zbekcha"
+        case .ru: return "Pусский"
+        case .fr: return "Français"
+        case .es: return "Español"
+        case .ja: return "日本語"
+        }
+    }
+}
