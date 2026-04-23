@@ -1581,3 +1581,4 @@
 "screen_chat_backup_recovery_action_setup" = "Ottieni la chiave di recupero";
 "screen_signout_confirmation_dialog_submit" = "Rimuovi questo dispositivo";
 "screen_signout_confirmation_dialog_title" = "Rimuovi questo dispositivo";
+"language_title" = "Lingua";

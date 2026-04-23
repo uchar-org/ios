@@ -1581,4 +1581,4 @@
 "screen_chat_backup_recovery_action_setup" = "Kurtarmayı ayarlayın";
 "screen_signout_confirmation_dialog_submit" = "Oturumu kapat";
 "screen_signout_confirmation_dialog_title" = "Oturumu kapat";
-"language" = "Dil";
+"language_title" = "Dil";
