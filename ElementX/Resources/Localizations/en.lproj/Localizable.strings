@@ -1581,4 +1581,4 @@
 "screen_chat_backup_recovery_action_setup" = "Get recovery key";
 "screen_signout_confirmation_dialog_submit" = "Remove this device";
 "screen_signout_confirmation_dialog_title" = "Remove this device";
-"language" = "Language";
+"language_title" = "Language";

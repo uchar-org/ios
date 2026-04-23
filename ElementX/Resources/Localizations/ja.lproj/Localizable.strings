@@ -1581,4 +1581,4 @@
 "screen_chat_backup_recovery_action_setup" = "回復鍵を作成";
 "screen_signout_confirmation_dialog_submit" = "この端末を削除";
 "screen_signout_confirmation_dialog_title" = "この端末を削除";
-"language_title": "言語"
+"language_title" = "言語";

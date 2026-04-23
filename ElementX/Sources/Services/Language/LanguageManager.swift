@@ -28,7 +28,7 @@ class LanguageManager {
 }
 
 enum AvailableLanguage: String, CaseIterable {
-    case en, uz, ru, fr, es, ja
+    case en, uz, ru, fr, it, ja
     
     var languageName: String {
         switch self {
@@ -36,7 +36,7 @@ enum AvailableLanguage: String, CaseIterable {
         case .uz: return "O'zbekcha"
         case .ru: return "Pусский"
         case .fr: return "Français"
-        case .es: return "Español"
+        case .it: return "Italiano"
         case .ja: return "日本語"
         }
     }

@@ -1055,7 +1055,7 @@ internal enum L10n {
     return L10n.tr("Localizable", "invite_friends_text", String(describing: p1), String(describing: p2))
   }
   /// Language
-  internal static var language: String { return L10n.tr("Localizable", "language") }
+  internal static var languageTitle: String { return L10n.tr("Localizable", "language_title") }
   /// Are you sure that you want to leave this conversation? This conversation is not public and you won't be able to rejoin without an invite.
   internal static var leaveConversationAlertSubtitle: String { return L10n.tr("Localizable", "leave_conversation_alert_subtitle") }
   /// Are you sure that you want to leave this room? You're the only person here. If you leave, no one will be able to join in the future, including you.
