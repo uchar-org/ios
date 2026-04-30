@@ -2113,6 +2113,150 @@ class BugReportServiceMock: BugReportServiceProtocol, @unchecked Sendable {
         }
     }
 }
+class CLLocationManagerMock: CLLocationManagerProtocol, @unchecked Sendable {
+    weak var delegate: CLLocationManagerDelegate?
+    var allowsBackgroundLocationUpdates: Bool {
+        get { return underlyingAllowsBackgroundLocationUpdates }
+        set(value) { underlyingAllowsBackgroundLocationUpdates = value }
+    }
+    var underlyingAllowsBackgroundLocationUpdates: Bool!
+    var showsBackgroundLocationIndicator: Bool {
+        get { return underlyingShowsBackgroundLocationIndicator }
+        set(value) { underlyingShowsBackgroundLocationIndicator = value }
+    }
+    var underlyingShowsBackgroundLocationIndicator: Bool!
+    var desiredAccuracy: CLLocationAccuracy {
+        get { return underlyingDesiredAccuracy }
+        set(value) { underlyingDesiredAccuracy = value }
+    }
+    var underlyingDesiredAccuracy: CLLocationAccuracy!
+    var distanceFilter: CLLocationDistance {
+        get { return underlyingDistanceFilter }
+        set(value) { underlyingDistanceFilter = value }
+    }
+    var underlyingDistanceFilter: CLLocationDistance!
+    var pausesLocationUpdatesAutomatically: Bool {
+        get { return underlyingPausesLocationUpdatesAutomatically }
+        set(value) { underlyingPausesLocationUpdatesAutomatically = value }
+    }
+    var underlyingPausesLocationUpdatesAutomatically: Bool!
+    var authorizationStatus: CLAuthorizationStatus {
+        get { return underlyingAuthorizationStatus }
+        set(value) { underlyingAuthorizationStatus = value }
+    }
+    var underlyingAuthorizationStatus: CLAuthorizationStatus!
+    var accuracyAuthorization: CLAccuracyAuthorization {
+        get { return underlyingAccuracyAuthorization }
+        set(value) { underlyingAccuracyAuthorization = value }
+    }
+    var underlyingAccuracyAuthorization: CLAccuracyAuthorization!
+
+    //MARK: - requestAlwaysAuthorization
+
+    var requestAlwaysAuthorizationUnderlyingCallsCount = 0
+    var requestAlwaysAuthorizationCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return requestAlwaysAuthorizationUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = requestAlwaysAuthorizationUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                requestAlwaysAuthorizationUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    requestAlwaysAuthorizationUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var requestAlwaysAuthorizationCalled: Bool {
+        return requestAlwaysAuthorizationCallsCount > 0
+    }
+    var requestAlwaysAuthorizationClosure: (() -> Void)?
+
+    func requestAlwaysAuthorization() {
+        requestAlwaysAuthorizationCallsCount += 1
+        requestAlwaysAuthorizationClosure?()
+    }
+    //MARK: - startUpdatingLocation
+
+    var startUpdatingLocationUnderlyingCallsCount = 0
+    var startUpdatingLocationCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return startUpdatingLocationUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = startUpdatingLocationUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                startUpdatingLocationUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    startUpdatingLocationUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var startUpdatingLocationCalled: Bool {
+        return startUpdatingLocationCallsCount > 0
+    }
+    var startUpdatingLocationClosure: (() -> Void)?
+
+    func startUpdatingLocation() {
+        startUpdatingLocationCallsCount += 1
+        startUpdatingLocationClosure?()
+    }
+    //MARK: - stopUpdatingLocation
+
+    var stopUpdatingLocationUnderlyingCallsCount = 0
+    var stopUpdatingLocationCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return stopUpdatingLocationUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = stopUpdatingLocationUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                stopUpdatingLocationUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    stopUpdatingLocationUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var stopUpdatingLocationCalled: Bool {
+        return stopUpdatingLocationCallsCount > 0
+    }
+    var stopUpdatingLocationClosure: (() -> Void)?
+
+    func stopUpdatingLocation() {
+        stopUpdatingLocationCallsCount += 1
+        stopUpdatingLocationClosure?()
+    }
+}
 class CXProviderMock: CXProviderProtocol, @unchecked Sendable {
 
     //MARK: - setDelegate
@@ -6661,6 +6805,172 @@ class ElementCallWidgetDriverMock: ElementCallWidgetDriverProtocol, @unchecked S
             return await handleMessageClosure(message)
         } else {
             return handleMessageReturnValue
+        }
+    }
+}
+class HomeserverCapabilitiesProxyMock: HomeserverCapabilitiesProxyProtocol, @unchecked Sendable {
+
+    //MARK: - refresh
+
+    var refreshUnderlyingCallsCount = 0
+    var refreshCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return refreshUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = refreshUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                refreshUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    refreshUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var refreshCalled: Bool {
+        return refreshCallsCount > 0
+    }
+    var refreshClosure: (() async -> Void)?
+
+    func refresh() async {
+        refreshCallsCount += 1
+        await refreshClosure?()
+    }
+    //MARK: - canChangeAvatar
+
+    var canChangeAvatarUnderlyingCallsCount = 0
+    var canChangeAvatarCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return canChangeAvatarUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = canChangeAvatarUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                canChangeAvatarUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    canChangeAvatarUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var canChangeAvatarCalled: Bool {
+        return canChangeAvatarCallsCount > 0
+    }
+
+    var canChangeAvatarUnderlyingReturnValue: Bool!
+    var canChangeAvatarReturnValue: Bool! {
+        get {
+            if Thread.isMainThread {
+                return canChangeAvatarUnderlyingReturnValue
+            } else {
+                var returnValue: Bool? = nil
+                DispatchQueue.main.sync {
+                    returnValue = canChangeAvatarUnderlyingReturnValue
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                canChangeAvatarUnderlyingReturnValue = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    canChangeAvatarUnderlyingReturnValue = newValue
+                }
+            }
+        }
+    }
+    var canChangeAvatarClosure: (() async -> Bool)?
+
+    func canChangeAvatar() async -> Bool {
+        canChangeAvatarCallsCount += 1
+        if let canChangeAvatarClosure = canChangeAvatarClosure {
+            return await canChangeAvatarClosure()
+        } else {
+            return canChangeAvatarReturnValue
+        }
+    }
+    //MARK: - canChangeDisplayName
+
+    var canChangeDisplayNameUnderlyingCallsCount = 0
+    var canChangeDisplayNameCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return canChangeDisplayNameUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = canChangeDisplayNameUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                canChangeDisplayNameUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    canChangeDisplayNameUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var canChangeDisplayNameCalled: Bool {
+        return canChangeDisplayNameCallsCount > 0
+    }
+
+    var canChangeDisplayNameUnderlyingReturnValue: Bool!
+    var canChangeDisplayNameReturnValue: Bool! {
+        get {
+            if Thread.isMainThread {
+                return canChangeDisplayNameUnderlyingReturnValue
+            } else {
+                var returnValue: Bool? = nil
+                DispatchQueue.main.sync {
+                    returnValue = canChangeDisplayNameUnderlyingReturnValue
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                canChangeDisplayNameUnderlyingReturnValue = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    canChangeDisplayNameUnderlyingReturnValue = newValue
+                }
+            }
+        }
+    }
+    var canChangeDisplayNameClosure: (() async -> Bool)?
+
+    func canChangeDisplayName() async -> Bool {
+        canChangeDisplayNameCallsCount += 1
+        if let canChangeDisplayNameClosure = canChangeDisplayNameClosure {
+            return await canChangeDisplayNameClosure()
+        } else {
+            return canChangeDisplayNameReturnValue
         }
     }
 }
@@ -14757,6 +15067,14 @@ class RoomInfoProxyMock: RoomInfoProxyProtocol, @unchecked Sendable {
     var powerLevels: RoomPowerLevelsProxyProtocol?
     var successor: SuccessorRoom?
     var heroes: [RoomHero] = []
+
+}
+class RoomLiveLocationServiceMock: RoomLiveLocationServiceProtocol, @unchecked Sendable {
+    var liveLocationsPublisher: CurrentValuePublisher<[LiveLocationShare], Never> {
+        get { return underlyingLiveLocationsPublisher }
+        set(value) { underlyingLiveLocationsPublisher = value }
+    }
+    var underlyingLiveLocationsPublisher: CurrentValuePublisher<[LiveLocationShare], Never>!
 
 }
 class RoomMemberProxyMock: RoomMemberProxyProtocol, @unchecked Sendable {
