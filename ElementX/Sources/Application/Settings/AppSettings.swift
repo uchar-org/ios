@@ -23,7 +23,6 @@ protocol CommonSettingsProtocol: AnyObject {
     var bugReportRageshakeURL: RemotePreference<RageshakeConfiguration> { get }
     
     var enableOnlySignedDeviceIsolationMode: Bool { get }
-    var enableKeyShareOnInvite: Bool { get }
     var threadsEnabled: Bool { get }
     var hideQuietNotificationAlerts: Bool { get }
 }
@@ -39,7 +38,6 @@ final class AppSettings {
     private enum UserDefaultsKeys: String {
         case lastVersionLaunched
         case seenInvites
-        case hasSeenSpacesAnnouncement
         case hasSeenNewSoundBanner
         case appLockNumberOfPINAttempts
         case appLockNumberOfBiometricAttempts
@@ -66,24 +64,27 @@ final class AppSettings {
         case elementCallBaseURLOverride
         
         case voiceMessagePlaybackSpeed
+        
+        // Live Location
         case liveLocationSharingTimeoutDatesByRoomID
+        case liveLocationMinimumDistanceUpdate
+        case liveLocationDisclaimerDisplayed
         
         // Feature flags
         case publicSearchEnabled
         case fuzzyRoomListSearchEnabled
         case lowPriorityFilterEnabled
         case enableOnlySignedDeviceIsolationMode
-        case enableKeyShareOnInvite
         case knockingEnabled
         case threadsEnabled
         case roomThreadListEnabled
         case linkPreviewsEnabled
         case focusEventOnNotificationTap
         case linkNewDeviceEnabled
-        case liveLocationSharingEnabled
+        case automaticBackPaginationEnabled
         
         // Doug's tweaks 🔧
-        case hideUnreadMessagesBadge
+        case roomListActivityVisibility
         case hideQuietNotificationAlerts
         
         case developerOptionsEnabled
@@ -184,9 +185,6 @@ final class AppSettings {
     /// This Set is being used to implement badges for unread invites.
     @UserPreference(key: UserDefaultsKeys.seenInvites, defaultValue: [], storageType: .userDefaults(store))
     var seenInvites: Set<String>
-    
-    @UserPreference(key: UserDefaultsKeys.hasSeenSpacesAnnouncement, defaultValue: false, storageType: .userDefaults(store))
-    var hasSeenSpacesAnnouncement
     
     /// Defaults to `true` for new users, and we use a migration to set it to `false` for existing users.
     @UserPreference(key: UserDefaultsKeys.hasSeenNewSoundBanner, defaultValue: true, storageType: .userDefaults(store))
@@ -349,16 +347,24 @@ final class AppSettings {
     @UserPreference(key: UserDefaultsKeys.hasRequestedLocationAlwaysLocationAuthorization, defaultValue: false, storageType: .userDefaults(store))
     var hasRequestedLocationAlwaysLocationAuthorization
     
-    @UserPreference(key: UserDefaultsKeys.liveLocationSharingTimeoutDatesByRoomID, defaultValue: [String: Date](), storageType: .userDefaults(store))
-    var liveLocationSharingTimeoutDatesByRoomID
-    
     @UserPreference(key: UserDefaultsKeys.frequentlyUsedSystemEmojis, defaultValue: [FrequentlyUsedEmoji](), storageType: .userDefaults(store))
     var frequentlyUsedSystemEmojis
     
+    // MARK: - Live Location
+    
+    @UserPreference(key: UserDefaultsKeys.liveLocationSharingTimeoutDatesByRoomID, defaultValue: [String: LiveLocationSession](), storageType: .userDefaults(store))
+    var liveLocationSharingSessionsByRoomID
+    
+    @UserPreference(key: UserDefaultsKeys.liveLocationMinimumDistanceUpdate, defaultValue: 10, storageType: .userDefaults(store))
+    var liveLocationMinimumDistanceUpdate
+    
+    @UserPreference(key: UserDefaultsKeys.liveLocationDisclaimerDisplayed, defaultValue: false, storageType: .userDefaults(store))
+    var liveLocationDisclaimerDisplayed
+    
     // MARK: - Home Screen
     
-    @UserPreference(key: UserDefaultsKeys.hideUnreadMessagesBadge, defaultValue: false, storageType: .userDefaults(store))
-    var hideUnreadMessagesBadge
+    @UserPreference(key: UserDefaultsKeys.roomListActivityVisibility, defaultValue: .current, storageType: .userDefaults(store))
+    var roomListActivityVisibility: RoomListActivityVisibility
     
     // MARK: - Room Screen
     
@@ -424,10 +430,6 @@ final class AppSettings {
     @UserPreference(key: UserDefaultsKeys.enableOnlySignedDeviceIsolationMode, defaultValue: false, storageType: .userDefaults(store))
     var enableOnlySignedDeviceIsolationMode
     
-    /// Configuration to enable encrypted history sharing on invite, and accepting keys from inviters.
-    @UserPreference(key: UserDefaultsKeys.enableKeyShareOnInvite, defaultValue: false, storageType: .userDefaults(store))
-    var enableKeyShareOnInvite
-    
     @UserPreference(key: UserDefaultsKeys.knockingEnabled, defaultValue: false, storageType: .userDefaults(store))
     var knockingEnabled
     
@@ -446,10 +448,10 @@ final class AppSettings {
     @UserPreference(key: UserDefaultsKeys.linkNewDeviceEnabled, defaultValue: false, storageType: .userDefaults(store))
     var linkNewDeviceEnabled
     
-    @UserPreference(key: UserDefaultsKeys.liveLocationSharingEnabled, defaultValue: false, storageType: .userDefaults(store))
-    var liveLocationSharingEnabled
+    @UserPreference(key: UserDefaultsKeys.automaticBackPaginationEnabled, defaultValue: false, storageType: .userDefaults(store))
+    var automaticBackPaginationEnabled
     
-    @UserPreference(key: UserDefaultsKeys.developerOptionsEnabled, defaultValue: appBuildType == .debug, storageType: .userDefaults(store))
+    @UserPreference(key: UserDefaultsKeys.developerOptionsEnabled, defaultValue: appBuildType != .release, storageType: .userDefaults(store))
     var developerOptionsEnabled
 }
 

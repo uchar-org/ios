@@ -36,6 +36,8 @@ internal enum L10n {
   internal static var a11yExpandMessageTextField: String { return L10n.tr("Localizable", "a11y_expand_message_text_field") }
   /// Hide password
   internal static var a11yHidePassword: String { return L10n.tr("Localizable", "a11y_hide_password") }
+  /// Info
+  internal static var a11yInfo: String { return L10n.tr("Localizable", "a11y_info") }
   /// Join call
   internal static var a11yJoinCall: String { return L10n.tr("Localizable", "a11y_join_call") }
   /// Jump to bottom
@@ -116,6 +118,8 @@ internal enum L10n {
   internal static var a11ySenderLocation: String { return L10n.tr("Localizable", "a11y_sender_location") }
   /// Time limited action required, you have one minute to verify
   internal static var a11ySessionVerificationTimeLimitedActionRequired: String { return L10n.tr("Localizable", "a11y_session_verification_time_limited_action_required") }
+  /// Settings, action required
+  internal static var a11ySettingsWithRequiredAction: String { return L10n.tr("Localizable", "a11y_settings_with_required_action") }
   /// Show password
   internal static var a11yShowPassword: String { return L10n.tr("Localizable", "a11y_show_password") }
   /// Start a call
@@ -156,6 +160,8 @@ internal enum L10n {
   internal static var actionCancel: String { return L10n.tr("Localizable", "action_cancel") }
   /// Cancel for now
   internal static var actionCancelForNow: String { return L10n.tr("Localizable", "action_cancel_for_now") }
+  /// Choose file
+  internal static var actionChooseFile: String { return L10n.tr("Localizable", "action_choose_file") }
   /// Choose photo
   internal static var actionChoosePhoto: String { return L10n.tr("Localizable", "action_choose_photo") }
   /// Clear
@@ -194,6 +200,10 @@ internal enum L10n {
   internal static var actionDecline: String { return L10n.tr("Localizable", "action_decline") }
   /// Decline and block
   internal static var actionDeclineAndBlock: String { return L10n.tr("Localizable", "action_decline_and_block") }
+  /// Delete
+  internal static var actionDelete: String { return L10n.tr("Localizable", "action_delete") }
+  /// Delete account
+  internal static var actionDeleteAccount: String { return L10n.tr("Localizable", "action_delete_account") }
   /// Delete Poll
   internal static var actionDeletePoll: String { return L10n.tr("Localizable", "action_delete_poll") }
   /// Deselect all
@@ -206,6 +216,8 @@ internal enum L10n {
   internal static var actionDismiss: String { return L10n.tr("Localizable", "action_dismiss") }
   /// Done
   internal static var actionDone: String { return L10n.tr("Localizable", "action_done") }
+  /// Download
+  internal static var actionDownload: String { return L10n.tr("Localizable", "action_download") }
   /// Edit
   internal static var actionEdit: String { return L10n.tr("Localizable", "action_edit") }
   /// Edit caption
@@ -418,7 +430,7 @@ internal enum L10n {
   internal static var commonAcceptableUsePolicy: String { return L10n.tr("Localizable", "common_acceptable_use_policy") }
   /// Add an account
   internal static var commonAddAccount: String { return L10n.tr("Localizable", "common_add_account") }
-  /// Add another account
+  /// Add account
   internal static var commonAddAnotherAccount: String { return L10n.tr("Localizable", "common_add_another_account") }
   /// Adding caption
   internal static var commonAddingCaption: String { return L10n.tr("Localizable", "common_adding_caption") }
@@ -444,8 +456,12 @@ internal enum L10n {
   internal static var commonBlockedUsers: String { return L10n.tr("Localizable", "common_blocked_users") }
   /// Bubbles
   internal static var commonBubbles: String { return L10n.tr("Localizable", "common_bubbles") }
+  /// Call declined
+  internal static var commonCallDeclined: String { return L10n.tr("Localizable", "common_call_declined") }
   /// Call started
   internal static var commonCallStarted: String { return L10n.tr("Localizable", "common_call_started") }
+  /// You declined a call
+  internal static var commonCallYouDeclined: String { return L10n.tr("Localizable", "common_call_you_declined") }
   /// Chat backup
   internal static var commonChatBackup: String { return L10n.tr("Localizable", "common_chat_backup") }
   /// Copied to clipboard
@@ -1292,6 +1308,20 @@ internal enum L10n {
   internal static var screenAdvancedSettingsHideTimelineMediaToggleTitle: String { return L10n.tr("Localizable", "screen_advanced_settings_hide_timeline_media_toggle_title") }
   /// Labs
   internal static var screenAdvancedSettingsLabs: String { return L10n.tr("Localizable", "screen_advanced_settings_labs") }
+  /// The distance you have to move to trigger an update.
+  internal static var screenAdvancedSettingsLiveLocationSectionDescription: String { return L10n.tr("Localizable", "screen_advanced_settings_live_location_section_description") }
+  /// Make sure "Precise Location” is enabled for this app. To change the permission go to %1$@.
+  internal static func screenAdvancedSettingsLiveLocationSectionFooter(_ p1: Any) -> String {
+    return L10n.tr("Localizable", "screen_advanced_settings_live_location_section_footer", String(describing: p1))
+  }
+  /// App Settings
+  internal static var screenAdvancedSettingsLiveLocationSectionFooterLink: String { return L10n.tr("Localizable", "screen_advanced_settings_live_location_section_footer_link") }
+  /// Live location updates
+  internal static var screenAdvancedSettingsLiveLocationSectionTitle: String { return L10n.tr("Localizable", "screen_advanced_settings_live_location_section_title") }
+  /// Plural format key: "%#@COUNT@"
+  internal static func screenAdvancedSettingsLiveLocationUpdateDistance(_ p1: Int) -> String {
+    return L10n.tr("Localizable", "screen_advanced_settings_live_location_update_distance", p1)
+  }
   /// Upload photos and videos faster and reduce data usage
   internal static var screenAdvancedSettingsMediaCompressionDescription: String { return L10n.tr("Localizable", "screen_advanced_settings_media_compression_description") }
   /// Optimise media quality
@@ -1446,6 +1476,10 @@ internal enum L10n {
   }
   /// Send invite?
   internal static var screenBottomSheetCreateDmTitle: String { return L10n.tr("Localizable", "screen_bottom_sheet_create_dm_title") }
+  /// You currently don’t have any chats with this person. Confirm inviting them before continuing.
+  internal static var screenBottomSheetCreateDmUnknownUserContent: String { return L10n.tr("Localizable", "screen_bottom_sheet_create_dm_unknown_user_content") }
+  /// Start a chat with this new contact?
+  internal static var screenBottomSheetCreateDmUnknownUserTitle: String { return L10n.tr("Localizable", "screen_bottom_sheet_create_dm_unknown_user_title") }
   /// Ban user
   internal static var screenBottomSheetManageRoomMemberBan: String { return L10n.tr("Localizable", "screen_bottom_sheet_manage_room_member_ban") }
   /// Ban
@@ -1728,13 +1762,13 @@ internal enum L10n {
   internal static var screenCreateRoomTopicLabel: String { return L10n.tr("Localizable", "screen_create_room_topic_label") }
   /// Add description…
   internal static var screenCreateRoomTopicPlaceholder: String { return L10n.tr("Localizable", "screen_create_room_topic_placeholder") }
-  /// Please confirm that you want to deactivate your account. This action cannot be undone.
+  /// Please confirm that you want to delete your account. This action cannot be undone.
   internal static var screenDeactivateAccountConfirmationDialogContent: String { return L10n.tr("Localizable", "screen_deactivate_account_confirmation_dialog_content") }
   /// Delete all my messages
   internal static var screenDeactivateAccountDeleteAllMessages: String { return L10n.tr("Localizable", "screen_deactivate_account_delete_all_messages") }
   /// Warning: Future users may see incomplete conversations.
   internal static var screenDeactivateAccountDeleteAllMessagesNotice: String { return L10n.tr("Localizable", "screen_deactivate_account_delete_all_messages_notice") }
-  /// Deactivating your account is %1$@, it will:
+  /// Deleting your account is %1$@, it will:
   internal static func screenDeactivateAccountDescription(_ p1: Any) -> String {
     return L10n.tr("Localizable", "screen_deactivate_account_description", String(describing: p1))
   }
@@ -1752,7 +1786,7 @@ internal enum L10n {
   internal static var screenDeactivateAccountListItem3: String { return L10n.tr("Localizable", "screen_deactivate_account_list_item_3") }
   /// Your messages will still be visible to registered users but won’t be available to new or unregistered users if you choose to delete them.
   internal static var screenDeactivateAccountListItem4: String { return L10n.tr("Localizable", "screen_deactivate_account_list_item_4") }
-  /// Deactivate account
+  /// Delete account
   internal static var screenDeactivateAccountTitle: String { return L10n.tr("Localizable", "screen_deactivate_account_title") }
   /// You will not see any messages or room invites from this user
   internal static var screenDeclineAndBlockBlockUserOptionDescription: String { return L10n.tr("Localizable", "screen_decline_and_block_block_user_option_description") }
@@ -1838,6 +1872,14 @@ internal enum L10n {
   internal static var screenInviteUsersAlreadyAMember: String { return L10n.tr("Localizable", "screen_invite_users_already_a_member") }
   /// Already invited
   internal static var screenInviteUsersAlreadyInvited: String { return L10n.tr("Localizable", "screen_invite_users_already_invited") }
+  /// You currently don’t have any chats with these contacts. Confirm inviting them to this room before continuing.
+  internal static var screenInviteUsersConfirmDialogSubtitleMultipleUsers: String { return L10n.tr("Localizable", "screen_invite_users_confirm_dialog_subtitle_multiple_users") }
+  /// You currently don’t have any chats with this contact. Confirm inviting them to this room before continuing.
+  internal static var screenInviteUsersConfirmDialogSubtitleOneUser: String { return L10n.tr("Localizable", "screen_invite_users_confirm_dialog_subtitle_one_user") }
+  /// Invite new contacts to this room?
+  internal static var screenInviteUsersConfirmDialogTitleMutipleUsers: String { return L10n.tr("Localizable", "screen_invite_users_confirm_dialog_title_mutiple_users") }
+  /// Invite new contact to this room?
+  internal static var screenInviteUsersConfirmDialogTitleOneUser: String { return L10n.tr("Localizable", "screen_invite_users_confirm_dialog_title_one_user") }
   /// Are you sure you want to decline the invitation to join %1$@?
   internal static func screenInvitesDeclineChatMessage(_ p1: Any) -> String {
     return L10n.tr("Localizable", "screen_invites_decline_chat_message", String(describing: p1))
@@ -2108,7 +2150,17 @@ internal enum L10n {
   internal static var screenLinkNewDeviceWrongNumberSubtitle: String { return L10n.tr("Localizable", "screen_link_new_device_wrong_number_subtitle") }
   /// The numbers don’t match
   internal static var screenLinkNewDeviceWrongNumberTitle: String { return L10n.tr("Localizable", "screen_link_new_device_wrong_number_title") }
-  /// This account has been deactivated.
+  /// Nobody is sharing their location
+  internal static var screenLiveLocationSheetNobodySharing: String { return L10n.tr("Localizable", "screen_live_location_sheet_nobody_sharing") }
+  /// Sharing live location
+  internal static var screenLiveLocationSheetSharingLiveLocation: String { return L10n.tr("Localizable", "screen_live_location_sheet_sharing_live_location") }
+  /// Plural format key: "%#@COUNT@"
+  internal static func screenLiveLocationSheetSubtitle(_ p1: Int) -> String {
+    return L10n.tr("Localizable", "screen_live_location_sheet_subtitle", p1)
+  }
+  /// On the map
+  internal static var screenLiveLocationSheetTitle: String { return L10n.tr("Localizable", "screen_live_location_sheet_title") }
+  /// This account has been deleted.
   internal static var screenLoginErrorDeactivatedAccount: String { return L10n.tr("Localizable", "screen_login_error_deactivated_account") }
   /// Incorrect username and/or password
   internal static var screenLoginErrorInvalidCredentials: String { return L10n.tr("Localizable", "screen_login_error_invalid_credentials") }
@@ -2162,14 +2214,16 @@ internal enum L10n {
   internal static var screenMediaBrowserMediaEmptyStateTitle: String { return L10n.tr("Localizable", "screen_media_browser_media_empty_state_title") }
   /// Media and files
   internal static var screenMediaBrowserTitle: String { return L10n.tr("Localizable", "screen_media_browser_title") }
-  /// File format
+  /// Format
   internal static var screenMediaDetailsFileFormat: String { return L10n.tr("Localizable", "screen_media_details_file_format") }
-  /// File name
+  /// Name
   internal static var screenMediaDetailsFilename: String { return L10n.tr("Localizable", "screen_media_details_filename") }
   /// No more files to show
   internal static var screenMediaDetailsNoMoreFilesToShow: String { return L10n.tr("Localizable", "screen_media_details_no_more_files_to_show") }
   /// No more media to show
   internal static var screenMediaDetailsNoMoreMediaToShow: String { return L10n.tr("Localizable", "screen_media_details_no_more_media_to_show") }
+  /// File info
+  internal static var screenMediaDetailsTitle: String { return L10n.tr("Localizable", "screen_media_details_title") }
   /// Uploaded by
   internal static var screenMediaDetailsUploadedBy: String { return L10n.tr("Localizable", "screen_media_details_uploaded_by") }
   /// Uploaded on
@@ -2284,6 +2338,8 @@ internal enum L10n {
   internal static func screenOnboardingAppVersion(_ p1: Any) -> String {
     return L10n.tr("Localizable", "screen_onboarding_app_version", String(describing: p1))
   }
+  /// Checking account
+  internal static var screenOnboardingCheckingAccount: String { return L10n.tr("Localizable", "screen_onboarding_checking_account") }
   /// Sign in manually
   internal static var screenOnboardingSignInManually: String { return L10n.tr("Localizable", "screen_onboarding_sign_in_manually") }
   /// Sign in to %1$@
@@ -3271,22 +3327,6 @@ internal enum L10n {
   internal static var screenSpaceAddRoomAction: String { return L10n.tr("Localizable", "screen_space_add_room_action") }
   /// Adding a room will not affect the room access. To change the access go to Room settings > Security & privacy.
   internal static var screenSpaceAddRoomsRoomAccessDescription: String { return L10n.tr("Localizable", "screen_space_add_rooms_room_access_description") }
-  /// View spaces you've created or joined
-  internal static var screenSpaceAnnouncementItem1: String { return L10n.tr("Localizable", "screen_space_announcement_item1") }
-  /// Accept or decline invites to spaces
-  internal static var screenSpaceAnnouncementItem2: String { return L10n.tr("Localizable", "screen_space_announcement_item2") }
-  /// Discover any rooms you can join in your spaces
-  internal static var screenSpaceAnnouncementItem3: String { return L10n.tr("Localizable", "screen_space_announcement_item3") }
-  /// Join public spaces
-  internal static var screenSpaceAnnouncementItem4: String { return L10n.tr("Localizable", "screen_space_announcement_item4") }
-  /// Leave any spaces you’ve joined
-  internal static var screenSpaceAnnouncementItem5: String { return L10n.tr("Localizable", "screen_space_announcement_item5") }
-  /// Filtering, creating and managing spaces is coming soon.
-  internal static var screenSpaceAnnouncementNotice: String { return L10n.tr("Localizable", "screen_space_announcement_notice") }
-  /// Welcome to the beta version of Spaces! With this first version you can:
-  internal static var screenSpaceAnnouncementSubtitle: String { return L10n.tr("Localizable", "screen_space_announcement_subtitle") }
-  /// Introducing Spaces
-  internal static var screenSpaceAnnouncementTitle: String { return L10n.tr("Localizable", "screen_space_announcement_title") }
   /// Add your first room
   internal static var screenSpaceEmptyStateTitle: String { return L10n.tr("Localizable", "screen_space_empty_state_title") }
   /// Spaces you have created or joined.

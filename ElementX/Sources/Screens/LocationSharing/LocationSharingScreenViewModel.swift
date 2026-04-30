@@ -7,6 +7,7 @@
 //
 
 import Combine
+import CoreLocation
 import Foundation
 import SwiftUI
 
@@ -26,10 +27,12 @@ class LocationSharingScreenViewModel: LocationSharingScreenViewModelType, Locati
     }
     
     private var authorizationStatusSubscription: AnyCancellable?
+    // periphery:ignore - keep alive to keep receiving updates.
+    private var liveLocationService: RoomLiveLocationServiceProtocol?
+    private var needsCenteringOnFirstLiveLocationUpdate = false
     
     init(interactionMode: LocationSharingInteractionMode,
          mapURLBuilder: MapTilerURLBuilderProtocol,
-         liveLocationSharingEnabled: Bool,
          roomProxy: JoinedRoomProxyProtocol,
          timelineController: TimelineControllerProtocol,
          liveLocationManager: LiveLocationManagerProtocol,
@@ -46,12 +49,18 @@ class LocationSharingScreenViewModel: LocationSharingScreenViewModelType, Locati
         
         super.init(initialViewState: .init(interactionMode: interactionMode,
                                            mapURLBuilder: mapURLBuilder,
-                                           showLiveLocationSharingButton: liveLocationSharingEnabled,
                                            ownUserID: roomProxy.ownUserID),
                    mediaProvider: mediaProvider)
         
-        updateShownUserProfile(members: roomProxy.membersPublisher.value)
+        updateUserProfiles(members: roomProxy.membersPublisher.value)
         setupSubscriptions()
+        
+        if case .viewLive(_, let initialLiveLocation) = interactionMode {
+            if initialLiveLocation == nil {
+                needsCenteringOnFirstLiveLocationUpdate = true
+            }
+            Task { await setupLiveLocationSubscription() }
+        }
     }
     
     override func process(viewAction: LocationSharingScreenViewAction) {
@@ -76,14 +85,58 @@ class LocationSharingScreenViewModel: LocationSharingScreenViewModelType, Locati
                                                  primaryButton: .init(title: L10n.actionNotNow, role: .cancel, action: nil),
                                                  secondaryButton: .init(title: L10n.commonSettings, action: action))
             }
+        case .stopLiveLocation:
+            stopLiveLocation()
+        case .setMapCenter(let coordinate):
+            state.bindings.showsUserLocationMode = .show
+            state.bindings.mapCenterLocation = coordinate
         }
     }
     
     // MARK: - Private
     
+    private func stopLiveLocation() {
+        state.isStoppingLiveLocation = true
+        if let index = state.liveLocationShares.firstIndex(where: { $0.userID == roomProxy.ownUserID }) {
+            state.liveLocationShares.remove(at: index)
+        }
+        Task { await liveLocationManager.stopLiveLocation(roomID: roomProxy.id) }
+    }
+    
+    private func setupLiveLocationSubscription() async {
+        let liveLocationService = await roomProxy.makeLiveLocationService()
+        self.liveLocationService = liveLocationService
+        
+        liveLocationService.liveLocationsPublisher
+            .sink { [weak self] liveLocationsShares in
+                guard let self else { return }
+                MXLog.info("Received live location shares update: \(liveLocationsShares.count) share(s)")
+                
+                let ownUserID = roomProxy.ownUserID
+                let isStoppingLiveLocation = state.isStoppingLiveLocation
+                state.liveLocationShares = liveLocationsShares
+                    .filter { !(isStoppingLiveLocation && ownUserID == $0.userID) }
+                    .sorted { lhs, rhs in
+                        if lhs.userID == ownUserID { return true }
+                        if rhs.userID == ownUserID { return false }
+                        return lhs.timestamp > rhs.timestamp
+                    }
+                
+                updateUserProfiles(members: roomProxy.membersPublisher.value)
+                
+                if needsCenteringOnFirstLiveLocationUpdate,
+                   let liveLocation = state.liveLocationShares.first,
+                   let geoURI = liveLocation.geoURI {
+                    needsCenteringOnFirstLiveLocationUpdate = false
+                    context.send(viewAction: .setMapCenter(.init(latitude: geoURI.latitude, longitude: geoURI.longitude)))
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     private func setupSubscriptions() {
         roomProxy.membersPublisher.sink { [weak self] members in
-            self?.updateShownUserProfile(members: members)
+            self?.updateUserProfiles(members: members)
         }
         .store(in: &cancellables)
         
@@ -95,19 +148,25 @@ class LocationSharingScreenViewModel: LocationSharingScreenViewModelType, Locati
             .store(in: &cancellables)
     }
     
-    private func updateShownUserProfile(members: [RoomMemberProxyProtocol]) {
+    private func updateUserProfiles(members: [RoomMemberProxyProtocol]) {
         switch state.interactionMode {
         case .picker:
-            if let ownUser = members.first(where: { $0.userID == roomProxy.ownUserID }).map(UserProfileProxy.init) {
-                state.userProfile = ownUser
-            } else {
-                state.userProfile = .init(userID: roomProxy.ownUserID)
-            }
+            let ownUser = members.first { $0.userID == roomProxy.ownUserID }.map(UserProfileProxy.init) ?? .init(userID: roomProxy.ownUserID)
+            state.userProfiles = [ownUser.userID: ownUser]
         case .viewStatic(let location):
-            if let sender = members.first(where: { $0.userID == location.sender.id }).map(UserProfileProxy.init) {
-                state.userProfile = sender
-            } else {
-                state.userProfile = .init(sender: location.sender)
+            let sender = members.first { $0.userID == location.sender.id }.map(UserProfileProxy.init) ?? .init(sender: location.sender)
+            state.userProfiles = [sender.userID: sender]
+        case .viewLive(let sender, _):
+            var userIDs = Set(state.liveLocationShares.map(\.userID))
+            if let senderID = sender?.id {
+                userIDs.insert(senderID)
+            }
+            state.userProfiles = userIDs.reduce(into: [:]) { dict, userID in
+                if let member = members.first(where: { $0.userID == userID }) {
+                    dict[userID] = UserProfileProxy(member: member)
+                } else {
+                    dict[userID] = UserProfileProxy(userID: userID)
+                }
             }
         }
     }
@@ -124,7 +183,7 @@ class LocationSharingScreenViewModel: LocationSharingScreenViewModelType, Locati
         let authorizationStatus = liveLocationManager.authorizationStatus.value
         switch authorizationStatus {
         case .authorizedAlways:
-            showLiveLocationDisclaimer()
+            showLiveLocationFlow()
         case .notDetermined:
             // This is to solve a race condition with map libre which always tries first
             // to request the when in use permission, we wait for it and then try again
@@ -147,23 +206,29 @@ class LocationSharingScreenViewModel: LocationSharingScreenViewModelType, Locati
                 .first() // this publisher only fires when there is an actual change, and if the user is done with permissions
                 .sink { [weak self] newValue in
                     guard newValue == .authorizedAlways else { return }
-                    self?.showLiveLocationDisclaimer()
+                    self?.showLiveLocationFlow()
                 }
         default:
             showMissingAlwaysAuthorizedAlert()
         }
     }
     
-    private func showLiveLocationDisclaimer() {
-        state.bindings.alertInfo = .init(alertID: .liveLocationDisclaimer,
-                                         primaryButton: .init(title: L10n.actionDecline, role: .cancel, action: nil),
-                                         secondaryButton: .init(title: L10n.actionAccept) { [weak self] in
-                                             // Delay so SwiftUI finishes dismissing the current alert
-                                             // before presenting the next one.
-                                             DispatchQueue.main.async {
-                                                 self?.showLiveLocationDurationPicker()
-                                             }
-                                         })
+    private func showLiveLocationFlow() {
+        if liveLocationManager.hasDisplayedLiveLocationDisclaimer {
+            showLiveLocationDurationPicker()
+        } else {
+            state.bindings.alertInfo = .init(alertID: .liveLocationDisclaimer,
+                                             primaryButton: .init(title: L10n.actionDecline, role: .cancel, action: nil),
+                                             secondaryButton: .init(title: L10n.actionAccept) { [weak self] in
+                                                 guard let self else { return }
+                                                 liveLocationManager.hasDisplayedLiveLocationDisclaimer = true
+                                                 // Delay so SwiftUI finishes dismissing the current alert
+                                                 // before presenting the next one.
+                                                 DispatchQueue.main.async {
+                                                     self.showLiveLocationDurationPicker()
+                                                 }
+                                             })
+        }
     }
     
     private func showLiveLocationDurationPicker() {
@@ -256,11 +321,12 @@ extension LocationSharingScreenViewModel {
         case picker
         case staticSenderLocation
         case staticPinLocation
+        case viewLive
+        case viewLiveEmpty
     }
     
     static func mock(type: MockType,
-                     senderID: String = "@dan:matrix.org",
-                     liveLocationSharingEnabled: Bool = true) -> LocationSharingScreenViewModel {
+                     senderID: String = "@dan:matrix.org") -> LocationSharingScreenViewModel {
         let interactionMode: LocationSharingInteractionMode = switch type {
         case .picker:
             .picker
@@ -276,12 +342,40 @@ extension LocationSharingScreenViewModel {
                                             longitude: 12.4963655),
                               kind: .sender,
                               timestamp: .mock))
+        case .viewLive, .viewLiveEmpty:
+            .viewLive(sender: .init(id: senderID, displayName: "Me"),
+                      initialLiveLocationShare: LiveLocationShare(userID: senderID,
+                                                                  geoURI: .init(latitude: 41.9027835, longitude: 12.4963655),
+                                                                  timestamp: .mock,
+                                                                  timeoutDate: .distantFuture))
         }
+        
+        let liveLocationShares: [LiveLocationShare] = if type == .viewLive {
+            [
+                LiveLocationShare(userID: RoomMemberProxyMock.mockMe.userID,
+                                  geoURI: .init(latitude: 41.9027835, longitude: 12.4963655),
+                                  timestamp: .mock,
+                                  timeoutDate: .distantFuture),
+                LiveLocationShare(userID: RoomMemberProxyMock.mockAlice.userID,
+                                  geoURI: .init(latitude: 48.8566, longitude: 2.3522),
+                                  timestamp: .mock,
+                                  timeoutDate: .distantFuture),
+                LiveLocationShare(userID: RoomMemberProxyMock.mockBob.userID,
+                                  geoURI: .init(latitude: 51.5074, longitude: -0.1278),
+                                  timestamp: .mock,
+                                  timeoutDate: .distantFuture)
+            ]
+        } else {
+            []
+        }
+        
+        let liveLocationServiceMock = RoomLiveLocationServiceMock(.init(shares: liveLocationShares))
+        let roomProxy = JoinedRoomProxyMock(.init(members: .allMembers, ownUserID: RoomMemberProxyMock.mockMe.userID))
+        roomProxy.makeLiveLocationServiceReturnValue = liveLocationServiceMock
         
         return LocationSharingScreenViewModel(interactionMode: interactionMode,
                                               mapURLBuilder: ServiceLocator.shared.settings.mapTilerConfiguration,
-                                              liveLocationSharingEnabled: liveLocationSharingEnabled,
-                                              roomProxy: JoinedRoomProxyMock(.init()),
+                                              roomProxy: roomProxy,
                                               timelineController: MockTimelineController(),
                                               liveLocationManager: LiveLocationManagerMock(),
                                               analytics: ServiceLocator.shared.analytics,

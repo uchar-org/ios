@@ -1946,6 +1946,80 @@ class AuthenticationClientFactoryMock: AuthenticationClientFactoryProtocol, @unc
             return makeClientHomeserverAddressSessionDirectoriesPassphraseClientSessionDelegateAppSettingsAppHooksReturnValue
         }
     }
+    //MARK: - makeInMemoryClient
+
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksThrowableError: Error?
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingCallsCount = 0
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksCalled: Bool {
+        return makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksCallsCount > 0
+    }
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksReceivedArguments: (homeserverAddress: String, clientSessionDelegate: ClientSessionDelegate, appSettings: AppSettings, appHooks: AppHooks)?
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksReceivedInvocations: [(homeserverAddress: String, clientSessionDelegate: ClientSessionDelegate, appSettings: AppSettings, appHooks: AppHooks)] = []
+
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingReturnValue: ClientProtocol!
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksReturnValue: ClientProtocol! {
+        get {
+            if Thread.isMainThread {
+                return makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingReturnValue
+            } else {
+                var returnValue: ClientProtocol? = nil
+                DispatchQueue.main.sync {
+                    returnValue = makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingReturnValue
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingReturnValue = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksUnderlyingReturnValue = newValue
+                }
+            }
+        }
+    }
+    var makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksClosure: ((String, ClientSessionDelegate, AppSettings, AppHooks) async throws -> ClientProtocol)?
+
+    func makeInMemoryClient(homeserverAddress: String, clientSessionDelegate: ClientSessionDelegate, appSettings: AppSettings, appHooks: AppHooks) async throws -> ClientProtocol {
+        if let error = makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksThrowableError {
+            throw error
+        }
+        makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksCallsCount += 1
+        makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksReceivedArguments = (homeserverAddress: homeserverAddress, clientSessionDelegate: clientSessionDelegate, appSettings: appSettings, appHooks: appHooks)
+        DispatchQueue.main.async {
+            self.makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksReceivedInvocations.append((homeserverAddress: homeserverAddress, clientSessionDelegate: clientSessionDelegate, appSettings: appSettings, appHooks: appHooks))
+        }
+        if let makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksClosure = makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksClosure {
+            return try await makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksClosure(homeserverAddress, clientSessionDelegate, appSettings, appHooks)
+        } else {
+            return makeInMemoryClientHomeserverAddressClientSessionDelegateAppSettingsAppHooksReturnValue
+        }
+    }
 }
 class BannedRoomProxyMock: BannedRoomProxyProtocol, @unchecked Sendable {
     var info: BaseRoomInfoProxyProtocol {
@@ -2453,6 +2527,154 @@ class ClassicAppManagerMock: ClassicAppManagerProtocol, @unchecked Sendable {
             return loadAccountsReturnValue
         }
     }
+    //MARK: - availableSecrets
+
+    var availableSecretsForThrowableError: Error?
+    var availableSecretsForUnderlyingCallsCount = 0
+    var availableSecretsForCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return availableSecretsForUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = availableSecretsForUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                availableSecretsForUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    availableSecretsForUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var availableSecretsForCalled: Bool {
+        return availableSecretsForCallsCount > 0
+    }
+    var availableSecretsForReceivedAccount: ClassicAppAccount?
+    var availableSecretsForReceivedInvocations: [ClassicAppAccount] = []
+
+    var availableSecretsForUnderlyingReturnValue: ClassicAppAccount.AvailableSecrets!
+    var availableSecretsForReturnValue: ClassicAppAccount.AvailableSecrets! {
+        get {
+            if Thread.isMainThread {
+                return availableSecretsForUnderlyingReturnValue
+            } else {
+                var returnValue: ClassicAppAccount.AvailableSecrets? = nil
+                DispatchQueue.main.sync {
+                    returnValue = availableSecretsForUnderlyingReturnValue
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                availableSecretsForUnderlyingReturnValue = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    availableSecretsForUnderlyingReturnValue = newValue
+                }
+            }
+        }
+    }
+    var availableSecretsForClosure: ((ClassicAppAccount) async throws -> ClassicAppAccount.AvailableSecrets)?
+
+    func availableSecrets(for account: ClassicAppAccount) async throws -> ClassicAppAccount.AvailableSecrets {
+        if let error = availableSecretsForThrowableError {
+            throw error
+        }
+        availableSecretsForCallsCount += 1
+        availableSecretsForReceivedAccount = account
+        DispatchQueue.main.async {
+            self.availableSecretsForReceivedInvocations.append(account)
+        }
+        if let availableSecretsForClosure = availableSecretsForClosure {
+            return try await availableSecretsForClosure(account)
+        } else {
+            return availableSecretsForReturnValue
+        }
+    }
+    //MARK: - secretsBundle
+
+    var secretsBundleForThrowableError: Error?
+    var secretsBundleForUnderlyingCallsCount = 0
+    var secretsBundleForCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return secretsBundleForUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = secretsBundleForUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                secretsBundleForUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    secretsBundleForUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var secretsBundleForCalled: Bool {
+        return secretsBundleForCallsCount > 0
+    }
+    var secretsBundleForReceivedAccount: ClassicAppAccount?
+    var secretsBundleForReceivedInvocations: [ClassicAppAccount] = []
+
+    var secretsBundleForUnderlyingReturnValue: SecretsBundleWithUserId!
+    var secretsBundleForReturnValue: SecretsBundleWithUserId! {
+        get {
+            if Thread.isMainThread {
+                return secretsBundleForUnderlyingReturnValue
+            } else {
+                var returnValue: SecretsBundleWithUserId? = nil
+                DispatchQueue.main.sync {
+                    returnValue = secretsBundleForUnderlyingReturnValue
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                secretsBundleForUnderlyingReturnValue = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    secretsBundleForUnderlyingReturnValue = newValue
+                }
+            }
+        }
+    }
+    var secretsBundleForClosure: ((ClassicAppAccount) async throws -> SecretsBundleWithUserId)?
+
+    func secretsBundle(for account: ClassicAppAccount) async throws -> SecretsBundleWithUserId {
+        if let error = secretsBundleForThrowableError {
+            throw error
+        }
+        secretsBundleForCallsCount += 1
+        secretsBundleForReceivedAccount = account
+        DispatchQueue.main.async {
+            self.secretsBundleForReceivedInvocations.append(account)
+        }
+        if let secretsBundleForClosure = secretsBundleForClosure {
+            return try await secretsBundleForClosure(account)
+        } else {
+            return secretsBundleForReturnValue
+        }
+    }
 }
 class ClientProxyMock: ClientProxyProtocol, @unchecked Sendable {
     var actionsPublisher: AnyPublisher<ClientProxyAction, Never> {
@@ -2559,6 +2781,11 @@ class ClientProxyMock: ClientProxyProtocol, @unchecked Sendable {
         set(value) { underlyingSpaceService = value }
     }
     var underlyingSpaceService: SpaceServiceProxyProtocol!
+    var capabilities: HomeserverCapabilitiesProxyProtocol {
+        get { return underlyingCapabilities }
+        set(value) { underlyingCapabilities = value }
+    }
+    var underlyingCapabilities: HomeserverCapabilitiesProxyProtocol!
     var isReportRoomSupportedCallsCount = 0
     var isReportRoomSupportedCalled: Bool {
         return isReportRoomSupportedCallsCount > 0
@@ -2627,6 +2854,11 @@ class ClientProxyMock: ClientProxyProtocol, @unchecked Sendable {
     }
     var underlyingMaxMediaUploadSize: Result<UInt, ClientProxyError>!
     var maxMediaUploadSizeClosure: (() async -> Result<UInt, ClientProxyError>)?
+    var liveLocationOwnInfoUpdatesPublisher: AnyPublisher<LiveLocationOwnInfoUpdate, Never> {
+        get { return underlyingLiveLocationOwnInfoUpdatesPublisher }
+        set(value) { underlyingLiveLocationOwnInfoUpdatesPublisher = value }
+    }
+    var underlyingLiveLocationOwnInfoUpdatesPublisher: AnyPublisher<LiveLocationOwnInfoUpdate, Never>!
 
     //MARK: - isOnlyDeviceLeft
 
@@ -10443,6 +10675,70 @@ class JoinedRoomProxyMock: JoinedRoomProxyProtocol, @unchecked Sendable {
             return clearDraftThreadRootEventIDReturnValue
         }
     }
+    //MARK: - makeLiveLocationService
+
+    var makeLiveLocationServiceUnderlyingCallsCount = 0
+    var makeLiveLocationServiceCallsCount: Int {
+        get {
+            if Thread.isMainThread {
+                return makeLiveLocationServiceUnderlyingCallsCount
+            } else {
+                var returnValue: Int? = nil
+                DispatchQueue.main.sync {
+                    returnValue = makeLiveLocationServiceUnderlyingCallsCount
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                makeLiveLocationServiceUnderlyingCallsCount = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    makeLiveLocationServiceUnderlyingCallsCount = newValue
+                }
+            }
+        }
+    }
+    var makeLiveLocationServiceCalled: Bool {
+        return makeLiveLocationServiceCallsCount > 0
+    }
+
+    var makeLiveLocationServiceUnderlyingReturnValue: RoomLiveLocationServiceProtocol!
+    var makeLiveLocationServiceReturnValue: RoomLiveLocationServiceProtocol! {
+        get {
+            if Thread.isMainThread {
+                return makeLiveLocationServiceUnderlyingReturnValue
+            } else {
+                var returnValue: RoomLiveLocationServiceProtocol? = nil
+                DispatchQueue.main.sync {
+                    returnValue = makeLiveLocationServiceUnderlyingReturnValue
+                }
+
+                return returnValue!
+            }
+        }
+        set {
+            if Thread.isMainThread {
+                makeLiveLocationServiceUnderlyingReturnValue = newValue
+            } else {
+                DispatchQueue.main.sync {
+                    makeLiveLocationServiceUnderlyingReturnValue = newValue
+                }
+            }
+        }
+    }
+    var makeLiveLocationServiceClosure: (() async -> RoomLiveLocationServiceProtocol)?
+
+    func makeLiveLocationService() async -> RoomLiveLocationServiceProtocol {
+        makeLiveLocationServiceCallsCount += 1
+        if let makeLiveLocationServiceClosure = makeLiveLocationServiceClosure {
+            return await makeLiveLocationServiceClosure()
+        } else {
+            return makeLiveLocationServiceReturnValue
+        }
+    }
     //MARK: - startLiveLocationShare
 
     var startLiveLocationShareDurationUnderlyingCallsCount = 0
@@ -10475,13 +10771,13 @@ class JoinedRoomProxyMock: JoinedRoomProxyProtocol, @unchecked Sendable {
     var startLiveLocationShareDurationReceivedDuration: Duration?
     var startLiveLocationShareDurationReceivedInvocations: [Duration] = []
 
-    var startLiveLocationShareDurationUnderlyingReturnValue: Result<Void, RoomProxyError>!
-    var startLiveLocationShareDurationReturnValue: Result<Void, RoomProxyError>! {
+    var startLiveLocationShareDurationUnderlyingReturnValue: Result<String, RoomProxyError>!
+    var startLiveLocationShareDurationReturnValue: Result<String, RoomProxyError>! {
         get {
             if Thread.isMainThread {
                 return startLiveLocationShareDurationUnderlyingReturnValue
             } else {
-                var returnValue: Result<Void, RoomProxyError>? = nil
+                var returnValue: Result<String, RoomProxyError>? = nil
                 DispatchQueue.main.sync {
                     returnValue = startLiveLocationShareDurationUnderlyingReturnValue
                 }
@@ -10499,9 +10795,9 @@ class JoinedRoomProxyMock: JoinedRoomProxyProtocol, @unchecked Sendable {
             }
         }
     }
-    var startLiveLocationShareDurationClosure: ((Duration) async -> Result<Void, RoomProxyError>)?
+    var startLiveLocationShareDurationClosure: ((Duration) async -> Result<String, RoomProxyError>)?
 
-    func startLiveLocationShare(duration: Duration) async -> Result<Void, RoomProxyError> {
+    func startLiveLocationShare(duration: Duration) async -> Result<String, RoomProxyError> {
         startLiveLocationShareDurationCallsCount += 1
         startLiveLocationShareDurationReceivedDuration = duration
         DispatchQueue.main.async {
@@ -11750,6 +12046,11 @@ class LinkNewDeviceServiceMock: LinkNewDeviceServiceProtocol, @unchecked Sendabl
     }
 }
 class LiveLocationManagerMock: LiveLocationManagerProtocol, @unchecked Sendable {
+    var hasDisplayedLiveLocationDisclaimer: Bool {
+        get { return underlyingHasDisplayedLiveLocationDisclaimer }
+        set(value) { underlyingHasDisplayedLiveLocationDisclaimer = value }
+    }
+    var underlyingHasDisplayedLiveLocationDisclaimer: Bool!
     var authorizationStatus: CurrentValuePublisher<CLAuthorizationStatus, Never> {
         get { return underlyingAuthorizationStatus }
         set(value) { underlyingAuthorizationStatus = value }
@@ -15032,6 +15333,7 @@ class RoomInfoProxyMock: RoomInfoProxyProtocol, @unchecked Sendable {
         set(value) { underlyingHasRoomCall = value }
     }
     var underlyingHasRoomCall: Bool!
+    var activeRoomCallIntent: CallIntent?
     var activeRoomCallParticipants: [String] = []
     var isMarkedUnread: Bool {
         get { return underlyingIsMarkedUnread }

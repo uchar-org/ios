@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import MatrixRustSDK
 import OrderedCollections
 
 enum RoomScreenViewModelAction: Equatable {
@@ -21,6 +20,8 @@ enum RoomScreenViewModelAction: Equatable {
     case displayKnockRequests
     case displayRoom(roomID: String, via: [String])
     case displayMessageForwarding(MessageForwardingItem)
+    case stopLiveLocationSharing
+    case displayLiveLocation
 }
 
 enum RoomScreenViewAction {
@@ -34,6 +35,8 @@ enum RoomScreenViewAction {
     case viewKnockRequests
     case displaySuccessorRoom
     case displayThreadList
+    case tappedOpenLiveLocation
+    case tappedStopLiveLocation
 }
 
 struct RoomScreenViewState: BindableState {
@@ -48,6 +51,8 @@ struct RoomScreenViewState: BindableState {
         !pinnedEventsBannerState.isEmpty && lastScrollDirection != .top
     }
     
+    var isSharingLiveLocation = false
+    
     var canSendMessage = true
     
     /// Whether or not starting a call is supported.
@@ -56,6 +61,8 @@ struct RoomScreenViewState: BindableState {
     var canJoinCall = false
     /// Whether or not this room currently has a call in progress.
     var hasOngoingCall: Bool
+    /// The ongoing call nature (audio or video), null if not advertised by the participants
+    var activeRoomCallIntent: CallIntent?
     /// Whether or not the user is already part of a call in another room.
     var isParticipatingInOngoingCall = false
     var shouldShowCallButton: Bool {
@@ -87,7 +94,7 @@ struct RoomScreenViewState: BindableState {
             (canAcceptKnocks || canDeclineKnocks || canBan)
     }
     
-    /// If `enableKeyShareOnInvite` is set, determines the current history sharing state.
+    /// The current history sharing state.
     var roomHistorySharingState: RoomHistorySharingState?
     
     var footerDetails: RoomScreenFooterViewDetails?

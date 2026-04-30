@@ -4,15 +4,12 @@ import Foundation
 struct UnitTests: AsyncParsableCommand {
     static let configuration = CommandConfiguration(commandName: "unit-tests",
                                                     abstract: "Runs the unit test CI workflow: lint, unit tests, preview tests, and result collection.")
-    
-    @Option(help: "Device name for unit tests.")
-    var device = "iPhone 17"
-    
-    @Option(help: "iOS version for the simulator.")
-    var osVersion = "26.1"
-    
+        
     @Flag(help: "Skip preview tests")
     var skipPreviews = false
+    
+    private static let osVersion = "26.4.1"
+    private static let device = "iPhone 17"
     
     func run() async throws {
         try await CI.lint()
@@ -24,8 +21,8 @@ struct UnitTests: AsyncParsableCommand {
             logger.info("\n🧪 Running unit tests…\n")
             try await RunTests.parse([
                 "--scheme", "UnitTests",
-                "--device", device,
-                "--os-version", osVersion,
+                "--device", Self.device,
+                "--os-version", Self.osVersion,
                 "--retries", "3"
             ]).run()
         } catch {
@@ -34,19 +31,10 @@ struct UnitTests: AsyncParsableCommand {
         }
         
         if !skipPreviews {
-            // Run preview tests on a smaller device
             do {
-                logger.info("\n🧪 Running preview tests…\n")
-                try await RunTests.parse([
-                    "--scheme", "PreviewTests",
-                    "--device", "iPhone SE (3rd generation)",
-                    "--os-version", osVersion,
-                    "--create-simulator-name", "iPhone SE (3rd generation)",
-                    "--create-simulator-type", "com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation"
-                ]).run()
+                try await PreviewTests.parse([]).run()
             } catch {
                 failures.append("Preview tests failed: \(error)")
-                logger.error("\n❌ Preview tests failed.\n")
             }
         }
         
@@ -54,13 +42,9 @@ struct UnitTests: AsyncParsableCommand {
         await CI.zipResults(bundles: ["UnitTests.xcresult", "PreviewTests.xcresult"],
                             outputName: "UnitTests.zip")
         
-        // Collect coverage reports
+        // Collect coverage and JUnit results for unit tests
         await CI.collectCoverage(resultBundle: "UnitTests.xcresult", outputName: "unit-cobertura.xml")
-        await CI.collectCoverage(resultBundle: "PreviewTests.xcresult", outputName: "preview-cobertura.xml")
-        
-        // Collect JUnit test results
         await CI.collectTestResults(resultBundle: "UnitTests.xcresult", outputName: "unit-junit.xml")
-        await CI.collectTestResults(resultBundle: "PreviewTests.xcresult", outputName: "preview-junit.xml")
         
         if !failures.isEmpty {
             logger.error("\n❌ \(failures.count) test suite(s) failed.\n")

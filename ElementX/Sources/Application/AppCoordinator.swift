@@ -241,6 +241,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     }
     
     func handleAppRoute(_ appRoute: AppRoute, windowType: SecondaryWindowType?) {
+        MXLog.info("Handling app route:  \(appRoute)")
+        
         if let windowType {
             windowManager.handleRoute(appRoute, windowType: windowType)
             return
@@ -274,12 +276,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
             case .accountProvisioningLink:
                 handleAppRoute(route,
                                windowType: windowType)
-            case .genericCallLink(let url):
-                if let userSessionFlowCoordinator {
-                    userSessionFlowCoordinator.handleAppRoute(route, animated: true)
-                } else {
-                    presentCallScreen(genericCallLink: url)
-                }
             case .userProfile(let userID):
                 if isExternalURL {
                     handleAppRoute(route,
@@ -655,12 +651,14 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
                                                           classicAppManager: classicAppManager,
                                                           appSettings: appSettings,
                                                           appHooks: appHooks)
+        Task { await authenticationService.setupClassicAppAccountState() }
         
         let coordinator = AuthenticationFlowCoordinator(authenticationService: authenticationService,
                                                         bugReportService: bugReportService,
                                                         navigationRootCoordinator: navigationRootCoordinator,
                                                         appMediator: appMediator,
                                                         appSettings: appSettings,
+                                                        appHooks: appHooks,
                                                         analytics: ServiceLocator.shared.analytics,
                                                         userIndicatorController: ServiceLocator.shared.userIndicatorController)
         coordinator.delegate = self
@@ -876,35 +874,6 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         elementCallService.setClientProxy(userSession.clientProxy)
     }
-    
-    private func presentCallScreen(genericCallLink url: URL) {
-        let configuration = ElementCallConfiguration(genericCallLink: url)
-        
-        let callScreenCoordinator = CallScreenCoordinator(parameters: .init(elementCallService: elementCallService,
-                                                                            configuration: configuration,
-                                                                            allowPictureInPicture: false,
-                                                                            appSettings: appSettings,
-                                                                            appHooks: appHooks,
-                                                                            analytics: ServiceLocator.shared.analytics))
-        
-        callScreenCoordinator.actions
-            .sink { [weak self] action in
-                guard let self else { return }
-                switch action {
-                case .pictureInPictureIsAvailable:
-                    break
-                case .pictureInPictureStarted, .pictureInPictureStopped:
-                    // Don't allow PiP when signed out - the user could login at which point we'd
-                    // need to hand over the call from here to the user session flow coordinator.
-                    MXLog.error("Picture in Picture not supported before login.")
-                case .dismiss:
-                    navigationRootCoordinator.setOverlayCoordinator(nil)
-                }
-            }
-            .store(in: &cancellables)
-        
-        navigationRootCoordinator.setOverlayCoordinator(callScreenCoordinator, animated: false)
-    }
 
     private func configureNotificationManager() {
         notificationManager.setUserSession(userSession)
@@ -963,12 +932,9 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         
         stopSync(isBackgroundTask: false)
         userSessionFlowCoordinator?.stop()
-        
-        tearDownUserSession()
     
         // Allow for everything to deallocate properly
         Task {
-            try? await Task.sleep(for: .seconds(2))
             await userSession.clientProxy.clearCaches()
             stateMachine.processEvent(.startWithExistingSession)
             hideLoadingIndicator()
@@ -1026,20 +992,20 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
 
         // This callback is only executed once during the entire run of the program to avoid
         // multiple callbacks if there are multiple crash events to send (see method documentation)
-        options.onCrashedLastRun = { event in
+        options.onLastRunStatusDetermined = { status, event in
+            guard case .didCrash = status, let event else { return }
             MXLog.error("Sentry detected a crash in the previous run: \(event.eventId.sentryIdString)")
             bugReportService.lastCrashEventID = event.eventId.sentryIdString
         }
+        
+        // Any ongoing transactions will no longer be valid after calling SentrySDK.start so lets
+        // remove them and start over, otherwise the app will crash if finishTransaction is used.
+        ServiceLocator.shared.analytics.signpost.resetTransactions()
         
         SentrySDK.start(options: options) // Swift
         enableSentryLogging(enabled: options.enabled) // Rust
         
         MXLog.info("Sentry configured (enabled: \(options.enabled))")
-    }
-    
-    private func teardownSentry() {
-        SentrySDK.close()
-        MXLog.info("SentrySDK stopped")
     }
     
     private func processInlineReply(roomID: String, replyText: String) async {

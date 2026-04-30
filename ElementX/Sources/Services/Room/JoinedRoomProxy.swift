@@ -91,7 +91,7 @@ class JoinedRoomProxy: JoinedRoomProxyProtocol {
         
         let openRoomSpan = analyticsService.signpost.addSpan(.timelineLoad, toTransaction: .openRoom)
         timeline = try await TimelineProxy(timeline: room.timelineWithConfiguration(configuration: .init(focus: .live(hideThreadedEvents: appSettings.threadsEnabled),
-                                                                                                         filter: .eventFilter(filter: Self.excludedEventsFilter(appSettings: appSettings)),
+                                                                                                         filter: .eventFilter(filter: Self.excludedEventsFilter),
                                                                                                          internalIdPrefix: nil,
                                                                                                          dateDividerMode: .daily,
                                                                                                          trackReadReceipts: .messageLikeEvents,
@@ -754,10 +754,14 @@ class JoinedRoomProxy: JoinedRoomProxyProtocol {
     
     // MARK: - Live Location
     
-    func startLiveLocationShare(duration: Duration) async -> Result<Void, RoomProxyError> {
+    func makeLiveLocationService() async -> RoomLiveLocationServiceProtocol {
+        await RoomLiveLocationService(liveLocationsObserver: room.liveLocationsObserver())
+    }
+    
+    func startLiveLocationShare(duration: Duration) async -> Result<String, RoomProxyError> {
         do {
-            try await room.startLiveLocationShare(durationMillis: UInt64(duration.seconds * 1000))
-            return .success(())
+            let eventID = try await room.startLiveLocationShare(durationMillis: UInt64(duration.seconds * 1000))
+            return .success(eventID)
         } catch {
             MXLog.error("Failed starting live location share with error: \(error)")
             return .failure(.sdkError(error))
@@ -768,6 +772,9 @@ class JoinedRoomProxy: JoinedRoomProxyProtocol {
         do {
             try await room.sendLiveLocation(geoUri: geoURI.string)
             return .success(())
+        } catch LiveLocationError.NotLive {
+            MXLog.error("Failed sending live location, session is not active")
+            return .failure(.liveLocationSessionIsNotActive)
         } catch {
             MXLog.error("Failed sending live location with error: \(error)")
             return .failure(.sdkError(error))
@@ -831,7 +838,7 @@ class JoinedRoomProxy: JoinedRoomProxyProtocol {
         }
     }
     
-    private static func excludedEventsFilter(appSettings: AppSettings) -> TimelineEventFilter {
+    private static let excludedEventsFilter: TimelineEventFilter = {
         var stateEventFilters: [StateEventType] = [.roomCanonicalAlias,
                                                    .roomGuestAccess,
                                                    .roomHistoryVisibility,
@@ -845,11 +852,6 @@ class JoinedRoomProxy: JoinedRoomProxyProtocol {
                                                    .policyRuleRoom,
                                                    .policyRuleServer,
                                                    .policyRuleUser]
-        
-        if !appSettings.liveLocationSharingEnabled {
-            stateEventFilters.append(.beaconInfo)
-        }
-        
         return .excludeEventTypes(eventTypes: stateEventFilters.map { FilterTimelineEventType.state(eventType: $0) })
-    }
+    }()
 }

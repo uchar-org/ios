@@ -157,8 +157,6 @@ enum A11yIdentifiers {
         let attachmentPickerTextFormatting = "room-attachment_picker_text_formatting"
         let timelineItemActionMenu = "room-timeline_item_action_menu"
         let joinCall = "room-join_call"
-        let startVoiceCall = "room-start_voice_call"
-        let startVideoCall = "room-start_video_call"
         let scrollToBottom = "room-scroll_to_bottom"
         
         let messageComposer = "room-message_composer"
@@ -284,6 +282,7 @@ enum A11yIdentifiers {
         let roomName = "create_room-room_name"
         let roomTopic = "create_room-room_topic"
         let mediaPicker = "create_room-media_picker"
+        let filePicker = "create_room-file_picker"
     }
 
     struct PollFormScreen {

@@ -121,6 +121,8 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
     
     // swiftlint:disable:next cyclomatic_complexity
     func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
+        MXLog.info("Handling app route: \(appRoute)")
+        
         guard stateMachine.state != .complete else {
             fatalError("This flow coordinator is `finished` ☠️")
         }
@@ -199,7 +201,7 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .roomAlias, .childRoomAlias, .eventOnRoomAlias, .childEventOnRoomAlias:
             break // These are converted to a room ID route one level above.
-        case .accountProvisioningLink, .roomList, .userProfile, .call, .genericCallLink, .settings, .chatBackupSettings, .globalSearch:
+        case .accountProvisioningLink, .roomList, .userProfile, .call, .settings, .chatBackupSettings, .globalSearch:
             break // These routes can't be handled.
         case .transferOwnership(let roomID):
             guard self.roomID == roomID else { fatalError("Navigation route doesn't belong to this room flow.") }
@@ -712,12 +714,15 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
                     stateMachine.tryEvent(.presentMapNavigator(interactionMode: .viewStatic(location)),
                                           userInfo: EventUserInfo(animated: animated,
                                                                   timelineController: timelineController))
+                case .presentLiveLocationViewer(let sender, let initialLiveLocationShare):
+                    stateMachine.tryEvent(.presentMapNavigator(interactionMode: .viewLive(sender: sender, initialLiveLocationShare: initialLiveLocationShare)),
+                                          userInfo: EventUserInfo(animated: animated, timelineController: timelineController))
                 case .presentRoomMemberDetails(userID: let userID):
                     stateMachine.tryEvent(.startMembersFlow(entryPoint: .roomMember(userID: userID)))
                 case .presentMessageForwarding(let forwardingItem):
                     stateMachine.tryEvent(.presentMessageForwarding(forwardingItem: forwardingItem))
-                case .presentCallScreen:
-                    actionsSubject.send(.presentCallScreen(roomProxy: roomProxy, isVoiceCall: false))
+                case .presentCallScreen(let isVoiceCall):
+                    actionsSubject.send(.presentCallScreen(roomProxy: roomProxy, isVoiceCall: isVoiceCall))
                 case .presentPinnedEventsTimeline:
                     stateMachine.tryEvent(.presentPinnedEventsTimeline)
                 case .presentResolveSendFailure(failure: let failure, sendHandle: let sendHandle):
@@ -810,6 +815,9 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
                                       userInfo: EventUserInfo(animated: animated, timelineController: timelineController))
             case .presentLocationPicker:
                 stateMachine.tryEvent(.presentMapNavigator(interactionMode: .picker),
+                                      userInfo: EventUserInfo(animated: animated, timelineController: timelineController))
+            case .presentLiveLocationViewer(let sender, let initialLiveLocationShare):
+                stateMachine.tryEvent(.presentMapNavigator(interactionMode: .viewLive(sender: sender, initialLiveLocationShare: initialLiveLocationShare)),
                                       userInfo: EventUserInfo(animated: animated, timelineController: timelineController))
             case .presentPollForm(let mode):
                 stateMachine.tryEvent(.presentPollForm(mode: mode),
@@ -1162,7 +1170,6 @@ class RoomFlowCoordinator: FlowCoordinatorProtocol {
         
         let params = LocationSharingScreenCoordinatorParameters(interactionMode: interactionMode,
                                                                 mapURLBuilder: flowParameters.appSettings.mapTilerConfiguration,
-                                                                liveLocationSharingEnabled: flowParameters.appSettings.liveLocationSharingEnabled,
                                                                 roomProxy: roomProxy,
                                                                 timelineController: timelineController,
                                                                 liveLocationManager: flowParameters.userSession.liveLocationManager,

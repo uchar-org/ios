@@ -22,6 +22,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     private let navigationStackCoordinator: NavigationStackCoordinator
     private let appMediator: AppMediatorProtocol
     private let appSettings: AppSettings
+    private let appHooks: AppHooks
     private let analytics: AnalyticsService
     private let userIndicatorController: UserIndicatorControllerProtocol
     
@@ -46,6 +47,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         /// The screen to report an error.
         case bugReportFlow
+        /// The screen to toggle feature flags.
+        case developerOptions
         
         /// The flow is complete.
         case complete
@@ -62,8 +65,6 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         case loginWithQR
         /// Show the server confirmation screen.
         case confirmServer(AuthenticationFlow)
-        /// The user encountered a problem.
-        case reportProblem
         
         /// The QR login flow was aborted.
         case cancelledLoginWithQR
@@ -84,8 +85,15 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         /// The password login was aborted.
         case cancelledPasswordLogin(previousState: State)
         
+        /// The user encountered a problem.
+        case reportProblem
         /// The user has finished reporting a problem (or viewing the logs).
         case bugReportFlowComplete
+        
+        /// The user wants to toggle a feature flag.
+        case developerOptions
+        /// The user finished toggling feature flags.
+        case dismissedDeveloperOptions
         
         /// The user has successfully signed in. The new session can be found in the `userInfo`.
         case signedIn
@@ -106,6 +114,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
          navigationRootCoordinator: NavigationRootCoordinator,
          appMediator: AppMediatorProtocol,
          appSettings: AppSettings,
+         appHooks: AppHooks,
          analytics: AnalyticsService,
          userIndicatorController: UserIndicatorControllerProtocol) {
         self.authenticationService = authenticationService
@@ -113,6 +122,7 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appMediator = appMediator
         self.appSettings = appSettings
+        self.appHooks = appHooks
         self.analytics = analytics
         self.userIndicatorController = userIndicatorController
         
@@ -127,6 +137,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
+        MXLog.info("Handling app route: \(appRoute)")
+        
         switch appRoute {
         case .accountProvisioningLink(let provisioningParameters):
             guard appSettings.allowOtherAccountProviders else {
@@ -162,6 +174,8 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         case .loginScreen:
             navigationStackCoordinator.popToRoot(animated: animated)
         case .bugReportFlow:
+            navigationStackCoordinator.setSheetCoordinator(nil)
+        case .developerOptions:
             navigationStackCoordinator.setSheetCoordinator(nil)
         case .complete:
             fatalError()
@@ -231,6 +245,13 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         }
         stateMachine.addRoutes(event: .bugReportFlowComplete, transitions: [.bugReportFlow => .startScreen])
         
+        // Developer Options
+        
+        stateMachine.addRoutes(event: .developerOptions, transitions: [.startScreen => .developerOptions]) { [weak self] _ in
+            self?.showDeveloperOptionsScreen()
+        }
+        stateMachine.addRoutes(event: .dismissedDeveloperOptions, transitions: [.developerOptions => .startScreen])
+        
         // Completion
         
         stateMachine.addRoutes(event: .signedIn, transitions: [.qrCodeLoginScreen => .complete,
@@ -259,11 +280,18 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     private func showStartScreen(fromState: State, applying provisioningParameters: AccountProvisioningParameters? = nil) {
+        let mediaProvider = authenticationService.classicAppAccount.map { account in
+            MediaProvider(mediaLoader: ClassicAppMediaLoader(classicAppAccount: account),
+                          imageCache: .onlyInMemory,
+                          homeserverReachabilityPublisher: appMediator.networkMonitor.reachabilityPublisher) // Close enough approximation
+        }
+        
         let parameters = AuthenticationStartScreenParameters(authenticationService: authenticationService,
                                                              provisioningParameters: provisioningParameters,
                                                              isBugReportServiceEnabled: bugReportService.isEnabled,
+                                                             appMediator: appMediator,
                                                              appSettings: appSettings,
-                                                             mediaProvider: nil, // Currently unused.
+                                                             mediaProvider: mediaProvider,
                                                              userIndicatorController: userIndicatorController)
         let coordinator = AuthenticationStartScreenCoordinator(parameters: parameters)
         
@@ -278,13 +306,16 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                     stateMachine.tryEvent(.confirmServer(.login))
                 case .register:
                     stateMachine.tryEvent(.confirmServer(.register))
-                case .reportProblem:
-                    stateMachine.tryEvent(.reportProblem)
                     
                 case .loginDirectlyWithOIDC(let oidcData, let window):
                     stateMachine.tryEvent(.continueWithOIDC, userInfo: (oidcData, window))
                 case .loginDirectlyWithPassword(let loginHint):
                     stateMachine.tryEvent(.continueWithPassword, userInfo: loginHint)
+                
+                case .reportProblem:
+                    stateMachine.tryEvent(.reportProblem)
+                case .developerOptions:
+                    stateMachine.tryEvent(.developerOptions)
                 }
             }
             .store(in: &cancellables)
@@ -319,8 +350,6 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
                 stateMachine.tryEvent(.confirmServer(.login))
             case .signedIn(let userSession):
                 navigationStackCoordinator.setSheetCoordinator(nil)
-                // Since the qr code login flow includes verification
-                appSettings.hasRunIdentityConfirmationOnboarding = true
                 DispatchQueue.main.async {
                     self.stateMachine.tryEvent(.signedIn, userInfo: userSession)
                 }
@@ -458,6 +487,28 @@ class AuthenticationFlowCoordinator: FlowCoordinatorProtocol {
         
         bugReportFlowCoordinator = coordinator
         coordinator.start()
+    }
+    
+    // MARK: - Developer Options
+    
+    private func showDeveloperOptionsScreen() {
+        let stackCoordinator = NavigationStackCoordinator()
+        let coordinator = DeveloperOptionsScreenCoordinator(appSettings: appSettings,
+                                                            appHooks: appHooks,
+                                                            clientProxy: nil)
+        coordinator.actions
+            .sink { action in
+                switch action {
+                case .clearCache:
+                    break // Not sent when clientProxy == nil
+                }
+            }
+            .store(in: &cancellables)
+        
+        stackCoordinator.setRootCoordinator(coordinator)
+        navigationStackCoordinator.setSheetCoordinator(stackCoordinator) { [weak self] in
+            self?.stateMachine.tryEvent(.dismissedDeveloperOptions)
+        }
     }
     
     // MARK: - Completion

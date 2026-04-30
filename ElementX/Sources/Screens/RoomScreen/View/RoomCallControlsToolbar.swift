@@ -15,8 +15,8 @@ struct RoomCallControlsToolbar: ToolbarContent {
     var body: some ToolbarContent {
         if viewState.hasOngoingCall {
             ToolbarItem(placement: .primaryAction) {
-                JoinCallButton {
-                    onCallTap(false)
+                JoinCallButton(isVoiceCall: viewState.activeRoomCallIntent == .audio) {
+                    onCallTap(viewState.activeRoomCallIntent == .audio)
                 }
                 .accessibilityIdentifier(A11yIdentifiers.roomScreen.joinCall)
                 .disabled(!viewState.canJoinCall)
@@ -24,21 +24,32 @@ struct RoomCallControlsToolbar: ToolbarContent {
         } else {
             if viewState.isDirectOneToOneRoom {
                 ToolbarItem(placement: .primaryAction) {
-                    Button { onCallTap(true) } label: {
+                    Menu {
+                        Button {
+                            onCallTap(true)
+                        } label: {
+                            Label(L10n.a11yStartVoiceCall, icon: \.voiceCallSolid)
+                        }
+                        
+                        Button {
+                            onCallTap(false)
+                        } label: {
+                            Label(L10n.a11yStartVideoCall, icon: \.videoCallSolid)
+                        }
+                    } label: {
                         CompoundIcon(\.voiceCallSolid)
                     }
-                    .accessibilityLabel(L10n.a11yStartVoiceCall)
-                    .accessibilityIdentifier(A11yIdentifiers.roomScreen.startVoiceCall)
+                    .accessibilityLabel(L10n.a11yStartCall)
                     .disabled(!viewState.canJoinCall)
                 }
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Button { onCallTap(false) } label: {
-                    CompoundIcon(\.videoCallSolid)
+            } else {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { onCallTap(false) } label: {
+                        CompoundIcon(\.videoCallSolid)
+                    }
+                    .accessibilityLabel(L10n.a11yStartVideoCall)
+                    .disabled(!viewState.canJoinCall)
                 }
-                .accessibilityLabel(L10n.a11yStartVideoCall)
-                .accessibilityIdentifier(A11yIdentifiers.roomScreen.startVideoCall)
-                .disabled(!viewState.canJoinCall)
             }
         }
     }
@@ -61,16 +72,21 @@ struct RoomCallControlsToolbar_Previews: PreviewProvider {
             ElementNavigationStack {
                 Color.clear.toolbar { RoomCallControlsToolbar(viewState: .mock(hasOngoingCall: false, canJoinCall: false)) { _ in } }
             }
+            ElementNavigationStack {
+                Color.clear.toolbar { RoomCallControlsToolbar(viewState: .mock(hasOngoingCall: true, activeRoomCallIntent: .audio)) { _ in } }
+            }
         }
         .previewDisplayName("All states")
     }
 }
 
 private extension RoomScreenViewState {
-    static func mock(hasOngoingCall: Bool, isDirectOneToOneRoom: Bool = false, canJoinCall: Bool = true) -> RoomScreenViewState {
+    static func mock(hasOngoingCall: Bool, isDirectOneToOneRoom: Bool = false, canJoinCall: Bool = true, activeRoomCallIntent: CallIntent? = nil) -> RoomScreenViewState {
         RoomScreenViewState(roomAvatar: .room(id: "mock", name: "Mock Room", avatarURL: nil),
                             canJoinCall: canJoinCall,
-                            hasOngoingCall: hasOngoingCall, isDirectOneToOneRoom: isDirectOneToOneRoom,
+                            hasOngoingCall: hasOngoingCall,
+                            activeRoomCallIntent: activeRoomCallIntent,
+                            isDirectOneToOneRoom: isDirectOneToOneRoom,
                             hasSuccessor: false)
     }
 }

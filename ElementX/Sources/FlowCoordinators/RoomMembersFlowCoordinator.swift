@@ -97,6 +97,8 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
     }
     
     func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
+        MXLog.info("Handling app route: \(appRoute)")
+        
         switch appRoute {
         case .roomMemberDetails(let userID):
             if case .roomFlow = stateMachine.state, let childFlowCoordinator {
@@ -119,7 +121,7 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
         case .roomAlias, .childRoomAlias, .eventOnRoomAlias, .childEventOnRoomAlias:
             break // These are converted to a room ID route one level above.
         case .accountProvisioningLink, .roomList, .room, .roomDetails, .event,
-             .userProfile, .call, .genericCallLink, .settings, .chatBackupSettings,
+             .userProfile, .call, .settings, .chatBackupSettings,
              .share, .transferOwnership, .thread, .globalSearch:
             break
         }
@@ -225,7 +227,8 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
                                                                   roomProxy: roomProxy,
                                                                   userSession: flowParameters.userSession,
                                                                   userIndicatorController: flowParameters.userIndicatorController,
-                                                                  analytics: flowParameters.analytics)
+                                                                  analytics: flowParameters.analytics,
+                                                                  appSettings: flowParameters.appSettings)
         let coordinator = RoomMemberDetailsScreenCoordinator(parameters: params)
         
         coordinator.actions.sink { [weak self] action in
@@ -286,7 +289,8 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
                                                                 isPresentedModally: false,
                                                                 userSession: flowParameters.userSession,
                                                                 userIndicatorController: flowParameters.userIndicatorController,
-                                                                analytics: flowParameters.analytics)
+                                                                analytics: flowParameters.analytics,
+                                                                appSettings: flowParameters.appSettings)
         let coordinator = UserProfileScreenCoordinator(parameters: parameters)
         coordinator.actionsPublisher.sink { [weak self] action in
             guard let self else { return }

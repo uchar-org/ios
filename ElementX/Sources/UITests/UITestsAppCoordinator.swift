@@ -157,6 +157,7 @@ class MockScreen: Identifiable {
                                                                 navigationRootCoordinator: navigationRootCoordinator,
                                                                 appMediator: AppMediatorMock.default,
                                                                 appSettings: appSettings,
+                                                                appHooks: AppHooks(),
                                                                 analytics: ServiceLocator.shared.analytics,
                                                                 userIndicatorController: ServiceLocator.shared.userIndicatorController)
             flowCoordinator.start()
@@ -591,7 +592,6 @@ class MockScreen: Identifiable {
             appSettings.hasRunIdentityConfirmationOnboarding = true
             appSettings.hasRunNotificationPermissionsOnboarding = true
             appSettings.analyticsConsentState = .optedOut
-            appSettings.hasSeenSpacesAnnouncement = true
             
             let roomSummaries: [RoomSummary] = if id == .userSessionSpacesFlow {
                 [[RoomSummary].mockSpaceInvites[0]] + .mockRooms

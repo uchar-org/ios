@@ -84,6 +84,8 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
     // MARK: - FlowCoordinatorProtocol
     
     func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
+        MXLog.info("Handling app route: \(appRoute)")
+        
         Task {
             await asyncHandleAppRoute(appRoute, animated: animated)
         }
@@ -172,7 +174,7 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .globalSearch:
             presentGlobalSearch()
-        case .accountProvisioningLink, .settings, .chatBackupSettings, .call, .genericCallLink:
+        case .accountProvisioningLink, .settings, .chatBackupSettings, .call:
             break // These routes cannot be handled.
         }
     }
@@ -791,7 +793,8 @@ class ChatsTabFlowCoordinator: FlowCoordinatorProtocol {
                                                                 isPresentedModally: true,
                                                                 userSession: userSession,
                                                                 userIndicatorController: flowParameters.userIndicatorController,
-                                                                analytics: flowParameters.analytics)
+                                                                analytics: flowParameters.analytics,
+                                                                appSettings: flowParameters.appSettings)
         let coordinator = UserProfileScreenCoordinator(parameters: parameters)
         coordinator.actionsPublisher.sink { [weak self] action in
             guard let self else { return }

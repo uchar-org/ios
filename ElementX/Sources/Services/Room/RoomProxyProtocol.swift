@@ -20,6 +20,7 @@ enum RoomProxyError: Error {
     case missingTransactionID
     case failedCreatingPinnedTimeline
     case timelineError(TimelineProxyError)
+    case liveLocationSessionIsNotActive
 }
 
 /// An enum that describes the relationship between the current user and the room, and contains a reference to the specific implementation of the `RoomProxy`.
@@ -197,7 +198,9 @@ protocol JoinedRoomProxyProtocol: RoomProxyProtocol {
     
     // MARK: - Live Location
     
-    func startLiveLocationShare(duration: Duration) async -> Result<Void, RoomProxyError>
+    func makeLiveLocationService() async -> RoomLiveLocationServiceProtocol
+    
+    func startLiveLocationShare(duration: Duration) async -> Result<String, RoomProxyError>
     func sendLiveLocation(geoURI: GeoURI) async -> Result<Void, RoomProxyError>
     func stopLiveLocationShare() async -> Result<Void, RoomProxyError>
 }
