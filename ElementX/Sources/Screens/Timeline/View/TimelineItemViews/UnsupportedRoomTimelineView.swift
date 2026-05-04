@@ -10,58 +10,50 @@ import Compound
 import SwiftUI
 
 struct UnsupportedRoomTimelineView: View {
-  let timelineItem: UnsupportedRoomTimelineItem
+    let timelineItem: UnsupportedRoomTimelineItem
 
-  var body: some View {
-    TimelineStyler(timelineItem: timelineItem) {
-      Label(
-        "\(timelineItem.body) (\(timelineItem.eventType)): \(timelineItem.error)",
-        icon: \.warning,
-        iconSize: .small,
-        relativeTo: .compound.bodyLG
-      )
-      .labelStyle(RoomTimelineViewPlaceholderLabelStyle())
+    var body: some View {
+        TimelineStyler(timelineItem: timelineItem) {
+            Label("\(timelineItem.body) (\(timelineItem.eventType)): \(timelineItem.error)",
+                  icon: \.warning,
+                  iconSize: .small,
+                  relativeTo: .compound.bodyLG)
+                .labelStyle(RoomTimelineViewPlaceholderLabelStyle())
+        }
     }
-  }
 }
 
 struct UnsupportedRoomTimelineView_Previews: PreviewProvider, TestablePreview {
-  static let viewModel = TimelineViewModel.mock
+    static let viewModel = TimelineViewModel.mock
 
-  static var previews: some View {
-    body.environmentObject(viewModel.context)
-  }
-
-  static var body: some View {
-    VStack(alignment: .leading, spacing: 20.0) {
-      UnsupportedRoomTimelineView(
-        timelineItem: itemWith(
-          text: "Unsupported",
-          timestamp: .mock,
-          isOutgoing: false,
-          senderId: "Bob"))
-
-      UnsupportedRoomTimelineView(
-        timelineItem: itemWith(
-          text: "Some other text",
-          timestamp: .mock,
-          isOutgoing: true,
-          senderId: "Anne"))
+    static var previews: some View {
+        body.environmentObject(viewModel.context)
     }
-  }
 
-  private static func itemWith(text: String, timestamp: Date, isOutgoing: Bool, senderId: String)
-    -> UnsupportedRoomTimelineItem
-  {
-    UnsupportedRoomTimelineItem(
-      id: .randomEvent,
-      body: text,
-      eventType: "event.type",
-      error: "something went wrong",
-      timestamp: timestamp,
-      isOutgoing: isOutgoing,
-      isEditable: false,
-      canBeRepliedTo: true,
-      sender: .init(id: senderId))
-  }
+    static var body: some View {
+        VStack(alignment: .leading, spacing: 20.0) {
+            UnsupportedRoomTimelineView(timelineItem: itemWith(text: "Unsupported",
+                                                               timestamp: .mock,
+                                                               isOutgoing: false,
+                                                               senderId: "Bob"))
+
+            UnsupportedRoomTimelineView(timelineItem: itemWith(text: "Some other text",
+                                                               timestamp: .mock,
+                                                               isOutgoing: true,
+                                                               senderId: "Anne"))
+        }
+    }
+
+    private static func itemWith(text: String, timestamp: Date, isOutgoing: Bool, senderId: String)
+        -> UnsupportedRoomTimelineItem {
+        UnsupportedRoomTimelineItem(id: .randomEvent,
+                                    body: text,
+                                    eventType: "event.type",
+                                    error: "something went wrong",
+                                    timestamp: timestamp,
+                                    isOutgoing: isOutgoing,
+                                    isEditable: false,
+                                    canBeRepliedTo: true,
+                                    sender: .init(id: senderId))
+    }
 }

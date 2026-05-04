@@ -8,21 +8,21 @@
 import Foundation
 
 enum RoomThreadListScreenViewModelAction {
-  case presentThread(threadRootEventID: String)
+    case presentThread(threadRootEventID: String)
 }
 
 struct RoomThreadListScreenViewState: BindableState {
-  var items = [RoomThreadListItem]()
+    var items = [RoomThreadListItem]()
 
-  var isPaginating = false
+    var isPaginating = false
 
-  var bindings: RoomThreadListScreenViewStateBindings
+    var bindings: RoomThreadListScreenViewStateBindings
 }
 
-struct RoomThreadListScreenViewStateBindings {}
+struct RoomThreadListScreenViewStateBindings { }
 
 enum RoomThreadListScreenViewAction {
-  case oldestItemDidAppear
-  case oldestItemDidDisappear
-  case tappedThread(threadRootEventID: String)
+    case oldestItemDidAppear
+    case oldestItemDidDisappear
+    case tappedThread(threadRootEventID: String)
 }

@@ -9,20 +9,20 @@
 import Foundation
 
 struct UserDiscoverySection {
-  let type: UserDiscoverySectionType
-  let users: [UserProfileProxy]
+    let type: UserDiscoverySectionType
+    let users: [UserProfileProxy]
 
-  var title: String? {
-    switch type {
-    case .searchResult:
-      return nil
-    case .suggestions:
-      return users.isEmpty ? nil : L10n.commonSuggestions
+    var title: String? {
+        switch type {
+        case .searchResult:
+            return nil
+        case .suggestions:
+            return users.isEmpty ? nil : L10n.commonSuggestions
+        }
     }
-  }
 }
 
 enum UserDiscoverySectionType: Equatable {
-  case searchResult
-  case suggestions
+    case searchResult
+    case suggestions
 }

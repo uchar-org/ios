@@ -8,7 +8,7 @@
 import CoreLocation
 
 extension CLLocationCoordinate2D: @retroactive Equatable {
-  public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
-  }
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
+    }
 }

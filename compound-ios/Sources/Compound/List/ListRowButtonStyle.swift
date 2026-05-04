@@ -16,23 +16,21 @@ import SwiftUI
 /// The primitive style is needed to set the list row insets to `0`. The inner style is then needed
 /// to change the background colour depending on whether the button is currently pressed or not.
 public struct ListRowButtonStyle: PrimitiveButtonStyle {
-  public func makeBody(configuration: Configuration) -> some View {
-    Button(role: configuration.role, action: configuration.trigger) {
-      configuration.label
+    public func makeBody(configuration: Configuration) -> some View {
+        Button(role: configuration.role, action: configuration.trigger) {
+            configuration.label
+        }
+        .buttonStyle(Style())
     }
-    .buttonStyle(Style())
-  }
 
-  /// Inner style used to set the pressed background colour.
-  struct Style: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-      configuration.label
-        .contentShape(Rectangle())
-        .background(
-          configuration.isPressed ? Color.compound.bgSubtlePrimary : .compound.bgCanvasDefaultLevel1
-        )
+    /// Inner style used to set the pressed background colour.
+    struct Style: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .contentShape(Rectangle())
+                .background(configuration.isPressed ? Color.compound.bgSubtlePrimary : .compound.bgCanvasDefaultLevel1)
+        }
     }
-  }
 }
 
 // MARK: - Previews
@@ -41,28 +39,28 @@ public struct ListRowButtonStyle: PrimitiveButtonStyle {
 // the previews need to do this manually for demonstration purposes.
 
 public struct ListRowButtonStyle_Previews: PreviewProvider, TestablePreview {
-  public static var previews: some View {
-    Form {
-      Section {
-        Button("Title") {}
-          .buttonStyle(ListRowButtonStyle.Style())
-      }
-      .listRowInsets(EdgeInsets())
+    public static var previews: some View {
+        Form {
+            Section {
+                Button("Title") { }
+                    .buttonStyle(ListRowButtonStyle.Style())
+            }
+            .listRowInsets(EdgeInsets())
 
-      Section {
-        Button("Title") {}
-        Button("Title") {}
-        Button("Title") {}
-      }
-      .buttonStyle(ListRowButtonStyle())
-      .listRowInsets(EdgeInsets())
+            Section {
+                Button("Title") { }
+                Button("Title") { }
+                Button("Title") { }
+            }
+            .buttonStyle(ListRowButtonStyle())
+            .listRowInsets(EdgeInsets())
 
-      Section {
-        ShareLink(item: "test")
-          .buttonStyle(ListRowButtonStyle())
-      }
-      .listRowInsets(EdgeInsets())
+            Section {
+                ShareLink(item: "test")
+                    .buttonStyle(ListRowButtonStyle())
+            }
+            .listRowInsets(EdgeInsets())
+        }
+        .compoundList()
     }
-    .compoundList()
-  }
 }

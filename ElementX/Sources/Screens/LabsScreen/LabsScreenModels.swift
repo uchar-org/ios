@@ -9,36 +9,35 @@
 import Foundation
 
 enum LabsScreenViewAction {
-  case clearCache
+    case clearCache
 }
 
 enum LabsScreenViewModelAction {
-  case clearCache
+    case clearCache
 }
 
 struct LabsScreenViewState: BindableState {
-  var bindings: LabsScreenViewStateBindings
+    var bindings: LabsScreenViewStateBindings
 }
 
 // periphery: ignore - subscripts are seen as false positive
 @dynamicMemberLookup
 struct LabsScreenViewStateBindings {
-  private let labsOptions: LabsOptionsProtocol
+    private let labsOptions: LabsOptionsProtocol
 
-  init(labsOptions: LabsOptionsProtocol) {
-    self.labsOptions = labsOptions
-  }
+    init(labsOptions: LabsOptionsProtocol) {
+        self.labsOptions = labsOptions
+    }
 
-  subscript<Setting>(dynamicMember keyPath: ReferenceWritableKeyPath<LabsOptionsProtocol, Setting>)
-    -> Setting
-  {
-    get { labsOptions[keyPath: keyPath] }
-    set { labsOptions[keyPath: keyPath] = newValue }
-  }
+    subscript<Setting>(dynamicMember keyPath: ReferenceWritableKeyPath<LabsOptionsProtocol, Setting>)
+        -> Setting {
+        get { labsOptions[keyPath: keyPath] }
+        set { labsOptions[keyPath: keyPath] = newValue }
+    }
 }
 
 protocol LabsOptionsProtocol: AnyObject {
-  var threadsEnabled: Bool { get set }
+    var threadsEnabled: Bool { get set }
 }
 
-extension AppSettings: LabsOptionsProtocol {}
+extension AppSettings: LabsOptionsProtocol { }

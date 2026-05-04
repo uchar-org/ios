@@ -9,25 +9,25 @@
 import Foundation
 
 struct CollapsibleTimelineItem: RoomTimelineItemProtocol, Equatable {
-  let id: TimelineItemIdentifier
-  let items: [RoomTimelineItemProtocol]
-  let itemIDs: [TimelineItemIdentifier]
+    let id: TimelineItemIdentifier
+    let items: [RoomTimelineItemProtocol]
+    let itemIDs: [TimelineItemIdentifier]
 
-  init(items: [RoomTimelineItemProtocol]) {
-    self.items = items
-    itemIDs = items.map(\.id)
+    init(items: [RoomTimelineItemProtocol]) {
+        self.items = items
+        itemIDs = items.map(\.id)
 
-    guard let firstItemID = itemIDs.first else {
-      fatalError()
+        guard let firstItemID = itemIDs.first else {
+            fatalError()
+        }
+
+        id = firstItemID
     }
 
-    id = firstItemID
-  }
+    // MARK: - Equatable
 
-  // MARK: - Equatable
-
-  static func == (lhs: CollapsibleTimelineItem, rhs: CollapsibleTimelineItem) -> Bool {
-    // Technically not a correct implementation of equality as the items themselves could be updated.
-    lhs.id == rhs.id && lhs.itemIDs == rhs.itemIDs
-  }
+    static func == (lhs: CollapsibleTimelineItem, rhs: CollapsibleTimelineItem) -> Bool {
+        // Technically not a correct implementation of equality as the items themselves could be updated.
+        lhs.id == rhs.id && lhs.itemIDs == rhs.itemIDs
+    }
 }

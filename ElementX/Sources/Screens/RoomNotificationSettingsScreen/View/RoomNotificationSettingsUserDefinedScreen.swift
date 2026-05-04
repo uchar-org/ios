@@ -10,68 +10,61 @@ import Compound
 import SwiftUI
 
 struct RoomNotificationSettingsUserDefinedScreen: View {
-  @Bindable var context: RoomNotificationSettingsScreenViewModel.Context
+    @Bindable var context: RoomNotificationSettingsScreenViewModel.Context
 
-  var body: some View {
-    Form {
-      RoomNotificationSettingsCustomSectionView(context: context)
+    var body: some View {
+        Form {
+            RoomNotificationSettingsCustomSectionView(context: context)
 
-      deleteButton
+            deleteButton
+        }
+        .compoundList()
+        .navigationTitle(context.viewState.navigationTitle)
+        .alert(item: $context.alertInfo)
+        .track(screen: .RoomNotifications)
     }
-    .compoundList()
-    .navigationTitle(context.viewState.navigationTitle)
-    .alert(item: $context.alertInfo)
-    .track(screen: .RoomNotifications)
-  }
 
-  // MARK: - Private
+    // MARK: - Private
 
-  private var deleteButton: some View {
-    ListRow(
-      label: .action(
-        title: L10n.screenRoomNotificationSettingsEditRemoveSetting,
-        icon: \.delete,
-        role: .destructive),
-      details: context.viewState.deletingCustomSetting ? .isWaiting(true) : nil,
-      kind: .button {
-        context.send(viewAction: .deleteCustomSettingTapped)
-      }
-    )
-    .disabled(context.viewState.deletingCustomSetting)
-  }
+    private var deleteButton: some View {
+        ListRow(label: .action(title: L10n.screenRoomNotificationSettingsEditRemoveSetting,
+                               icon: \.delete,
+                               role: .destructive),
+                details: context.viewState.deletingCustomSetting ? .isWaiting(true) : nil,
+                kind: .button {
+                    context.send(viewAction: .deleteCustomSettingTapped)
+                })
+                .disabled(context.viewState.deletingCustomSetting)
+    }
 }
 
 // MARK: - Previews
 
 struct RoomNotificationSettingsUserDefinedScreen_Previews: PreviewProvider, TestablePreview {
-  static let viewModel = {
-    let notificationSettingsProxy = NotificationSettingsProxyMock(
-      with: .init(defaultRoomMode: .mentionsAndKeywordsOnly, roomMode: .mentionsAndKeywordsOnly))
+    static let viewModel = {
+        let notificationSettingsProxy = NotificationSettingsProxyMock(with: .init(defaultRoomMode: .mentionsAndKeywordsOnly, roomMode: .mentionsAndKeywordsOnly))
 
-    let roomProxy = JoinedRoomProxyMock(.init(name: "Room", isEncrypted: true))
+        let roomProxy = JoinedRoomProxyMock(.init(name: "Room", isEncrypted: true))
 
-    return RoomNotificationSettingsScreenViewModel(
-      notificationSettingsProxy: notificationSettingsProxy,
-      roomProxy: roomProxy,
-      displayAsUserDefinedRoomSettings: true)
-  }()
+        return RoomNotificationSettingsScreenViewModel(notificationSettingsProxy: notificationSettingsProxy,
+                                                       roomProxy: roomProxy,
+                                                       displayAsUserDefinedRoomSettings: true)
+    }()
 
-  static let viewModelUnencrypted = {
-    let notificationSettingsProxy = NotificationSettingsProxyMock(
-      with: .init(defaultRoomMode: .mentionsAndKeywordsOnly, roomMode: .mentionsAndKeywordsOnly))
+    static let viewModelUnencrypted = {
+        let notificationSettingsProxy = NotificationSettingsProxyMock(with: .init(defaultRoomMode: .mentionsAndKeywordsOnly, roomMode: .mentionsAndKeywordsOnly))
 
-    let roomProxy = JoinedRoomProxyMock(.init(name: "Room", isEncrypted: false))
+        let roomProxy = JoinedRoomProxyMock(.init(name: "Room", isEncrypted: false))
 
-    return RoomNotificationSettingsScreenViewModel(
-      notificationSettingsProxy: notificationSettingsProxy,
-      roomProxy: roomProxy,
-      displayAsUserDefinedRoomSettings: true)
-  }()
+        return RoomNotificationSettingsScreenViewModel(notificationSettingsProxy: notificationSettingsProxy,
+                                                       roomProxy: roomProxy,
+                                                       displayAsUserDefinedRoomSettings: true)
+    }()
 
-  static var previews: some View {
-    RoomNotificationSettingsUserDefinedScreen(context: viewModel.context)
-      .previewDisplayName("Encrypted")
-    RoomNotificationSettingsUserDefinedScreen(context: viewModelUnencrypted.context)
-      .previewDisplayName("Unencrypted")
-  }
+    static var previews: some View {
+        RoomNotificationSettingsUserDefinedScreen(context: viewModel.context)
+            .previewDisplayName("Encrypted")
+        RoomNotificationSettingsUserDefinedScreen(context: viewModelUnencrypted.context)
+            .previewDisplayName("Unencrypted")
+    }
 }

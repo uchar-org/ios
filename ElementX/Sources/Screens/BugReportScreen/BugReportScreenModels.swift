@@ -10,31 +10,31 @@ import Foundation
 import UIKit
 
 enum BugReportScreenViewModelAction {
-  case cancel
-  case viewLogs
-  case submitStarted(progressPublisher: CurrentValuePublisher<Double, Never>)
-  case submitFinished
-  case submitFailed(error: Error)
+    case cancel
+    case viewLogs
+    case submitStarted(progressPublisher: CurrentValuePublisher<Double, Never>)
+    case submitFinished
+    case submitFailed(error: Error)
 }
 
 struct BugReportScreenViewState: BindableState {
-  let canSendLogFiles: Bool
-  var screenshot: UIImage?
-  var bindings: BugReportScreenViewStateBindings
-  let isModallyPresented: Bool
-  var shouldDisableInteraction = false
+    let canSendLogFiles: Bool
+    var screenshot: UIImage?
+    var bindings: BugReportScreenViewStateBindings
+    let isModallyPresented: Bool
+    var shouldDisableInteraction = false
 }
 
 struct BugReportScreenViewStateBindings {
-  var reportText: String
-  var sendingLogsEnabled: Bool
-  var canContact: Bool
+    var reportText: String
+    var sendingLogsEnabled: Bool
+    var canContact: Bool
 }
 
 enum BugReportScreenViewAction {
-  case cancel
-  case submit
-  case removeScreenshot
-  case attachScreenshot(UIImage)
-  case viewLogs
+    case cancel
+    case submit
+    case removeScreenshot
+    case attachScreenshot(UIImage)
+    case viewLogs
 }

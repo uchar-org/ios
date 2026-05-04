@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol IdentityConfirmationScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<IdentityConfirmationScreenViewModelAction, Never> { get }
-  var context: IdentityConfirmationScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<IdentityConfirmationScreenViewModelAction, Never> { get }
+    var context: IdentityConfirmationScreenViewModelType.Context { get }
 }

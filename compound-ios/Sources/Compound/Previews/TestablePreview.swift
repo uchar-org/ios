@@ -6,4 +6,4 @@
 // Please see LICENSE in the repository root for full details.
 //
 
-protocol TestablePreview {}
+protocol TestablePreview { }

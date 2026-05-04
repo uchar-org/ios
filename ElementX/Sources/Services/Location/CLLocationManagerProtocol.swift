@@ -9,21 +9,21 @@ import CoreLocation
 
 /// Protocol for CLLocationManager used for authorization handling and location updates.
 protocol CLLocationManagerProtocol: AnyObject {
-  var delegate: CLLocationManagerDelegate? { get set }
-  var allowsBackgroundLocationUpdates: Bool { get set }
-  var showsBackgroundLocationIndicator: Bool { get set }
-  var desiredAccuracy: CLLocationAccuracy { get set }
-  var distanceFilter: CLLocationDistance { get set }
-  var pausesLocationUpdatesAutomatically: Bool { get set }
-  var authorizationStatus: CLAuthorizationStatus { get }
-  var accuracyAuthorization: CLAccuracyAuthorization { get }
+    var delegate: CLLocationManagerDelegate? { get set }
+    var allowsBackgroundLocationUpdates: Bool { get set }
+    var showsBackgroundLocationIndicator: Bool { get set }
+    var desiredAccuracy: CLLocationAccuracy { get set }
+    var distanceFilter: CLLocationDistance { get set }
+    var pausesLocationUpdatesAutomatically: Bool { get set }
+    var authorizationStatus: CLAuthorizationStatus { get }
+    var accuracyAuthorization: CLAccuracyAuthorization { get }
 
-  func requestAlwaysAuthorization()
-  func startUpdatingLocation()
-  func stopUpdatingLocation()
+    func requestAlwaysAuthorization()
+    func startUpdatingLocation()
+    func stopUpdatingLocation()
 }
 
 // sourcery: AutoMockable
-extension CLLocationManagerProtocol {}
+extension CLLocationManagerProtocol { }
 
-extension CLLocationManager: CLLocationManagerProtocol {}
+extension CLLocationManager: CLLocationManagerProtocol { }

@@ -9,12 +9,12 @@ import Combine
 import Foundation
 
 struct RoomLiveLocationServiceMockConfiguration {
-  var shares: [LiveLocationShare] = []
+    var shares: [LiveLocationShare] = []
 }
 
 extension RoomLiveLocationServiceMock {
-  convenience init(_ configuration: RoomLiveLocationServiceMockConfiguration = .init()) {
-    self.init()
-    liveLocationsPublisher = CurrentValueSubject(configuration.shares).asCurrentValuePublisher()
-  }
+    convenience init(_ configuration: RoomLiveLocationServiceMockConfiguration = .init()) {
+        self.init()
+        liveLocationsPublisher = CurrentValueSubject(configuration.shares).asCurrentValuePublisher()
+    }
 }

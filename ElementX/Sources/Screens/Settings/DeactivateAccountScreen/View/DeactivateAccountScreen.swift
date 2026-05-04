@@ -10,101 +10,94 @@ import Compound
 import SwiftUI
 
 struct DeactivateAccountScreen: View {
-  @Bindable var context: DeactivateAccountScreenViewModel.Context
+    @Bindable var context: DeactivateAccountScreenViewModel.Context
 
-  var body: some View {
-    Form {
-      infoSection
-      eraseDataSection
-      passwordSection
-    }
-    .compoundList()
-    .safeAreaInset(edge: .bottom) {
-      Button(L10n.actionDeleteAccount, role: .destructive) {
-        context.send(viewAction: .deactivate)
-      }
-      .buttonStyle(.compound(.primary))
-      .disabled(context.password.isEmpty)
-      .padding(16)
-      .background(Color.compound.bgSubtleSecondaryLevel0.ignoresSafeArea())
-    }
-    .navigationTitle(L10n.screenDeactivateAccountTitle)
-    .navigationBarTitleDisplayMode(.inline)
-    .alert(item: $context.alertInfo)
-  }
-
-  private var infoSection: some View {
-    ListRow(
-      kind: .custom {
-        VStack(alignment: .leading, spacing: 16) {
-          Text(context.viewState.info)
-
-          VStack(alignment: .leading, spacing: 8) {
-            InfoItem(title: context.viewState.infoPoint1)
-            InfoItem(title: context.viewState.infoPoint2)
-            InfoItem(title: context.viewState.infoPoint3)
-            InfoItem(title: context.viewState.infoPoint4, isSuccess: true)
-          }
+    var body: some View {
+        Form {
+            infoSection
+            eraseDataSection
+            passwordSection
         }
-        .foregroundColor(.compound.textSecondary)
-        .font(.compound.bodyMD)
-        .listRowBackground(Color.clear)
-      })
-  }
-
-  private var eraseDataSection: some View {
-    Section {
-      ListRow(
-        label: .plain(title: L10n.screenDeactivateAccountDeleteAllMessages),
-        kind: .toggle($context.eraseData))
-    } footer: {
-      Text(L10n.screenDeactivateAccountDeleteAllMessagesNotice)
-        .compoundListSectionFooter()
+        .compoundList()
+        .safeAreaInset(edge: .bottom) {
+            Button(L10n.actionDeleteAccount, role: .destructive) {
+                context.send(viewAction: .deactivate)
+            }
+            .buttonStyle(.compound(.primary))
+            .disabled(context.password.isEmpty)
+            .padding(16)
+            .background(Color.compound.bgSubtleSecondaryLevel0.ignoresSafeArea())
+        }
+        .navigationTitle(L10n.screenDeactivateAccountTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .alert(item: $context.alertInfo)
     }
-  }
 
-  private var passwordSection: some View {
-    Section {
-      ListRow(
-        label: .plain(title: L10n.commonPassword),
-        kind: .secureField(text: $context.password)
-      )
-      .submitLabel(.done)
-    } header: {
-      Text(L10n.actionConfirmPassword)
-        .compoundListSectionHeader()
+    private var infoSection: some View {
+        ListRow(kind: .custom {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(context.viewState.info)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    InfoItem(title: context.viewState.infoPoint1)
+                    InfoItem(title: context.viewState.infoPoint2)
+                    InfoItem(title: context.viewState.infoPoint3)
+                    InfoItem(title: context.viewState.infoPoint4, isSuccess: true)
+                }
+            }
+            .foregroundColor(.compound.textSecondary)
+            .font(.compound.bodyMD)
+            .listRowBackground(Color.clear)
+        })
     }
-  }
+
+    private var eraseDataSection: some View {
+        Section {
+            ListRow(label: .plain(title: L10n.screenDeactivateAccountDeleteAllMessages),
+                    kind: .toggle($context.eraseData))
+        } footer: {
+            Text(L10n.screenDeactivateAccountDeleteAllMessagesNotice)
+                .compoundListSectionFooter()
+        }
+    }
+
+    private var passwordSection: some View {
+        Section {
+            ListRow(label: .plain(title: L10n.commonPassword),
+                    kind: .secureField(text: $context.password))
+                .submitLabel(.done)
+        } header: {
+            Text(L10n.actionConfirmPassword)
+                .compoundListSectionHeader()
+        }
+    }
 }
 
 private struct InfoItem: View {
-  let title: AttributedString
-  var isSuccess = false
+    let title: AttributedString
+    var isSuccess = false
 
-  var body: some View {
-    Label {
-      Text(title).padding(.vertical, 1)
-    } icon: {
-      CompoundIcon(
-        isSuccess ? \.check : \.close,
-        size: .small,
-        relativeTo: .compound.bodyMD
-      )
-      .foregroundStyle(isSuccess ? .compound.iconSuccessPrimary : .compound.iconCriticalPrimary)
+    var body: some View {
+        Label {
+            Text(title).padding(.vertical, 1)
+        } icon: {
+            CompoundIcon(isSuccess ? \.check : \.close,
+                         size: .small,
+                         relativeTo: .compound.bodyMD)
+                .foregroundStyle(isSuccess ? .compound.iconSuccessPrimary : .compound.iconCriticalPrimary)
+        }
+        .labelStyle(.custom(spacing: 8, alignment: .top))
     }
-    .labelStyle(.custom(spacing: 8, alignment: .top))
-  }
 }
 
 // MARK: - Previews
 
 struct DeactivateAccountScreen_Previews: PreviewProvider, TestablePreview {
-  static let viewModel = DeactivateAccountScreenViewModel(
-    clientProxy: ClientProxyMock(.init()),
-    userIndicatorController: UserIndicatorControllerMock())
-  static var previews: some View {
-    ElementNavigationStack {
-      DeactivateAccountScreen(context: viewModel.context)
+    static let viewModel = DeactivateAccountScreenViewModel(clientProxy: ClientProxyMock(.init()),
+                                                            userIndicatorController: UserIndicatorControllerMock())
+    static var previews: some View {
+        ElementNavigationStack {
+            DeactivateAccountScreen(context: viewModel.context)
+        }
     }
-  }
 }

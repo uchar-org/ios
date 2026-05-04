@@ -9,23 +9,23 @@
 import UIKit
 
 struct NoticeRoomTimelineItem: TextBasedRoomTimelineItem, Equatable {
-  let id: TimelineItemIdentifier
-  let timestamp: Date
-  let isOutgoing: Bool
-  let isEditable: Bool
-  let canBeRepliedTo: Bool
+    let id: TimelineItemIdentifier
+    let timestamp: Date
+    let isOutgoing: Bool
+    let isEditable: Bool
+    let canBeRepliedTo: Bool
 
-  let sender: TimelineItemSender
+    let sender: TimelineItemSender
 
-  let content: NoticeRoomTimelineItemContent
+    let content: NoticeRoomTimelineItemContent
 
-  var properties = RoomTimelineItemProperties()
+    var properties = RoomTimelineItemProperties()
 
-  var body: String {
-    content.body
-  }
+    var body: String {
+        content.body
+    }
 
-  var contentType: EventBasedMessageTimelineItemContentType {
-    .notice(content)
-  }
+    var contentType: EventBasedMessageTimelineItemContentType {
+        .notice(content)
+    }
 }

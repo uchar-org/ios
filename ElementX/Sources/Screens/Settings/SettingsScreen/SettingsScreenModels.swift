@@ -10,72 +10,72 @@ import Foundation
 import UIKit
 
 enum SettingsScreenViewModelAction: Equatable {
-  case close
-  case userDetails
-  case linkNewDevice
-  case manageAccount(url: URL)
-  case analytics
-  case appLock
-  case reportBug
-  case about
-  case blockedUsers
-  case secureBackup
-  case language
-  case notifications
-  case advancedSettings
-  case labs
-  case developerOptions
-  case logout
-  case deactivateAccount
+    case close
+    case userDetails
+    case linkNewDevice
+    case manageAccount(url: URL)
+    case analytics
+    case appLock
+    case reportBug
+    case about
+    case blockedUsers
+    case secureBackup
+    case language
+    case notifications
+    case advancedSettings
+    case labs
+    case developerOptions
+    case logout
+    case deactivateAccount
 }
 
 enum SettingsScreenSecuritySectionMode {
-  case none
-  case secureBackup
+    case none
+    case secureBackup
 }
 
 struct SettingsScreenViewState: BindableState {
-  var deviceID: String?
-  var userID: String
-  var showLinkNewDeviceButton: Bool
-  var accountProfileURL: URL?
-  var showAccountDeactivation: Bool
-  var userAvatarURL: URL?
-  var userDisplayName: String?
-  var showDeveloperOptions: Bool
+    var deviceID: String?
+    var userID: String
+    var showLinkNewDeviceButton: Bool
+    var accountProfileURL: URL?
+    var showAccountDeactivation: Bool
+    var userAvatarURL: URL?
+    var userDisplayName: String?
+    var showDeveloperOptions: Bool
 
-  var securitySectionMode = SettingsScreenSecuritySectionMode.none
-  var showSecuritySectionBadge = false
+    var securitySectionMode = SettingsScreenSecuritySectionMode.none
+    var showSecuritySectionBadge = false
 
-  var showBlockedUsers = false
-  let showAnalyticsSettings: Bool
+    var showBlockedUsers = false
+    let showAnalyticsSettings: Bool
 
-  let isBugReportServiceEnabled: Bool
+    let isBugReportServiceEnabled: Bool
 
-  var bindings = SettingsScreenViewStateBindings()
+    var bindings = SettingsScreenViewStateBindings()
 }
 
 struct SettingsScreenViewStateBindings {
-  var isPresentingAccountDeactivationConfirmation = false
+    var isPresentingAccountDeactivationConfirmation = false
 }
 
 enum SettingsScreenViewAction {
-  case close
-  case userDetails
-  case analytics
-  case appLock
-  case reportBug
-  case about
-  case blockedUsers
-  case secureBackup
-  case linkNewDevice
-  case manageAccount(url: URL)
-  case language
-  case notifications
-  case enableDeveloperOptions
-  case developerOptions
-  case advancedSettings
-  case labs
-  case logout
-  case deactivateAccount
+    case close
+    case userDetails
+    case analytics
+    case appLock
+    case reportBug
+    case about
+    case blockedUsers
+    case secureBackup
+    case linkNewDevice
+    case manageAccount(url: URL)
+    case language
+    case notifications
+    case enableDeveloperOptions
+    case developerOptions
+    case advancedSettings
+    case labs
+    case logout
+    case deactivateAccount
 }

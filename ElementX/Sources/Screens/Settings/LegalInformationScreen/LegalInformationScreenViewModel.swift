@@ -9,18 +9,13 @@
 import Combine
 import SwiftUI
 
-typealias LegalInformationScreenViewModelType = StateStoreViewModelV2<
-  LegalInformationScreenViewState, LegalInformationScreenViewAction
->
+typealias LegalInformationScreenViewModelType = StateStoreViewModelV2<LegalInformationScreenViewState, LegalInformationScreenViewAction>
 
 class LegalInformationScreenViewModel: LegalInformationScreenViewModelType,
-  LegalInformationScreenViewModelProtocol
-{
-  init(appSettings: AppSettings) {
-    super.init(
-      initialViewState: LegalInformationScreenViewState(
-        copyrightURL: appSettings.copyrightURL,
-        acceptableUseURL: appSettings.acceptableUseURL,
-        privacyURL: appSettings.privacyURL))
-  }
+    LegalInformationScreenViewModelProtocol {
+    init(appSettings: AppSettings) {
+        super.init(initialViewState: LegalInformationScreenViewState(copyrightURL: appSettings.copyrightURL,
+                                                                     acceptableUseURL: appSettings.acceptableUseURL,
+                                                                     privacyURL: appSettings.privacyURL))
+    }
 }

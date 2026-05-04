@@ -9,24 +9,23 @@
 import SwiftUI
 
 struct SeparatorRoomTimelineView: View {
-  let timelineItem: SeparatorRoomTimelineItem
+    let timelineItem: SeparatorRoomTimelineItem
 
-  var body: some View {
-    Text(timelineItem.timestamp.formattedDateSeparator())
-      .font(.compound.bodySMSemibold)
-      .foregroundColor(.compound.textPrimary)
-      .frame(maxWidth: .infinity)
-      .multilineTextAlignment(.center)
-      .padding(.horizontal, 36.0)
-      .padding(.vertical, 8.0)
-  }
+    var body: some View {
+        Text(timelineItem.timestamp.formattedDateSeparator())
+            .font(.compound.bodySMSemibold)
+            .foregroundColor(.compound.textPrimary)
+            .frame(maxWidth: .infinity)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 36.0)
+            .padding(.vertical, 8.0)
+    }
 }
 
 struct SeparatorRoomTimelineView_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    let item = SeparatorRoomTimelineItem(
-      id: .virtual(uniqueID: .init("Separator")),
-      timestamp: .mock)
-    SeparatorRoomTimelineView(timelineItem: item)
-  }
+    static var previews: some View {
+        let item = SeparatorRoomTimelineItem(id: .virtual(uniqueID: .init("Separator")),
+                                             timestamp: .mock)
+        SeparatorRoomTimelineView(timelineItem: item)
+    }
 }

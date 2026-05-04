@@ -10,40 +10,39 @@ import Combine
 import SwiftUI
 
 enum DeveloperOptionsScreenCoordinatorAction {
-  case clearCache
+    case clearCache
 }
 
 final class DeveloperOptionsScreenCoordinator: CoordinatorProtocol {
-  private var viewModel: DeveloperOptionsScreenViewModelProtocol
+    private var viewModel: DeveloperOptionsScreenViewModelProtocol
 
-  private let actionsSubject: PassthroughSubject<DeveloperOptionsScreenCoordinatorAction, Never> =
-    .init()
-  private var cancellables = Set<AnyCancellable>()
+    private let actionsSubject: PassthroughSubject<DeveloperOptionsScreenCoordinatorAction, Never> =
+        .init()
+    private var cancellables = Set<AnyCancellable>()
 
-  var actions: AnyPublisher<DeveloperOptionsScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
+    var actions: AnyPublisher<DeveloperOptionsScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
 
-  init(appSettings: AppSettings, appHooks: AppHooks, clientProxy: ClientProxyProtocol?) {
-    viewModel = DeveloperOptionsScreenViewModel(
-      developerOptions: appSettings,
-      elementCallBaseURL: appSettings.elementCallBaseURL,
-      appHooks: appHooks,
-      clientProxy: clientProxy)
+    init(appSettings: AppSettings, appHooks: AppHooks, clientProxy: ClientProxyProtocol?) {
+        viewModel = DeveloperOptionsScreenViewModel(developerOptions: appSettings,
+                                                    elementCallBaseURL: appSettings.elementCallBaseURL,
+                                                    appHooks: appHooks,
+                                                    clientProxy: clientProxy)
 
-    viewModel.actions
-      .sink { [weak self] action in
-        guard let self else { return }
+        viewModel.actions
+            .sink { [weak self] action in
+                guard let self else { return }
 
-        switch action {
-        case .clearCache:
-          actionsSubject.send(.clearCache)
-        }
-      }
-      .store(in: &cancellables)
-  }
+                switch action {
+                case .clearCache:
+                    actionsSubject.send(.clearCache)
+                }
+            }
+            .store(in: &cancellables)
+    }
 
-  func toPresentable() -> AnyView {
-    AnyView(DeveloperOptionsScreen(context: viewModel.context))
-  }
+    func toPresentable() -> AnyView {
+        AnyView(DeveloperOptionsScreen(context: viewModel.context))
+    }
 }

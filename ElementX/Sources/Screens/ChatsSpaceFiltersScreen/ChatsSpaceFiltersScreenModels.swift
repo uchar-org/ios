@@ -8,38 +8,38 @@
 import Foundation
 
 enum ChatsSpaceFiltersScreenViewModelAction {
-  case confirm(SpaceServiceFilter)
-  case cancel
+    case confirm(SpaceServiceFilter)
+    case cancel
 }
 
 struct ChatsSpaceFiltersScreenViewState: BindableState {
-  var filters = [SpaceServiceFilter]()
-  var bindings: ChatsSpaceFiltersScreenViewStateBindings
+    var filters = [SpaceServiceFilter]()
+    var bindings: ChatsSpaceFiltersScreenViewStateBindings
 
-  var visibleFilters: [SpaceServiceFilter] {
-    if bindings.searchQuery.isEmpty {
-      return filters
-    }
+    var visibleFilters: [SpaceServiceFilter] {
+        if bindings.searchQuery.isEmpty {
+            return filters
+        }
 
-    return filters.filter { filter in
-      filter.room.name.localizedStandardContains(bindings.searchQuery)
-        || (filter.room.canonicalAlias ?? "").localizedStandardContains(bindings.searchQuery)
+        return filters.filter { filter in
+            filter.room.name.localizedStandardContains(bindings.searchQuery)
+                || (filter.room.canonicalAlias ?? "").localizedStandardContains(bindings.searchQuery)
+        }
     }
-  }
 }
 
 struct ChatsSpaceFiltersScreenViewStateBindings {
-  var searchQuery = ""
+    var searchQuery = ""
 }
 
 enum ChatsSpaceFiltersScreenViewAction: CustomStringConvertible {
-  case confirm(SpaceServiceFilter)
-  case cancel
+    case confirm(SpaceServiceFilter)
+    case cancel
 
-  var description: String {
-    switch self {
-    case .confirm: "Confirm"
-    case .cancel: "Cancel"
+    var description: String {
+        switch self {
+        case .confirm: "Confirm"
+        case .cancel: "Cancel"
+        }
     }
-  }
 }

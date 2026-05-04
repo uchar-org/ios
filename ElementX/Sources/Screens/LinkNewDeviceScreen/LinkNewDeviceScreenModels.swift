@@ -8,26 +8,26 @@
 import Foundation
 
 enum LinkNewDeviceScreenViewModelAction {
-  case linkMobileDevice(LinkNewDeviceService.LinkMobileProgressPublisher)
-  case linkDesktopComputer
-  case dismiss
+    case linkMobileDevice(LinkNewDeviceService.LinkMobileProgressPublisher)
+    case linkDesktopComputer
+    case dismiss
 }
 
 struct LinkNewDeviceScreenViewState: BindableState {
-  enum Mode: Equatable {
-    case loading
-    case readyToLink(isGeneratingCode: Bool)
-    case error(QRCodeLoginState.ErrorState)
-  }
+    enum Mode: Equatable {
+        case loading
+        case readyToLink(isGeneratingCode: Bool)
+        case error(QRCodeLoginState.ErrorState)
+    }
 
-  var mode: Mode = .loading
+    var mode: Mode = .loading
 
-  let showLinkDesktopComputerButton: Bool
+    let showLinkDesktopComputerButton: Bool
 }
 
 enum LinkNewDeviceScreenViewAction {
-  case linkMobileDevice
-  case linkDesktopComputer
-  case errorAction(QRCodeErrorView.Action)
-  case dismiss
+    case linkMobileDevice
+    case linkDesktopComputer
+    case errorAction(QRCodeErrorView.Action)
+    case dismiss
 }

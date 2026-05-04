@@ -9,46 +9,46 @@
 import Foundation
 
 struct PollRoomTimelineItem: Equatable, EventBasedTimelineItemProtocol {
-  let id: TimelineItemIdentifier
-  let poll: Poll
-  let body: String
-  let timestamp: Date
-  let isOutgoing: Bool
-  let isEditable: Bool
-  let canBeRepliedTo: Bool
-  let sender: TimelineItemSender
-  var properties: RoomTimelineItemProperties
+    let id: TimelineItemIdentifier
+    let poll: Poll
+    let body: String
+    let timestamp: Date
+    let isOutgoing: Bool
+    let isEditable: Bool
+    let canBeRepliedTo: Bool
+    let sender: TimelineItemSender
+    var properties: RoomTimelineItemProperties
 }
 
 struct Poll: Hashable {
-  let question: String
-  let kind: Kind
-  let maxSelections: Int
-  let options: [Option]
-  let votes: [String: [String]]
-  let endDate: Date?
-  /// Whether the poll has been created by the account owner
-  let createdByAccountOwner: Bool
+    let question: String
+    let kind: Kind
+    let maxSelections: Int
+    let options: [Option]
+    let votes: [String: [String]]
+    let endDate: Date?
+    /// Whether the poll has been created by the account owner
+    let createdByAccountOwner: Bool
 
-  var hasEnded: Bool {
-    endDate != nil
-  }
+    var hasEnded: Bool {
+        endDate != nil
+    }
 
-  enum Kind: Hashable {
-    case disclosed
-    case undisclosed
-  }
+    enum Kind: Hashable {
+        case disclosed
+        case undisclosed
+    }
 
-  var hasMaxSelections: Bool {
-    options.filter(\.isSelected).count == maxSelections
-  }
+    var hasMaxSelections: Bool {
+        options.filter(\.isSelected).count == maxSelections
+    }
 
-  struct Option: Hashable {
-    let id: String
-    let text: String
-    let votes: Int
-    let allVotes: Int
-    let isSelected: Bool
-    let isWinning: Bool
-  }
+    struct Option: Hashable {
+        let id: String
+        let text: String
+        let votes: Int
+        let allVotes: Int
+        let isSelected: Bool
+        let isWinning: Bool
+    }
 }

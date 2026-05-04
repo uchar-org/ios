@@ -9,17 +9,17 @@ import Compound
 import SwiftUI
 
 struct StopButton: View {
-  let stopAction: () -> Void
+    let stopAction: () -> Void
 
-  var body: some View {
-    Button {
-      stopAction()
-    } label: {
-      CompoundIcon(\.stop, size: .small, relativeTo: .compound.bodySMSemibold)
-        .foregroundStyle(.compound.iconOnSolidPrimary)
-        .padding(8)
-        .background(Color.compound.bgCriticalPrimary, in: Circle())
-        .accessibilityLabel(L10n.actionStop)
+    var body: some View {
+        Button {
+            stopAction()
+        } label: {
+            CompoundIcon(\.stop, size: .small, relativeTo: .compound.bodySMSemibold)
+                .foregroundStyle(.compound.iconOnSolidPrimary)
+                .padding(8)
+                .background(Color.compound.bgCriticalPrimary, in: Circle())
+                .accessibilityLabel(L10n.actionStop)
+        }
     }
-  }
 }

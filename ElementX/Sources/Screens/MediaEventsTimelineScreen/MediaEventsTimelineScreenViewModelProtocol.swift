@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol MediaEventsTimelineScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<MediaEventsTimelineScreenViewModelAction, Never> { get }
-  var context: MediaEventsTimelineScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<MediaEventsTimelineScreenViewModelAction, Never> { get }
+    var context: MediaEventsTimelineScreenViewModelType.Context { get }
 
-  func stop()
+    func stop()
 }

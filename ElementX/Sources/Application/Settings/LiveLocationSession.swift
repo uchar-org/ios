@@ -8,6 +8,6 @@
 import Foundation
 
 struct LiveLocationSession: Codable, Equatable {
-  let eventID: String
-  let expirationDate: Date
+    let eventID: String
+    let expirationDate: Date
 }

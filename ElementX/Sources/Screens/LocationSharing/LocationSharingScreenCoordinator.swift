@@ -10,63 +10,62 @@ import Combine
 import SwiftUI
 
 struct LocationSharingScreenCoordinatorParameters {
-  let interactionMode: LocationSharingInteractionMode
-  let mapURLBuilder: MapTilerURLBuilderProtocol
-  let roomProxy: JoinedRoomProxyProtocol
-  let timelineController: TimelineControllerProtocol
-  let liveLocationManager: LiveLocationManagerProtocol
-  let appMediator: AppMediatorProtocol
-  let analytics: AnalyticsService
-  let userIndicatorController: UserIndicatorControllerProtocol
-  let mediaProvider: MediaProviderProtocol
+    let interactionMode: LocationSharingInteractionMode
+    let mapURLBuilder: MapTilerURLBuilderProtocol
+    let roomProxy: JoinedRoomProxyProtocol
+    let timelineController: TimelineControllerProtocol
+    let liveLocationManager: LiveLocationManagerProtocol
+    let appMediator: AppMediatorProtocol
+    let analytics: AnalyticsService
+    let userIndicatorController: UserIndicatorControllerProtocol
+    let mediaProvider: MediaProviderProtocol
 }
 
 enum LocationSharingScreenCoordinatorAction {
-  case close
+    case close
 }
 
 final class LocationSharingScreenCoordinator: CoordinatorProtocol {
-  private let parameters: LocationSharingScreenCoordinatorParameters
-  private let viewModel: LocationSharingScreenViewModelProtocol
+    private let parameters: LocationSharingScreenCoordinatorParameters
+    private let viewModel: LocationSharingScreenViewModelProtocol
 
-  private let actionsSubject: PassthroughSubject<LocationSharingScreenCoordinatorAction, Never> =
-    .init()
-  private var cancellables = Set<AnyCancellable>()
+    private let actionsSubject: PassthroughSubject<LocationSharingScreenCoordinatorAction, Never> =
+        .init()
+    private var cancellables = Set<AnyCancellable>()
 
-  var actions: AnyPublisher<LocationSharingScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(parameters: LocationSharingScreenCoordinatorParameters) {
-    self.parameters = parameters
-
-    viewModel = LocationSharingScreenViewModel(
-      interactionMode: parameters.interactionMode,
-      mapURLBuilder: parameters.mapURLBuilder,
-      roomProxy: parameters.roomProxy,
-      timelineController: parameters.timelineController,
-      liveLocationManager: parameters.liveLocationManager,
-      analytics: parameters.analytics,
-      userIndicatorController: parameters.userIndicatorController,
-      mediaProvider: parameters.mediaProvider)
-  }
-
-  // MARK: - Public
-
-  func start() {
-    viewModel.actions.sink { [weak self] action in
-      guard let self else { return }
-      switch action {
-      case .close:
-        actionsSubject.send(.close)
-      case .openSystemSettings:
-        parameters.appMediator.openAppSettings()
-      }
+    var actions: AnyPublisher<LocationSharingScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-    .store(in: &cancellables)
-  }
 
-  func toPresentable() -> AnyView {
-    AnyView(LocationSharingScreen(context: viewModel.context))
-  }
+    init(parameters: LocationSharingScreenCoordinatorParameters) {
+        self.parameters = parameters
+
+        viewModel = LocationSharingScreenViewModel(interactionMode: parameters.interactionMode,
+                                                   mapURLBuilder: parameters.mapURLBuilder,
+                                                   roomProxy: parameters.roomProxy,
+                                                   timelineController: parameters.timelineController,
+                                                   liveLocationManager: parameters.liveLocationManager,
+                                                   analytics: parameters.analytics,
+                                                   userIndicatorController: parameters.userIndicatorController,
+                                                   mediaProvider: parameters.mediaProvider)
+    }
+
+    // MARK: - Public
+
+    func start() {
+        viewModel.actions.sink { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .close:
+                actionsSubject.send(.close)
+            case .openSystemSettings:
+                parameters.appMediator.openAppSettings()
+            }
+        }
+        .store(in: &cancellables)
+    }
+
+    func toPresentable() -> AnyView {
+        AnyView(LocationSharingScreen(context: viewModel.context))
+    }
 }

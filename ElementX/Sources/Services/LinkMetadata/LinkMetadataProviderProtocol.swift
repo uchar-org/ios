@@ -10,12 +10,12 @@ import Foundation
 import LinkPresentation
 
 struct LinkMetadataProviderItem {
-  let url: URL
-  let metadata: LPLinkMetadata?
+    let url: URL
+    let metadata: LPLinkMetadata?
 }
 
 protocol LinkMetadataProviderProtocol {
-  var metadataItems: [URL: LinkMetadataProviderItem] { get }
+    var metadataItems: [URL: LinkMetadataProviderItem] { get }
 
-  func fetchMetadataFor(url: URL) async -> Result<LinkMetadataProviderItem, Error>
+    func fetchMetadataFor(url: URL) async -> Result<LinkMetadataProviderItem, Error>
 }

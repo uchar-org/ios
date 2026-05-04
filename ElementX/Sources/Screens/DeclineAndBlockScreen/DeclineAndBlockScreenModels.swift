@@ -9,33 +9,33 @@
 import Foundation
 
 enum DeclineAndBlockScreenViewModelAction: Equatable {
-  case dismiss(hasDeclined: Bool)
+    case dismiss(hasDeclined: Bool)
 }
 
 struct DeclineAndBlockScreenViewState: BindableState {
-  var bindings = DeclineAndBlockScreenViewStateBindings()
+    var bindings = DeclineAndBlockScreenViewStateBindings()
 
-  var isDeclineDisabled: Bool {
-    if bindings.shouldReport {
-      return bindings.reportReason.isEmpty
+    var isDeclineDisabled: Bool {
+        if bindings.shouldReport {
+            return bindings.reportReason.isEmpty
+        }
+        return !bindings.shouldBlockUser && !bindings.shouldReport
     }
-    return !bindings.shouldBlockUser && !bindings.shouldReport
-  }
 }
 
 struct DeclineAndBlockScreenViewStateBindings {
-  var shouldBlockUser = true
-  var shouldReport = false
-  var reportReason = ""
+    var shouldBlockUser = true
+    var shouldReport = false
+    var reportReason = ""
 
-  var alert: AlertInfo<DeclineAndBlockAlertType>?
+    var alert: AlertInfo<DeclineAndBlockAlertType>?
 }
 
 enum DeclineAndBlockScreenViewAction {
-  case decline
-  case dismiss
+    case decline
+    case dismiss
 }
 
 enum DeclineAndBlockAlertType {
-  case declineFailed
+    case declineFailed
 }

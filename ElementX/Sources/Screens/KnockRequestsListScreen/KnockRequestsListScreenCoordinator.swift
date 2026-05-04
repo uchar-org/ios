@@ -12,34 +12,33 @@ import Combine
 import SwiftUI
 
 struct KnockRequestsListScreenCoordinatorParameters {
-  let roomProxy: JoinedRoomProxyProtocol
-  let mediaProvider: MediaProviderProtocol
-  let userIndicatorController: UserIndicatorControllerProtocol
+    let roomProxy: JoinedRoomProxyProtocol
+    let mediaProvider: MediaProviderProtocol
+    let userIndicatorController: UserIndicatorControllerProtocol
 }
 
-enum KnockRequestsListScreenCoordinatorAction {}
+enum KnockRequestsListScreenCoordinatorAction { }
 
 final class KnockRequestsListScreenCoordinator: CoordinatorProtocol {
-  private let viewModel: KnockRequestsListScreenViewModelProtocol
+    private let viewModel: KnockRequestsListScreenViewModelProtocol
 
-  private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
 
-  private let actionsSubject: PassthroughSubject<KnockRequestsListScreenCoordinatorAction, Never> =
-    .init()
-  var actionsPublisher: AnyPublisher<KnockRequestsListScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
+    private let actionsSubject: PassthroughSubject<KnockRequestsListScreenCoordinatorAction, Never> =
+        .init()
+    var actionsPublisher: AnyPublisher<KnockRequestsListScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
 
-  init(parameters: KnockRequestsListScreenCoordinatorParameters) {
-    viewModel = KnockRequestsListScreenViewModel(
-      roomProxy: parameters.roomProxy,
-      mediaProvider: parameters.mediaProvider,
-      userIndicatorController: parameters.userIndicatorController)
-  }
+    init(parameters: KnockRequestsListScreenCoordinatorParameters) {
+        viewModel = KnockRequestsListScreenViewModel(roomProxy: parameters.roomProxy,
+                                                     mediaProvider: parameters.mediaProvider,
+                                                     userIndicatorController: parameters.userIndicatorController)
+    }
 
-  func start() {}
+    func start() { }
 
-  func toPresentable() -> AnyView {
-    AnyView(KnockRequestsListScreen(context: viewModel.context))
-  }
+    func toPresentable() -> AnyView {
+        AnyView(KnockRequestsListScreen(context: viewModel.context))
+    }
 }

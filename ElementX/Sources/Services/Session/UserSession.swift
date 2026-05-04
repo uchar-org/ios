@@ -10,57 +10,52 @@ import Combine
 import Foundation
 
 class UserSession: UserSessionProtocol {
-  private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
 
-  private var authErrorCancellable: AnyCancellable?
+    private var authErrorCancellable: AnyCancellable?
 
-  let clientProxy: ClientProxyProtocol
-  let mediaProvider: MediaProviderProtocol
-  let voiceMessageMediaManager: VoiceMessageMediaManagerProtocol
-  let liveLocationManager: LiveLocationManagerProtocol
+    let clientProxy: ClientProxyProtocol
+    let mediaProvider: MediaProviderProtocol
+    let voiceMessageMediaManager: VoiceMessageMediaManagerProtocol
+    let liveLocationManager: LiveLocationManagerProtocol
 
-  let callbacks = PassthroughSubject<UserSessionCallback, Never>()
+    let callbacks = PassthroughSubject<UserSessionCallback, Never>()
 
-  let sessionSecurityStateSubject = CurrentValueSubject<SessionSecurityState, Never>(
-    .init(verificationState: .unknown, recoveryState: .unknown))
-  var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
-    sessionSecurityStateSubject.asCurrentValuePublisher()
-  }
-
-  init(
-    clientProxy: ClientProxyProtocol, mediaProvider: MediaProviderProtocol,
-    voiceMessageMediaManager: VoiceMessageMediaManagerProtocol,
-    liveLocationManager: LiveLocationManagerProtocol
-  ) {
-    self.clientProxy = clientProxy
-    self.mediaProvider = mediaProvider
-    self.voiceMessageMediaManager = voiceMessageMediaManager
-    self.liveLocationManager = liveLocationManager
-
-    authErrorCancellable = clientProxy.actionsPublisher
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] callback in
-        guard let self else { return }
-        switch callback {
-        case .receivedAuthError(let isSoftLogout):
-          callbacks.send(.didReceiveAuthError(isSoftLogout: isSoftLogout))
-          authErrorCancellable = nil
-        default:
-          break
-        }
-      }
-
-    Publishers.CombineLatest(
-      clientProxy.verificationStatePublisher, clientProxy.secureBackupController.recoveryState
-    )
-    .map {
-      MXLog.info("Session security state changed, verificationState: \($0), recoveryState: \($1)")
-      return SessionSecurityState(verificationState: $0, recoveryState: $1)
+    let sessionSecurityStateSubject = CurrentValueSubject<SessionSecurityState, Never>(.init(verificationState: .unknown, recoveryState: .unknown))
+    var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> {
+        sessionSecurityStateSubject.asCurrentValuePublisher()
     }
-    .receive(on: DispatchQueue.main)
-    .sink { [weak self] value in
-      self?.sessionSecurityStateSubject.send(value)
+
+    init(clientProxy: ClientProxyProtocol, mediaProvider: MediaProviderProtocol,
+         voiceMessageMediaManager: VoiceMessageMediaManagerProtocol,
+         liveLocationManager: LiveLocationManagerProtocol) {
+        self.clientProxy = clientProxy
+        self.mediaProvider = mediaProvider
+        self.voiceMessageMediaManager = voiceMessageMediaManager
+        self.liveLocationManager = liveLocationManager
+
+        authErrorCancellable = clientProxy.actionsPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] callback in
+                guard let self else { return }
+                switch callback {
+                case .receivedAuthError(let isSoftLogout):
+                    callbacks.send(.didReceiveAuthError(isSoftLogout: isSoftLogout))
+                    authErrorCancellable = nil
+                default:
+                    break
+                }
+            }
+
+        Publishers.CombineLatest(clientProxy.verificationStatePublisher, clientProxy.secureBackupController.recoveryState)
+            .map {
+                MXLog.info("Session security state changed, verificationState: \($0), recoveryState: \($1)")
+                return SessionSecurityState(verificationState: $0, recoveryState: $1)
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.sessionSecurityStateSubject.send(value)
+            }
+            .store(in: &cancellables)
     }
-    .store(in: &cancellables)
-  }
 }

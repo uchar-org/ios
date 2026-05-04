@@ -7,10 +7,10 @@
 //
 
 struct FrequentlyUsedEmoji: Codable, Hashable {
-  let count: UInt
-  let key: String
+    let count: UInt
+    let key: String
 
-  static func == (lhs: FrequentlyUsedEmoji, rhs: FrequentlyUsedEmoji) -> Bool {
-    lhs.key == rhs.key
-  }
+    static func == (lhs: FrequentlyUsedEmoji, rhs: FrequentlyUsedEmoji) -> Bool {
+        lhs.key == rhs.key
+    }
 }

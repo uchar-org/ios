@@ -8,29 +8,29 @@
 import Foundation
 
 enum TemplateScreenViewModelAction {
-  case done
+    case done
 
-  // Consider adding CustomStringConvertible conformance if the actions contain PII
+    // Consider adding CustomStringConvertible conformance if the actions contain PII
 }
 
 struct TemplateScreenViewState: BindableState {
-  var title: String
-  var placeholder: String
-  var counter = 0
+    var title: String
+    var placeholder: String
+    var counter = 0
 
-  var bindings: TemplateScreenViewStateBindings
+    var bindings: TemplateScreenViewStateBindings
 }
 
 struct TemplateScreenViewStateBindings {
-  var composerText: String
+    var composerText: String
 }
 
 enum TemplateScreenViewAction {
-  case done
-  case textChanged
+    case done
+    case textChanged
 
-  case incrementCounter
-  case decrementCounter
+    case incrementCounter
+    case decrementCounter
 
-  // Consider adding CustomStringConvertible conformance if the actions contain PII
+    // Consider adding CustomStringConvertible conformance if the actions contain PII
 }

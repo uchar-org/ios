@@ -6,39 +6,35 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+@testable import ElementX
 import MatrixRustSDK
 import Testing
 
-@testable import ElementX
-
 @MainActor
 struct TimelineItemFactoryTests {
-  @Test
-  func callInvite() throws {
-    let ownUserID = "@alice:matrix.org"
-    let senderUserID = "@bob:matrix.org"
+    @Test
+    func callInvite() throws {
+        let ownUserID = "@alice:matrix.org"
+        let senderUserID = "@bob:matrix.org"
 
-    let factory = RoomTimelineItemFactory(
-      userID: ownUserID,
-      attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
-      stateEventStringBuilder: RoomStateEventStringBuilder(userID: ownUserID))
+        let factory = RoomTimelineItemFactory(userID: ownUserID,
+                                              attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
+                                              stateEventStringBuilder: RoomStateEventStringBuilder(userID: ownUserID))
 
-    let eventTimelineItem = EventTimelineItem.mockCallInvite(sender: senderUserID)
+        let eventTimelineItem = EventTimelineItem.mockCallInvite(sender: senderUserID)
 
-    let eventTimelineItemProxy = EventTimelineItemProxy(
-      item: eventTimelineItem, uniqueID: .init("0"))
+        let eventTimelineItemProxy = EventTimelineItemProxy(item: eventTimelineItem, uniqueID: .init("0"))
 
-    let item = try #require(
-      factory.buildTimelineItem(for: eventTimelineItemProxy, isDM: false)
-        as? CallInviteRoomTimelineItem,
-      "Incorrect item type")
+        let item = try #require(factory.buildTimelineItem(for: eventTimelineItemProxy, isDM: false)
+            as? CallInviteRoomTimelineItem,
+            "Incorrect item type")
 
-    #expect(item.isReactable == false)
-    #expect(item.canBeRepliedTo == false)
-    #expect(item.isEditable == false)
-    #expect(item.sender == TimelineItemSender(id: senderUserID))
-    #expect(item.properties.isEdited == false)
-    #expect(item.properties.reactions == [])
-    #expect(item.properties.deliveryStatus == nil)
-  }
+        #expect(item.isReactable == false)
+        #expect(item.canBeRepliedTo == false)
+        #expect(item.isEditable == false)
+        #expect(item.sender == TimelineItemSender(id: senderUserID))
+        #expect(item.properties.isEdited == false)
+        #expect(item.properties.reactions == [])
+        #expect(item.properties.deliveryStatus == nil)
+    }
 }

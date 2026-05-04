@@ -10,51 +10,50 @@ import Compound
 import SwiftUI
 
 struct TimelineItemStatusView: View {
-  let timelineItem: EventBasedTimelineItemProtocol
-  let adjustedDeliveryStatus: TimelineItemDeliveryStatus?
-  @EnvironmentObject private var context: TimelineViewModel.Context
+    let timelineItem: EventBasedTimelineItemProtocol
+    let adjustedDeliveryStatus: TimelineItemDeliveryStatus?
+    @EnvironmentObject private var context: TimelineViewModel.Context
 
-  private var isLastOutgoingMessage: Bool {
-    timelineItem.isOutgoing
-      && context.viewState.timelineState.uniqueIDs.last == timelineItem.id.uniqueID
-  }
-
-  var body: some View {
-    mainContent
-  }
-
-  @ViewBuilder
-  private var mainContent: some View {
-    if context.viewState.timelineKind == .pinned {
-      // Do not display any status when is a pinned events timeline
-      EmptyView()
-    } else if context.viewState.showReadReceipts,
-      !timelineItem.properties.orderedReadReceipts.isEmpty
-    {
-      readReceipts
-    } else {
-      deliveryStatusBadge
+    private var isLastOutgoingMessage: Bool {
+        timelineItem.isOutgoing
+            && context.viewState.timelineState.uniqueIDs.last == timelineItem.id.uniqueID
     }
-  }
 
-  @ViewBuilder
-  var deliveryStatusBadge: some View {
-    switch adjustedDeliveryStatus {
-    case .sending:
-      TimelineDeliveryStatusView(deliveryStatus: .sending)
-    case .sent, .none:
-      if isLastOutgoingMessage {
-        // We only display the sent icon for the latest outgoing message
-        TimelineDeliveryStatusView(deliveryStatus: .sent)
-      }
-    case .sendingFailed:
-      // Bubbles handle the case internally
-      EmptyView()
+    var body: some View {
+        mainContent
     }
-  }
 
-  var readReceipts: some View {
-    TimelineReadReceiptsView(timelineItem: timelineItem)
-      .environmentObject(context)
-  }
+    @ViewBuilder
+    private var mainContent: some View {
+        if context.viewState.timelineKind == .pinned {
+            // Do not display any status when is a pinned events timeline
+            EmptyView()
+        } else if context.viewState.showReadReceipts,
+                  !timelineItem.properties.orderedReadReceipts.isEmpty {
+            readReceipts
+        } else {
+            deliveryStatusBadge
+        }
+    }
+
+    @ViewBuilder
+    var deliveryStatusBadge: some View {
+        switch adjustedDeliveryStatus {
+        case .sending:
+            TimelineDeliveryStatusView(deliveryStatus: .sending)
+        case .sent, .none:
+            if isLastOutgoingMessage {
+                // We only display the sent icon for the latest outgoing message
+                TimelineDeliveryStatusView(deliveryStatus: .sent)
+            }
+        case .sendingFailed:
+            // Bubbles handle the case internally
+            EmptyView()
+        }
+    }
+
+    var readReceipts: some View {
+        TimelineReadReceiptsView(timelineItem: timelineItem)
+            .environmentObject(context)
+    }
 }

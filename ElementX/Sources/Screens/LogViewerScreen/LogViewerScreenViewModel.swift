@@ -9,29 +9,27 @@
 import Combine
 import SwiftUI
 
-typealias LogViewerScreenViewModelType = StateStoreViewModelV2<
-  LogViewerScreenViewState, LogViewerScreenViewAction
->
+typealias LogViewerScreenViewModelType = StateStoreViewModelV2<LogViewerScreenViewState, LogViewerScreenViewAction>
 
 class LogViewerScreenViewModel: LogViewerScreenViewModelType, LogViewerScreenViewModelProtocol {
-  private var actionsSubject: PassthroughSubject<LogViewerScreenViewModelAction, Never> = .init()
+    private var actionsSubject: PassthroughSubject<LogViewerScreenViewModelAction, Never> = .init()
 
-  var actions: AnyPublisher<LogViewerScreenViewModelAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init() {
-    super.init(initialViewState: LogViewerScreenViewState(urls: Tracing.logFiles))
-  }
-
-  // MARK: - Public
-
-  override func process(viewAction: LogViewerScreenViewAction) {
-    MXLog.info("View model: received view action: \(viewAction)")
-
-    switch viewAction {
-    case .done:
-      actionsSubject.send(.done)
+    var actions: AnyPublisher<LogViewerScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-  }
+
+    init() {
+        super.init(initialViewState: LogViewerScreenViewState(urls: Tracing.logFiles))
+    }
+
+    // MARK: - Public
+
+    override func process(viewAction: LogViewerScreenViewAction) {
+        MXLog.info("View model: received view action: \(viewAction)")
+
+        switch viewAction {
+        case .done:
+            actionsSubject.send(.done)
+        }
+    }
 }

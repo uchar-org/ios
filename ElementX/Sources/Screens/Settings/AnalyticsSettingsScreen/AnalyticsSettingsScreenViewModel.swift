@@ -9,38 +9,35 @@
 import Combine
 import SwiftUI
 
-typealias AnalyticsSettingsScreenViewModelType = StateStoreViewModelV2<
-  AnalyticsSettingsScreenViewState, AnalyticsSettingsScreenViewAction
->
+typealias AnalyticsSettingsScreenViewModelType = StateStoreViewModelV2<AnalyticsSettingsScreenViewState, AnalyticsSettingsScreenViewAction>
 
 class AnalyticsSettingsScreenViewModel: AnalyticsSettingsScreenViewModelType,
-  AnalyticsSettingsScreenViewModelProtocol
-{
-  private let analytics: AnalyticsService
+    AnalyticsSettingsScreenViewModelProtocol {
+    private let analytics: AnalyticsService
 
-  init(appSettings: AppSettings, analytics: AnalyticsService) {
-    self.analytics = analytics
+    init(appSettings: AppSettings, analytics: AnalyticsService) {
+        self.analytics = analytics
 
-    let strings = AnalyticsSettingsScreenStrings(termsURL: appSettings.analyticsTermsURL)
-    let bindings = AnalyticsSettingsScreenViewStateBindings(enableAnalytics: analytics.isEnabled)
-    let state = AnalyticsSettingsScreenViewState(strings: strings, bindings: bindings)
+        let strings = AnalyticsSettingsScreenStrings(termsURL: appSettings.analyticsTermsURL)
+        let bindings = AnalyticsSettingsScreenViewStateBindings(enableAnalytics: analytics.isEnabled)
+        let state = AnalyticsSettingsScreenViewState(strings: strings, bindings: bindings)
 
-    super.init(initialViewState: state)
+        super.init(initialViewState: state)
 
-    appSettings.$analyticsConsentState
-      .map { $0 == .optedIn }
-      .weakAssign(to: \.state.bindings.enableAnalytics, on: self)
-      .store(in: &cancellables)
-  }
-
-  override func process(viewAction: AnalyticsSettingsScreenViewAction) {
-    switch viewAction {
-    case .toggleAnalytics:
-      if analytics.isEnabled {
-        analytics.optOut()
-      } else {
-        analytics.optIn()
-      }
+        appSettings.$analyticsConsentState
+            .map { $0 == .optedIn }
+            .weakAssign(to: \.state.bindings.enableAnalytics, on: self)
+            .store(in: &cancellables)
     }
-  }
+
+    override func process(viewAction: AnalyticsSettingsScreenViewAction) {
+        switch viewAction {
+        case .toggleAnalytics:
+            if analytics.isEnabled {
+                analytics.optOut()
+            } else {
+                analytics.optIn()
+            }
+        }
+    }
 }

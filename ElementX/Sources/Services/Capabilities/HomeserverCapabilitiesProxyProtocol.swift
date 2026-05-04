@@ -9,7 +9,7 @@ import Foundation
 
 // sourcery: AutoMockable
 protocol HomeserverCapabilitiesProxyProtocol {
-  func refresh() async
-  func canChangeAvatar() async -> Bool
-  func canChangeDisplayName() async -> Bool
+    func refresh() async
+    func canChangeAvatar() async -> Bool
+    func canChangeDisplayName() async -> Bool
 }

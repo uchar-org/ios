@@ -10,27 +10,26 @@ import Foundation
 import MatrixRustSDK
 
 extension ClientProtocol {
-  func elementWellKnown() async -> Result<Data, ClientProxyError> {
-    let serverNameURLString =
-      if let userIDServerName = try? userIdServerName() {
-        "https://\(userIDServerName)"
-      } else {
-        server() ?? homeserver()
-      }
+    func elementWellKnown() async -> Result<Data, ClientProxyError> {
+        let serverNameURLString =
+            if let userIDServerName = try? userIdServerName() {
+                "https://\(userIDServerName)"
+            } else {
+                server() ?? homeserver()
+            }
 
-    do {
-      guard
-        let url = URL(string: serverNameURLString)?.appending(
-          path: "/.well-known/element/element.json")
-      else {
-        return .failure(.invalidServerName)
-      }
+        do {
+            guard
+                let url = URL(string: serverNameURLString)?.appending(path: "/.well-known/element/element.json")
+            else {
+                return .failure(.invalidServerName)
+            }
 
-      let data = try await getUrl(url: url.absoluteString)
+            let data = try await getUrl(url: url.absoluteString)
 
-      return .success(data)
-    } catch {
-      return .failure(.sdkError(error))
+            return .success(data)
+        } catch {
+            return .failure(.sdkError(error))
+        }
     }
-  }
 }

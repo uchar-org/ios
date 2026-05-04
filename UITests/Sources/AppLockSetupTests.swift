@@ -10,142 +10,142 @@ import XCTest
 
 @MainActor
 class AppLockSetupUITests: XCTestCase {
-  var app: XCUIApplication!
+    var app: XCUIApplication!
 
-  @MainActor enum Step {
-    static let createPIN = 0
-    static let confirmPIN = 1
-    static let setupBiometrics = 2
-    static let settings = 3
+    @MainActor enum Step {
+        static let createPIN = 0
+        static let confirmPIN = 1
+        static let setupBiometrics = 2
+        static let settings = 3
 
-    /// iPad shows the settings screen behind the modal, iPhone doesn't.
-    static let changePIN = isPhone ? createPIN : 4
-    /// iPad shows the settings screen behind the modal, iPhone doesn't.
-    static let confirmChangePIN = isPhone ? confirmPIN : 5
+        /// iPad shows the settings screen behind the modal, iPhone doesn't.
+        static let changePIN = isPhone ? createPIN : 4
+        /// iPad shows the settings screen behind the modal, iPhone doesn't.
+        static let confirmChangePIN = isPhone ? confirmPIN : 5
 
-    /// Not part of the flow, only to verify the stack is cleared.
-    static let clearedStack = 99
+        /// Not part of the flow, only to verify the stack is cleared.
+        static let clearedStack = 99
 
-    static var isPhone: Bool {
-      UIDevice.current.userInterfaceIdiom == .phone
+        static var isPhone: Bool {
+            UIDevice.current.userInterfaceIdiom == .phone
+        }
     }
-  }
 
-  func disabled_testCreateFlow() async throws {
-    app = Application.launch(.appLockSetupFlow)
+    func disabled_testCreateFlow() async throws {
+        app = Application.launch(.appLockSetupFlow)
 
-    // Wait for the keyboard to push the sheet up before snapshotting
-    try await Task.sleep(for: .seconds(0.5))
+        // Wait for the keyboard to push the sheet up before snapshotting
+        try await Task.sleep(for: .seconds(0.5))
 
-    // Create PIN screen.
-    try await app.assertScreenshot(step: Step.createPIN)
+        // Create PIN screen.
+        try await app.assertScreenshot(step: Step.createPIN)
 
-    enterPIN()
+        enterPIN()
 
-    // Confirm PIN screen.
-    try await app.assertScreenshot(step: Step.confirmPIN)
+        // Confirm PIN screen.
+        try await app.assertScreenshot(step: Step.confirmPIN)
 
-    enterPIN()
+        enterPIN()
 
-    // Setup biometrics screen.
-    try await app.assertScreenshot(step: Step.setupBiometrics)
+        // Setup biometrics screen.
+        try await app.assertScreenshot(step: Step.setupBiometrics)
 
-    app.buttons[A11yIdentifiers.appLockSetupBiometricsScreen.allow].tap()
+        app.buttons[A11yIdentifiers.appLockSetupBiometricsScreen.allow].tap()
 
-    // Settings screen.
-    try await app.assertScreenshot(step: Step.settings)
+        // Settings screen.
+        try await app.assertScreenshot(step: Step.settings)
 
-    app.buttons[A11yIdentifiers.appLockSetupSettingsScreen.changePIN].tap()
+        app.buttons[A11yIdentifiers.appLockSetupSettingsScreen.changePIN].tap()
 
-    // Change PIN (create).
-    try await app.assertScreenshot(step: Step.changePIN)
+        // Change PIN (create).
+        try await app.assertScreenshot(step: Step.changePIN)
 
-    enterDifferentPIN()
+        enterDifferentPIN()
 
-    // Change PIN (confirm).
-    try await app.assertScreenshot(step: Step.confirmChangePIN)
+        // Change PIN (confirm).
+        try await app.assertScreenshot(step: Step.confirmChangePIN)
 
-    enterDifferentPIN()
+        enterDifferentPIN()
 
-    // Settings screen.
-    try await app.assertScreenshot(step: Step.settings)
+        // Settings screen.
+        try await app.assertScreenshot(step: Step.settings)
 
-    app.buttons[A11yIdentifiers.appLockSetupSettingsScreen.removePIN].tap()
-    app.alerts.element.buttons[A11yIdentifiers.alertInfo.primaryButton].firstMatch.tap()
+        app.buttons[A11yIdentifiers.appLockSetupSettingsScreen.removePIN].tap()
+        app.alerts.element.buttons[A11yIdentifiers.alertInfo.primaryButton].firstMatch.tap()
 
-    // Pop the stack returning to whatever was last presented.
-    try await app.assertScreenshot(step: Step.clearedStack)
-  }
+        // Pop the stack returning to whatever was last presented.
+        try await app.assertScreenshot(step: Step.clearedStack)
+    }
 
-  func testMandatoryCreateFlow() async throws {
-    app = Application.launch(.appLockSetupFlowMandatory)
+    func testMandatoryCreateFlow() async throws {
+        app = Application.launch(.appLockSetupFlowMandatory)
 
-    // Create PIN screen (non-modal and no cancellation button).
-    try await app.assertScreenshot(step: Step.createPIN)
+        // Create PIN screen (non-modal and no cancellation button).
+        try await app.assertScreenshot(step: Step.createPIN)
 
-    enterPIN()
+        enterPIN()
 
-    // Confirm PIN screen (non-modal and no cancellation button).
-    try await app.assertScreenshot(step: Step.confirmPIN)
+        // Confirm PIN screen (non-modal and no cancellation button).
+        try await app.assertScreenshot(step: Step.confirmPIN)
 
-    enterPIN()
+        enterPIN()
 
-    // Setup biometrics screen (non-modal).
-    try await app.assertScreenshot(step: Step.setupBiometrics)
+        // Setup biometrics screen (non-modal).
+        try await app.assertScreenshot(step: Step.setupBiometrics)
 
-    let allowButton = app.buttons[A11yIdentifiers.appLockSetupBiometricsScreen.allow]
-    XCTAssertTrue(allowButton.exists, "The biometrics screen should be shown.")
-    allowButton.tap()
+        let allowButton = app.buttons[A11yIdentifiers.appLockSetupBiometricsScreen.allow]
+        XCTAssertTrue(allowButton.exists, "The biometrics screen should be shown.")
+        allowButton.tap()
 
-    // The stack should remain on biometrics for the presenting flow to take over navigation.
-    try await app.assertScreenshot(step: Step.setupBiometrics)
-  }
+        // The stack should remain on biometrics for the presenting flow to take over navigation.
+        try await app.assertScreenshot(step: Step.setupBiometrics)
+    }
 
-  func disabled_testUnlockFlow() async throws {
-    app = Application.launch(.appLockSetupFlowUnlock)
+    func disabled_testUnlockFlow() async throws {
+        app = Application.launch(.appLockSetupFlowUnlock)
 
-    // Create PIN screen.
-    try await app.assertScreenshot()
+        // Create PIN screen.
+        try await app.assertScreenshot()
 
-    enterPIN()
+        enterPIN()
 
-    // Settings screen.
-    try await app.assertScreenshot(step: Step.settings)
+        // Settings screen.
+        try await app.assertScreenshot(step: Step.settings)
 
-    app.buttons[A11yIdentifiers.appLockSetupSettingsScreen.removePIN].tap()
-    app.alerts.element.buttons[A11yIdentifiers.alertInfo.primaryButton].firstMatch.tap()
+        app.buttons[A11yIdentifiers.appLockSetupSettingsScreen.removePIN].tap()
+        app.alerts.element.buttons[A11yIdentifiers.alertInfo.primaryButton].firstMatch.tap()
 
-    // Pop the stack returning to whatever was last presented.
-    try await app.assertScreenshot(step: Step.clearedStack)
-  }
+        // Pop the stack returning to whatever was last presented.
+        try await app.assertScreenshot(step: Step.clearedStack)
+    }
 
-  func disabled_testCancel() async throws {
-    app = Application.launch(.appLockSetupFlowUnlock)
+    func disabled_testCancel() async throws {
+        app = Application.launch(.appLockSetupFlowUnlock)
 
-    app.showKeyboardIfNeeded()  // The secure text field is focussed automatically
+        app.showKeyboardIfNeeded() // The secure text field is focussed automatically
 
-    // Create PIN screen.
-    try await app.assertScreenshot()
+        // Create PIN screen.
+        try await app.assertScreenshot()
 
-    app.buttons[A11yIdentifiers.appLockSetupPINScreen.cancel].tap()
+        app.buttons[A11yIdentifiers.appLockSetupPINScreen.cancel].tap()
 
-    // Return to whatever was last presented.
-    try await app.assertScreenshot(step: Step.clearedStack)
-  }
+        // Return to whatever was last presented.
+        try await app.assertScreenshot(step: Step.clearedStack)
+    }
 
-  // MARK: - Helpers
+    // MARK: - Helpers
 
-  private func enterPIN() {
-    let textField = app.secureTextFields[A11yIdentifiers.appLockSetupPINScreen.textField]
-    XCTAssert(textField.waitForExistence(timeout: 10))
+    private func enterPIN() {
+        let textField = app.secureTextFields[A11yIdentifiers.appLockSetupPINScreen.textField]
+        XCTAssert(textField.waitForExistence(timeout: 10))
 
-    textField.clearAndTypeText("2023", app: app)
-  }
+        textField.clearAndTypeText("2023", app: app)
+    }
 
-  private func enterDifferentPIN() {
-    let textField = app.secureTextFields[A11yIdentifiers.appLockSetupPINScreen.textField]
-    XCTAssert(textField.waitForExistence(timeout: 10))
+    private func enterDifferentPIN() {
+        let textField = app.secureTextFields[A11yIdentifiers.appLockSetupPINScreen.textField]
+        XCTAssert(textField.waitForExistence(timeout: 10))
 
-    textField.clearAndTypeText("2233", app: app)
-  }
+        textField.clearAndTypeText("2233", app: app)
+    }
 }

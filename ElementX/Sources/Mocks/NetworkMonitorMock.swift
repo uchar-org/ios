@@ -10,9 +10,9 @@ import Combine
 import Foundation
 
 extension NetworkMonitorMock {
-  static var `default`: NetworkMonitorMock {
-    let mock = NetworkMonitorMock()
-    mock.underlyingReachabilityPublisher = .init(.init(.reachable))
-    return mock
-  }
+    static var `default`: NetworkMonitorMock {
+        let mock = NetworkMonitorMock()
+        mock.underlyingReachabilityPublisher = .init(.init(.reachable))
+        return mock
+    }
 }

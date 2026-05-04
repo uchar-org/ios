@@ -9,12 +9,12 @@
 import UIKit
 
 extension UIDevice {
-  /// Returns if the device is a Phone
-  var isPhone: Bool {
-    userInterfaceIdiom == .phone
-  }
+    /// Returns if the device is a Phone
+    var isPhone: Bool {
+        userInterfaceIdiom == .phone
+    }
 
-  var initialDeviceName: String {
-    L10n.loginInitialDeviceNameIos(InfoPlistReader.main.bundleDisplayName)
-  }
+    var initialDeviceName: String {
+        L10n.loginInitialDeviceNameIos(InfoPlistReader.main.bundleDisplayName)
+    }
 }

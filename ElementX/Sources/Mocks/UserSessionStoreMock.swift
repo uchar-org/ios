@@ -7,12 +7,12 @@
 //
 
 extension UserSessionStoreMock {
-  struct Configuration {}
+    struct Configuration { }
 
-  convenience init(configuration: Configuration) {
-    self.init()
+    convenience init(configuration: Configuration) {
+        self.init()
 
-    userSessionForSessionDirectoriesPassphraseReturnValue = .success(UserSessionMock(.init()))
-    clientSessionDelegate = KeychainControllerMock()
-  }
+        userSessionForSessionDirectoriesPassphraseReturnValue = .success(UserSessionMock(.init()))
+        clientSessionDelegate = KeychainControllerMock()
+    }
 }

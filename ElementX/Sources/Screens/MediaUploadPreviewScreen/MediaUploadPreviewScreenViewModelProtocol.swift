@@ -10,9 +10,9 @@ import Combine
 
 @MainActor
 protocol MediaUploadPreviewScreenViewModelProtocol {
-  var actions: AnyPublisher<MediaUploadPreviewScreenViewModelAction, Never> { get }
-  var context: MediaUploadPreviewScreenViewModelType.Context { get }
+    var actions: AnyPublisher<MediaUploadPreviewScreenViewModelAction, Never> { get }
+    var context: MediaUploadPreviewScreenViewModelType.Context { get }
 
-  /// Stops any ongoing media processing tasks.
-  func stopProcessing()
+    /// Stops any ongoing media processing tasks.
+    func stopProcessing()
 }

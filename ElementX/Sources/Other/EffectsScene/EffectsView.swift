@@ -12,39 +12,39 @@ import SwiftUI
 /// A SwiftUI wrapper around `SCNView`, that unlike `SceneView` allows the
 /// scene to have a transparent background and be rendered on top of other views.
 struct EffectsView: UIViewRepresentable {
-  enum Effect {
-    /// A confetti drop effect from the top centre of the screen.
-    case confetti
-    /// No effect will be shown.
-    case none
-  }
-
-  /// The type of effects to be shown in the view.
-  var effect: Effect
-
-  func makeUIView(context: Context) -> SCNView {
-    SCNView(frame: .zero)
-  }
-
-  func updateUIView(_ sceneView: SCNView, context: Context) {
-    sceneView.scene = makeScene()
-    sceneView.backgroundColor = .clear
-  }
-
-  // MARK: - Private
-
-  private func makeScene() -> EffectsScene? {
-    switch effect {
-    case .confetti:
-      return EffectsScene.confetti()
-    case .none:
-      return nil
+    enum Effect {
+        /// A confetti drop effect from the top centre of the screen.
+        case confetti
+        /// No effect will be shown.
+        case none
     }
-  }
+
+    /// The type of effects to be shown in the view.
+    var effect: Effect
+
+    func makeUIView(context: Context) -> SCNView {
+        SCNView(frame: .zero)
+    }
+
+    func updateUIView(_ sceneView: SCNView, context: Context) {
+        sceneView.scene = makeScene()
+        sceneView.backgroundColor = .clear
+    }
+
+    // MARK: - Private
+
+    private func makeScene() -> EffectsScene? {
+        switch effect {
+        case .confetti:
+            return EffectsScene.confetti()
+        case .none:
+            return nil
+        }
+    }
 }
 
 struct EffectsView_Previews: PreviewProvider {
-  static var previews: some View {
-    EffectsView(effect: .confetti)
-  }
+    static var previews: some View {
+        EffectsView(effect: .confetti)
+    }
 }

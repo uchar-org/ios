@@ -6,102 +6,95 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+@testable import ElementX
 import Foundation
 import Testing
 
-@testable import ElementX
-
 @MainActor
 struct UserIndicatorControllerTests {
-  private var indicatorController: UserIndicatorController
+    private var indicatorController: UserIndicatorController
 
-  init() {
-    indicatorController = UserIndicatorController()
-  }
-
-  @Test
-  mutating func indicatorQueueing() {
-    indicatorController.minimumDisplayDuration = 0.0
-
-    indicatorController.submitIndicator(.init(id: "First", title: ""))
-    indicatorController.submitIndicator(.init(id: "Second", title: ""))
-    indicatorController.submitIndicator(.init(id: "Third", title: ""))
-
-    #expect(indicatorController.indicatorQueue.count == 3)
-    #expect(indicatorController.indicatorQueue[2].id == "Third")
-    #expect(indicatorController.indicatorQueue[1].id == "Second")
-    #expect(indicatorController.indicatorQueue[0].id == "First")
-
-    indicatorController.retractIndicatorWithId("Second")
-
-    #expect(indicatorController.indicatorQueue.count == 2)
-    #expect(indicatorController.indicatorQueue[1].id == "Third")
-    #expect(indicatorController.indicatorQueue[0].id == "First")
-
-    indicatorController.retractAllIndicators()
-
-    #expect(indicatorController.indicatorQueue.count == 0)
-  }
-
-  @Test
-  mutating func chainedPresentation() async throws {
-    indicatorController.minimumDisplayDuration = 0.25
-    indicatorController.nonPersistentDisplayDuration = 2.5
-
-    indicatorController.submitIndicator(.init(id: "First", title: ""))
-    indicatorController.submitIndicator(.init(id: "Second", title: ""))
-    indicatorController.submitIndicator(.init(id: "Third", title: ""))
-
-    #expect(indicatorController.activeIndicator?.id == "Third")
-
-    let fulfillment = deferFulfillment(
-      indicatorController.$activeIndicator,
-      message: "Waiting for last indicator to be dismissed"
-    ) { indicator in
-      indicator?.id == "Second"
+    init() {
+        indicatorController = UserIndicatorController()
     }
 
-    try await fulfillment.fulfill()
+    @Test
+    mutating func indicatorQueueing() {
+        indicatorController.minimumDisplayDuration = 0.0
 
-    #expect(indicatorController.indicatorQueue.count == 2)
-    #expect(indicatorController.activeIndicator?.id == "Second")
-  }
+        indicatorController.submitIndicator(.init(id: "First", title: ""))
+        indicatorController.submitIndicator(.init(id: "Second", title: ""))
+        indicatorController.submitIndicator(.init(id: "Third", title: ""))
 
-  @Test
-  mutating func minimumDisplayDuration() async throws {
-    indicatorController.minimumDisplayDuration = 0.25
-    indicatorController.nonPersistentDisplayDuration = 2.5
+        #expect(indicatorController.indicatorQueue.count == 3)
+        #expect(indicatorController.indicatorQueue[2].id == "Third")
+        #expect(indicatorController.indicatorQueue[1].id == "Second")
+        #expect(indicatorController.indicatorQueue[0].id == "First")
 
-    indicatorController.submitIndicator(.init(id: "First", title: ""))
-    indicatorController.submitIndicator(.init(id: "Second", title: ""))
-    indicatorController.submitIndicator(.init(id: "Third", title: ""))
+        indicatorController.retractIndicatorWithId("Second")
 
-    #expect(indicatorController.indicatorQueue.count == 3)
+        #expect(indicatorController.indicatorQueue.count == 2)
+        #expect(indicatorController.indicatorQueue[1].id == "Third")
+        #expect(indicatorController.indicatorQueue[0].id == "First")
 
-    var fulfillment = deferFulfillment(
-      indicatorController.$activeIndicator,
-      message: "Waiting for minimum display duration to pass"
-    ) { indicator in
-      indicator?.id == "First"
+        indicatorController.retractAllIndicators()
+
+        #expect(indicatorController.indicatorQueue.count == 0)
     }
 
-    indicatorController.retractIndicatorWithId("Second")
+    @Test
+    mutating func chainedPresentation() async throws {
+        indicatorController.minimumDisplayDuration = 0.25
+        indicatorController.nonPersistentDisplayDuration = 2.5
 
-    try await fulfillment.fulfill()
+        indicatorController.submitIndicator(.init(id: "First", title: ""))
+        indicatorController.submitIndicator(.init(id: "Second", title: ""))
+        indicatorController.submitIndicator(.init(id: "Third", title: ""))
 
-    #expect(indicatorController.indicatorQueue.count == 1)
-    #expect(indicatorController.activeIndicator?.id == "First")
+        #expect(indicatorController.activeIndicator?.id == "Third")
 
-    fulfillment = deferFulfillment(
-      indicatorController.$activeIndicator,
-      message: "Waiting for last indicator to be dismissed"
-    ) { indicator in
-      indicator == nil
+        let fulfillment = deferFulfillment(indicatorController.$activeIndicator,
+                                           message: "Waiting for last indicator to be dismissed") { indicator in
+            indicator?.id == "Second"
+        }
+
+        try await fulfillment.fulfill()
+
+        #expect(indicatorController.indicatorQueue.count == 2)
+        #expect(indicatorController.activeIndicator?.id == "Second")
     }
 
-    try await fulfillment.fulfill()
+    @Test
+    mutating func minimumDisplayDuration() async throws {
+        indicatorController.minimumDisplayDuration = 0.25
+        indicatorController.nonPersistentDisplayDuration = 2.5
 
-    #expect(indicatorController.indicatorQueue.count == 0)
-    #expect(indicatorController.activeIndicator == nil)
-  }
+        indicatorController.submitIndicator(.init(id: "First", title: ""))
+        indicatorController.submitIndicator(.init(id: "Second", title: ""))
+        indicatorController.submitIndicator(.init(id: "Third", title: ""))
+
+        #expect(indicatorController.indicatorQueue.count == 3)
+
+        var fulfillment = deferFulfillment(indicatorController.$activeIndicator,
+                                           message: "Waiting for minimum display duration to pass") { indicator in
+            indicator?.id == "First"
+        }
+
+        indicatorController.retractIndicatorWithId("Second")
+
+        try await fulfillment.fulfill()
+
+        #expect(indicatorController.indicatorQueue.count == 1)
+        #expect(indicatorController.activeIndicator?.id == "First")
+
+        fulfillment = deferFulfillment(indicatorController.$activeIndicator,
+                                       message: "Waiting for last indicator to be dismissed") { indicator in
+            indicator == nil
+        }
+
+        try await fulfillment.fulfill()
+
+        #expect(indicatorController.indicatorQueue.count == 0)
+        #expect(indicatorController.activeIndicator == nil)
+    }
 }

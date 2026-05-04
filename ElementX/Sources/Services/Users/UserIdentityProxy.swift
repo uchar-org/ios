@@ -9,19 +9,19 @@
 import MatrixRustSDK
 
 class UserIdentityProxy: UserIdentityProxyProtocol {
-  private let userIdentity: UserIdentity
+    private let userIdentity: UserIdentity
 
-  init(userIdentity: UserIdentity) {
-    self.userIdentity = userIdentity
-  }
-
-  var verificationState: UserIdentityVerificationState {
-    if userIdentity.hasVerificationViolation() {
-      return .verificationViolation
-    } else if userIdentity.isVerified() {
-      return .verified
+    init(userIdentity: UserIdentity) {
+        self.userIdentity = userIdentity
     }
 
-    return .notVerified
-  }
+    var verificationState: UserIdentityVerificationState {
+        if userIdentity.hasVerificationViolation() {
+            return .verificationViolation
+        } else if userIdentity.isVerified() {
+            return .verified
+        }
+
+        return .notVerified
+    }
 }

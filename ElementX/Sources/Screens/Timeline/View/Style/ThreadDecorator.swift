@@ -10,21 +10,21 @@ import Compound
 import SwiftUI
 
 struct ThreadDecorator: View {
-  var body: some View {
-    Label {
-      Text(L10n.commonThread)
-        .foregroundColor(.compound.textPrimary)
-        .font(.compound.bodyXS)
-    } icon: {
-      CompoundIcon(\.threads, size: .xSmall, relativeTo: .compound.bodyXS)
-        .foregroundColor(.compound.iconSecondary)
+    var body: some View {
+        Label {
+            Text(L10n.commonThread)
+                .foregroundColor(.compound.textPrimary)
+                .font(.compound.bodyXS)
+        } icon: {
+            CompoundIcon(\.threads, size: .xSmall, relativeTo: .compound.bodyXS)
+                .foregroundColor(.compound.iconSecondary)
+        }
+        .labelStyle(.custom(spacing: 4))
     }
-    .labelStyle(.custom(spacing: 4))
-  }
 }
 
 struct ThreadDecorator_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    ThreadDecorator()
-  }
+    static var previews: some View {
+        ThreadDecorator()
+    }
 }

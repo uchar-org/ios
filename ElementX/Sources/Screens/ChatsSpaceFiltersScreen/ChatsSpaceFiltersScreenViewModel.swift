@@ -8,51 +8,45 @@
 import Combine
 import SwiftUI
 
-typealias ChatsSpaceFiltersScreenViewModelType = StateStoreViewModelV2<
-  ChatsSpaceFiltersScreenViewState, ChatsSpaceFiltersScreenViewAction
->
+typealias ChatsSpaceFiltersScreenViewModelType = StateStoreViewModelV2<ChatsSpaceFiltersScreenViewState, ChatsSpaceFiltersScreenViewAction>
 
 class ChatsSpaceFiltersScreenViewModel: ChatsSpaceFiltersScreenViewModelType,
-  ChatsSpaceFiltersScreenViewModelProtocol, Identifiable
-{
-  private let spaceService: SpaceServiceProxyProtocol
+    ChatsSpaceFiltersScreenViewModelProtocol, Identifiable {
+    private let spaceService: SpaceServiceProxyProtocol
 
-  private let actionsSubject: PassthroughSubject<ChatsSpaceFiltersScreenViewModelAction, Never> =
-    .init()
-  var actionsPublisher: AnyPublisher<ChatsSpaceFiltersScreenViewModelAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  let id = UUID()
-
-  init(
-    spaceService: SpaceServiceProxyProtocol,
-    mediaProvider: MediaProviderProtocol
-  ) {
-    self.spaceService = spaceService
-
-    super.init(
-      initialViewState: ChatsSpaceFiltersScreenViewState(bindings: .init()),
-      mediaProvider: mediaProvider)
-
-    state.filters = spaceService.spaceFilterPublisher.value
-
-    spaceService.spaceFilterPublisher.sink { [weak self] filters in
-      self?.state.filters = filters
+    private let actionsSubject: PassthroughSubject<ChatsSpaceFiltersScreenViewModelAction, Never> =
+        .init()
+    var actionsPublisher: AnyPublisher<ChatsSpaceFiltersScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-    .store(in: &cancellables)
-  }
 
-  // MARK: - Public
+    let id = UUID()
 
-  override func process(viewAction: ChatsSpaceFiltersScreenViewAction) {
-    MXLog.info("View model: received view action: \(viewAction)")
+    init(spaceService: SpaceServiceProxyProtocol,
+         mediaProvider: MediaProviderProtocol) {
+        self.spaceService = spaceService
 
-    switch viewAction {
-    case .confirm(let filter):
-      actionsSubject.send(.confirm(filter))
-    case .cancel:
-      actionsSubject.send(.cancel)
+        super.init(initialViewState: ChatsSpaceFiltersScreenViewState(bindings: .init()),
+                   mediaProvider: mediaProvider)
+
+        state.filters = spaceService.spaceFilterPublisher.value
+
+        spaceService.spaceFilterPublisher.sink { [weak self] filters in
+            self?.state.filters = filters
+        }
+        .store(in: &cancellables)
     }
-  }
+
+    // MARK: - Public
+
+    override func process(viewAction: ChatsSpaceFiltersScreenViewAction) {
+        MXLog.info("View model: received view action: \(viewAction)")
+
+        switch viewAction {
+        case .confirm(let filter):
+            actionsSubject.send(.confirm(filter))
+        case .cancel:
+            actionsSubject.send(.cancel)
+        }
+    }
 }

@@ -10,32 +10,32 @@ import Combine
 import Foundation
 
 enum AudioRecorderError: Error, Equatable {
-  case unsupportedAudioFormat
-  case audioSessionFailure
-  case audioEngineFailure
-  case audioFileCreationFailure
-  case interrupted
-  case recordingCancelled
-  case recordPermissionNotGranted
+    case unsupportedAudioFormat
+    case audioSessionFailure
+    case audioEngineFailure
+    case audioFileCreationFailure
+    case interrupted
+    case recordingCancelled
+    case recordPermissionNotGranted
 }
 
 enum AudioRecorderAction {
-  case didStartRecording
-  case didStopRecording
-  case didFailWithError(error: AudioRecorderError)
+    case didStartRecording
+    case didStopRecording
+    case didFailWithError(error: AudioRecorderError)
 }
 
 protocol AudioRecorderProtocol: AnyObject {
-  var actions: AnyPublisher<AudioRecorderAction, Never> { get }
-  var currentTime: TimeInterval { get }
-  var isRecording: Bool { get }
-  var audioFileURL: URL? { get }
+    var actions: AnyPublisher<AudioRecorderAction, Never> { get }
+    var currentTime: TimeInterval { get }
+    var isRecording: Bool { get }
+    var audioFileURL: URL? { get }
 
-  func record(audioFileURL: URL) async
-  func stopRecording() async
-  func deleteRecording() async
-  func averagePower() -> Float
+    func record(audioFileURL: URL) async
+    func stopRecording() async
+    func deleteRecording() async
+    func averagePower() -> Float
 }
 
 // sourcery: AutoMockable
-extension AudioRecorderProtocol {}
+extension AudioRecorderProtocol { }

@@ -9,8 +9,8 @@
 import Foundation
 
 enum WaveformSource: Equatable {
-  /// File URL of the source audio file
-  case url(URL)
-  /// Array of small number of pre-computed samples
-  case data([Float])
+    /// File URL of the source audio file
+    case url(URL)
+    /// Array of small number of pre-computed samples
+    case data([Float])
 }

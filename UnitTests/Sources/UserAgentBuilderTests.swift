@@ -6,29 +6,26 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+@testable import ElementX
 import Testing
 
-@testable import ElementX
-
 struct UserAgentBuilderTests {
-  @Test
-  func isNotUnknow() {
-    #expect(UserAgentBuilder.makeASCIIUserAgent() != "unknown")
-  }
+    @Test
+    func isNotUnknow() {
+        #expect(UserAgentBuilder.makeASCIIUserAgent() != "unknown")
+    }
 
-  @Test
-  func containsClientName() {
-    let userAgent = UserAgentBuilder.makeASCIIUserAgent()
-    #expect(
-      userAgent.contains(InfoPlistReader.main.bundleDisplayName) == true,
-      "\(userAgent) does not contain client name")
-  }
+    @Test
+    func containsClientName() {
+        let userAgent = UserAgentBuilder.makeASCIIUserAgent()
+        #expect(userAgent.contains(InfoPlistReader.main.bundleDisplayName) == true,
+                "\(userAgent) does not contain client name")
+    }
 
-  @Test
-  func containsClientVersion() {
-    let userAgent = UserAgentBuilder.makeASCIIUserAgent()
-    #expect(
-      userAgent.contains(InfoPlistReader.main.bundleShortVersionString) == true,
-      "\(userAgent) does not contain client version")
-  }
+    @Test
+    func containsClientVersion() {
+        let userAgent = UserAgentBuilder.makeASCIIUserAgent()
+        #expect(userAgent.contains(InfoPlistReader.main.bundleShortVersionString) == true,
+                "\(userAgent) does not contain client version")
+    }
 }

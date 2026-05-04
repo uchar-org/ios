@@ -9,29 +9,29 @@
 import Foundation
 
 enum ReportRoomScreenViewModelAction: Equatable {
-  case dismiss(shouldLeaveRoom: Bool)
+    case dismiss(shouldLeaveRoom: Bool)
 }
 
 struct ReportRoomScreenViewState: BindableState {
-  var bindings = ReportRoomScreenViewStateBindings()
+    var bindings = ReportRoomScreenViewStateBindings()
 
-  var canReport: Bool {
-    !bindings.reason.isEmpty
-  }
+    var canReport: Bool {
+        !bindings.reason.isEmpty
+    }
 }
 
 struct ReportRoomScreenViewStateBindings {
-  var reason = ""
-  var shouldLeaveRoom = false
-  var alert: AlertInfo<ReportRoomScreenAlertType>?
+    var reason = ""
+    var shouldLeaveRoom = false
+    var alert: AlertInfo<ReportRoomScreenAlertType>?
 }
 
 enum ReportRoomScreenViewAction {
-  case report
-  case dismiss
+    case report
+    case dismiss
 }
 
 enum ReportRoomScreenAlertType {
-  case reportRoomFailed
-  case leaveRoomFailed
+    case reportRoomFailed
+    case leaveRoomFailed
 }

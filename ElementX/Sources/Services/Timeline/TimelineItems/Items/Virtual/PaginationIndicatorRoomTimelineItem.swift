@@ -9,20 +9,20 @@
 import Foundation
 
 struct PaginationIndicatorRoomTimelineItem: DecorationTimelineItemProtocol, Equatable {
-  let id: TimelineItemIdentifier
+    let id: TimelineItemIdentifier
 
-  enum Position {
-    case start, end
+    enum Position {
+        case start, end
 
-    var id: String {
-      switch self {
-      case .start: "backwardPaginationIndicatorTimelineItemIdentifier"
-      case .end: "forwardPaginationIndicatorTimelineItemIdentifier"
-      }
+        var id: String {
+            switch self {
+            case .start: "backwardPaginationIndicatorTimelineItemIdentifier"
+            case .end: "forwardPaginationIndicatorTimelineItemIdentifier"
+            }
+        }
     }
-  }
 
-  init(position: Position) {
-    id = .virtual(uniqueID: .init(position.id))
-  }
+    init(position: Position) {
+        id = .virtual(uniqueID: .init(position.id))
+    }
 }

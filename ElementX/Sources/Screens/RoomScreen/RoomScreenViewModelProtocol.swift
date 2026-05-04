@@ -10,12 +10,12 @@ import Combine
 
 @MainActor
 protocol RoomScreenViewModelProtocol {
-  var actions: AnyPublisher<RoomScreenViewModelAction, Never> { get }
-  var context: RoomScreenViewModel.Context { get }
+    var actions: AnyPublisher<RoomScreenViewModelAction, Never> { get }
+    var context: RoomScreenViewModel.Context { get }
 
-  func stop()
+    func stop()
 
-  func timelineHasScrolled(direction: ScrollDirection)
-  func setSelectedPinnedEventID(_ eventID: String)
-  func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
+    func timelineHasScrolled(direction: ScrollDirection)
+    func setSelectedPinnedEventID(_ eventID: String)
+    func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
 }

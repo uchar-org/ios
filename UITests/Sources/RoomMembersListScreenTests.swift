@@ -10,27 +10,27 @@ import XCTest
 
 @MainActor
 class RoomMembersListScreenUITests: XCTestCase {
-  func testJoinedAndInvitedMembers() async throws {
-    let app = Application.launch(.roomMembersListScreenPendingInvites)
+    func testJoinedAndInvitedMembers() async throws {
+        let app = Application.launch(.roomMembersListScreenPendingInvites)
 
-    try await app.assertScreenshot()
-  }
+        try await app.assertScreenshot()
+    }
 
-  func testSearchInvitedMember() async throws {
-    let app = Application.launch(.roomMembersListScreenPendingInvites)
+    func testSearchInvitedMember() async throws {
+        let app = Application.launch(.roomMembersListScreenPendingInvites)
 
-    let searchBar = app.searchFields.firstMatch
-    searchBar.clearAndTypeText("alice\n", app: app)
+        let searchBar = app.searchFields.firstMatch
+        searchBar.clearAndTypeText("alice\n", app: app)
 
-    try await app.assertScreenshot()
-  }
+        try await app.assertScreenshot()
+    }
 
-  func testSearchJoinedMember() async throws {
-    let app = Application.launch(.roomMembersListScreenPendingInvites)
+    func testSearchJoinedMember() async throws {
+        let app = Application.launch(.roomMembersListScreenPendingInvites)
 
-    let searchBar = app.searchFields.firstMatch
-    searchBar.clearAndTypeText("bob\n", app: app)
+        let searchBar = app.searchFields.firstMatch
+        searchBar.clearAndTypeText("bob\n", app: app)
 
-    try await app.assertScreenshot()
-  }
+        try await app.assertScreenshot()
+    }
 }

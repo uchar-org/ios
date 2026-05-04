@@ -9,52 +9,52 @@
 import Foundation
 
 enum EmojiPickerScreenViewModelAction {
-  case dismiss
+    case dismiss
 }
 
 struct EmojiPickerScreenViewState: BindableState {
-  var categories: [EmojiPickerEmojiCategoryViewData]
-  var selectedEmojis: Set<String>
+    var categories: [EmojiPickerEmojiCategoryViewData]
+    var selectedEmojis: Set<String>
 }
 
 enum EmojiPickerScreenViewAction {
-  case search(searchString: String)
-  case emojiTapped(emoji: EmojiPickerEmojiViewData)
-  case dismiss
+    case search(searchString: String)
+    case emojiTapped(emoji: EmojiPickerEmojiViewData)
+    case dismiss
 }
 
 struct EmojiPickerEmojiCategoryViewData: Identifiable {
-  let id: String
-  let emojis: [EmojiPickerEmojiViewData]
+    let id: String
+    let emojis: [EmojiPickerEmojiViewData]
 
-  var name: String {
-    switch id {
-    case "people":
-      return L10n.emojiPickerCategoryPeople
-    case "nature":
-      return L10n.emojiPickerCategoryNature
-    case "foods":
-      return L10n.emojiPickerCategoryFoods
-    case "activity":
-      return L10n.emojiPickerCategoryActivity
-    case "places":
-      return L10n.emojiPickerCategoryPlaces
-    case "objects":
-      return L10n.emojiPickerCategoryObjects
-    case "symbols":
-      return L10n.emojiPickerCategorySymbols
-    case "flags":
-      return L10n.emojiPickerCategoryFlags
-    case EmojiCategory.frequentlyUsedCategoryIdentifier:
-      return L10n.commonFrequentlyUsed
-    default:
-      MXLog.failure("Missing translation for emoji category with id \(id)")
-      return ""
+    var name: String {
+        switch id {
+        case "people":
+            return L10n.emojiPickerCategoryPeople
+        case "nature":
+            return L10n.emojiPickerCategoryNature
+        case "foods":
+            return L10n.emojiPickerCategoryFoods
+        case "activity":
+            return L10n.emojiPickerCategoryActivity
+        case "places":
+            return L10n.emojiPickerCategoryPlaces
+        case "objects":
+            return L10n.emojiPickerCategoryObjects
+        case "symbols":
+            return L10n.emojiPickerCategorySymbols
+        case "flags":
+            return L10n.emojiPickerCategoryFlags
+        case EmojiCategory.frequentlyUsedCategoryIdentifier:
+            return L10n.commonFrequentlyUsed
+        default:
+            MXLog.failure("Missing translation for emoji category with id \(id)")
+            return ""
+        }
     }
-  }
 }
 
 struct EmojiPickerEmojiViewData: Identifiable {
-  var id: String
-  let value: String
+    var id: String
+    let value: String
 }

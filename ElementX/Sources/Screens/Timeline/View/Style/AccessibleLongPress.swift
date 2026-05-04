@@ -9,27 +9,27 @@
 import SwiftUI
 
 extension View {
-  func accessibleLongPress(named name: String, action: @escaping () -> Void) -> some View {
-    modifier(AccessibleLongPress(name: name, action: action))
-  }
+    func accessibleLongPress(named name: String, action: @escaping () -> Void) -> some View {
+        modifier(AccessibleLongPress(name: name, action: action))
+    }
 }
 
 struct AccessibleLongPress: ViewModifier {
-  @Environment(\.accessibilityVoiceOverEnabled) private var isVoiceOverEnabled
-  let name: String
-  let action: () -> Void
+    @Environment(\.accessibilityVoiceOverEnabled) private var isVoiceOverEnabled
+    let name: String
+    let action: () -> Void
 
-  func body(content: Content) -> some View {
-    if isVoiceOverEnabled {
-      content
-        .accessibilityAction(named: name) {
-          action()
-        }
-    } else {
-      content
-        .longPressWithFeedback {
-          action()
+    func body(content: Content) -> some View {
+        if isVoiceOverEnabled {
+            content
+                .accessibilityAction(named: name) {
+                    action()
+                }
+        } else {
+            content
+                .longPressWithFeedback {
+                    action()
+                }
         }
     }
-  }
 }

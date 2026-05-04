@@ -9,23 +9,23 @@
 import Foundation
 
 struct VoiceMessageRoomTimelineItem: EventBasedMessageTimelineItemProtocol, Equatable {
-  let id: TimelineItemIdentifier
-  let timestamp: Date
-  let isOutgoing: Bool
-  let isEditable: Bool
-  let canBeRepliedTo: Bool
+    let id: TimelineItemIdentifier
+    let timestamp: Date
+    let isOutgoing: Bool
+    let isEditable: Bool
+    let canBeRepliedTo: Bool
 
-  let sender: TimelineItemSender
+    let sender: TimelineItemSender
 
-  let content: AudioRoomTimelineItemContent
+    let content: AudioRoomTimelineItemContent
 
-  var properties = RoomTimelineItemProperties()
+    var properties = RoomTimelineItemProperties()
 
-  var body: String {
-    content.caption ?? content.filename
-  }
+    var body: String {
+        content.caption ?? content.filename
+    }
 
-  var contentType: EventBasedMessageTimelineItemContentType {
-    .voice(content)
-  }
+    var contentType: EventBasedMessageTimelineItemContentType {
+        .voice(content)
+    }
 }

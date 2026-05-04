@@ -9,18 +9,18 @@
 import Foundation
 
 enum MediaPlayerProviderError: Error {
-  case unsupportedMediaType
+    case unsupportedMediaType
 }
 
 @MainActor
 protocol MediaPlayerProviderProtocol {
-  var player: AudioPlayerProtocol { get }
+    var player: AudioPlayerProtocol { get }
 
-  func playerState(for id: AudioPlayerStateIdentifier) -> AudioPlayerState?
-  func register(audioPlayerState: AudioPlayerState)
-  func unregister(audioPlayerState: AudioPlayerState)
-  func detachAllStates(except exception: AudioPlayerState?) async
+    func playerState(for id: AudioPlayerStateIdentifier) -> AudioPlayerState?
+    func register(audioPlayerState: AudioPlayerState)
+    func unregister(audioPlayerState: AudioPlayerState)
+    func detachAllStates(except exception: AudioPlayerState?) async
 }
 
 // sourcery: AutoMockable
-extension MediaPlayerProviderProtocol {}
+extension MediaPlayerProviderProtocol { }

@@ -8,9 +8,9 @@
 import SwiftUI
 
 public var supportsGlass: Bool {
-  if #available(iOS 26, *) {
-    true
-  } else {
-    false
-  }
+    if #available(iOS 26, *) {
+        true
+    } else {
+        false
+    }
 }

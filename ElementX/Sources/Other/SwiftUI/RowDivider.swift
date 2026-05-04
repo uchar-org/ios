@@ -8,23 +8,23 @@
 import SwiftUI
 
 struct RowDivider: ViewModifier {
-  @Environment(\.pixelLength) var pixelLength: CGFloat
-  let alignment: Alignment
-  let horizontalInsets: CGFloat
+    @Environment(\.pixelLength) var pixelLength: CGFloat
+    let alignment: Alignment
+    let horizontalInsets: CGFloat
 
-  func body(content: Content) -> some View {
-    content
-      .overlay(alignment: alignment) {
-        Rectangle()
-          .fill(Color.compound.borderDisabled)
-          .frame(height: pixelLength)
-          .padding(.trailing, -horizontalInsets)
-      }
-  }
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: alignment) {
+                Rectangle()
+                    .fill(Color.compound.borderDisabled)
+                    .frame(height: pixelLength)
+                    .padding(.trailing, -horizontalInsets)
+            }
+    }
 }
 
 extension View {
-  func rowDivider(alignment: Alignment = .bottom, horizontalInsets: CGFloat = .zero) -> some View {
-    modifier(RowDivider(alignment: alignment, horizontalInsets: horizontalInsets))
-  }
+    func rowDivider(alignment: Alignment = .bottom, horizontalInsets: CGFloat = .zero) -> some View {
+        modifier(RowDivider(alignment: alignment, horizontalInsets: horizontalInsets))
+    }
 }

@@ -9,48 +9,48 @@
 import XCTest
 
 enum Application {
-  @discardableResult static func launch() -> XCUIApplication {
-    let app = XCUIApplication()
+    @discardableResult static func launch() -> XCUIApplication {
+        let app = XCUIApplication()
 
-    let launchEnvironment = [
-      "IS_RUNNING_INTEGRATION_TESTS": "1"
-    ]
+        let launchEnvironment = [
+            "IS_RUNNING_INTEGRATION_TESTS": "1"
+        ]
 
-    app.launchEnvironment = launchEnvironment
-    app.launch()
+        app.launchEnvironment = launchEnvironment
+        app.launch()
 
-    return app
-  }
+        return app
+    }
 }
 
 extension XCUIApplication {
-  var homeserver: String? {
-    guard let homeserver = ProcessInfo.processInfo.environment["INTEGRATION_TESTS_HOST"],
-      homeserver.count > 0
-    else {
-      return nil
+    var homeserver: String? {
+        guard let homeserver = ProcessInfo.processInfo.environment["INTEGRATION_TESTS_HOST"],
+              homeserver.count > 0
+        else {
+            return nil
+        }
+
+        return homeserver
     }
 
-    return homeserver
-  }
+    var username: String {
+        guard let username = ProcessInfo.processInfo.environment["INTEGRATION_TESTS_USERNAME"],
+              username.count > 0
+        else {
+            return "default"
+        }
 
-  var username: String {
-    guard let username = ProcessInfo.processInfo.environment["INTEGRATION_TESTS_USERNAME"],
-      username.count > 0
-    else {
-      return "default"
+        return username
     }
 
-    return username
-  }
+    var password: String {
+        guard let password = ProcessInfo.processInfo.environment["INTEGRATION_TESTS_PASSWORD"],
+              password.count > 0
+        else {
+            return "default"
+        }
 
-  var password: String {
-    guard let password = ProcessInfo.processInfo.environment["INTEGRATION_TESTS_PASSWORD"],
-      password.count > 0
-    else {
-      return "default"
+        return password
     }
-
-    return password
-  }
 }

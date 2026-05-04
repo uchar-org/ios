@@ -9,22 +9,22 @@ import Foundation
 import MatrixRustSDK
 
 enum CallIntent: Codable, CaseIterable {
-  case video, audio
+    case video, audio
 }
 
 extension CallIntent {
-  // periphery:ignore - Unused, but added to detect new cases when updating the SDK.
-  init(rustCallIntent: MatrixRustSDK.RtcCallIntent) {
-    switch rustCallIntent {
-    case .audio: self = .audio
-    case .video: self = .video
+    // periphery:ignore - Unused, but added to detect new cases when updating the SDK.
+    init(rustCallIntent: MatrixRustSDK.RtcCallIntent) {
+        switch rustCallIntent {
+        case .audio: self = .audio
+        case .video: self = .video
+        }
     }
-  }
 
-  var rustCallIntent: MatrixRustSDK.RtcCallIntent {
-    switch self {
-    case .audio: .audio
-    case .video: .video
+    var rustCallIntent: MatrixRustSDK.RtcCallIntent {
+        switch self {
+        case .audio: .audio
+        case .video: .video
+        }
     }
-  }
 }

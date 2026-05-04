@@ -9,47 +9,46 @@
 import Foundation
 
 enum ResolveVerifiedUserSendFailureScreenViewModelAction {
-  case dismiss
+    case dismiss
 }
 
 struct ResolveVerifiedUserSendFailureScreenViewState: BindableState {
-  var currentFailure: TimelineItemSendFailure.VerifiedUser
-  var currentMemberDisplayName: String
-  var isYou: Bool
+    var currentFailure: TimelineItemSendFailure.VerifiedUser
+    var currentMemberDisplayName: String
+    var isYou: Bool
 
-  var title: String {
-    switch currentFailure {
-    case .hasUnsignedDevice:
-      isYou
-        ? L10n.screenResolveSendFailureYouUnsignedDeviceTitle
-        : L10n.screenResolveSendFailureUnsignedDeviceTitle(currentMemberDisplayName)
-    case .changedIdentity:
-      L10n.screenResolveSendFailureChangedIdentityTitle(currentMemberDisplayName)
+    var title: String {
+        switch currentFailure {
+        case .hasUnsignedDevice:
+            isYou
+                ? L10n.screenResolveSendFailureYouUnsignedDeviceTitle
+                : L10n.screenResolveSendFailureUnsignedDeviceTitle(currentMemberDisplayName)
+        case .changedIdentity:
+            L10n.screenResolveSendFailureChangedIdentityTitle(currentMemberDisplayName)
+        }
     }
-  }
 
-  var subtitle: String {
-    switch currentFailure {
-    case .hasUnsignedDevice:
-      isYou
-        ? L10n.screenResolveSendFailureYouUnsignedDeviceSubtitle
-        : L10n.screenResolveSendFailureUnsignedDeviceSubtitle(
-          currentMemberDisplayName, currentMemberDisplayName)
-    case .changedIdentity:
-      L10n.screenResolveSendFailureChangedIdentitySubtitle(currentMemberDisplayName)
+    var subtitle: String {
+        switch currentFailure {
+        case .hasUnsignedDevice:
+            isYou
+                ? L10n.screenResolveSendFailureYouUnsignedDeviceSubtitle
+                : L10n.screenResolveSendFailureUnsignedDeviceSubtitle(currentMemberDisplayName, currentMemberDisplayName)
+        case .changedIdentity:
+            L10n.screenResolveSendFailureChangedIdentitySubtitle(currentMemberDisplayName)
+        }
     }
-  }
 
-  var primaryButtonTitle: String {
-    switch currentFailure {
-    case .hasUnsignedDevice: L10n.screenResolveSendFailureUnsignedDevicePrimaryButtonTitle
-    case .changedIdentity: L10n.screenResolveSendFailureChangedIdentityPrimaryButtonTitle
+    var primaryButtonTitle: String {
+        switch currentFailure {
+        case .hasUnsignedDevice: L10n.screenResolveSendFailureUnsignedDevicePrimaryButtonTitle
+        case .changedIdentity: L10n.screenResolveSendFailureChangedIdentityPrimaryButtonTitle
+        }
     }
-  }
 }
 
 enum ResolveVerifiedUserSendFailureScreenViewAction {
-  case resolveAndResend
-  case resend
-  case cancel
+    case resolveAndResend
+    case resend
+    case cancel
 }

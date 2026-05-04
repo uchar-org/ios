@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol ServerSelectionScreenViewModelProtocol {
-  var actions: AnyPublisher<ServerSelectionScreenViewModelAction, Never> { get }
-  var context: ServerSelectionScreenViewModelType.Context { get }
+    var actions: AnyPublisher<ServerSelectionScreenViewModelAction, Never> { get }
+    var context: ServerSelectionScreenViewModelType.Context { get }
 }

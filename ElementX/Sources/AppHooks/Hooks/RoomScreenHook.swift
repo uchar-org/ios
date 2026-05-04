@@ -9,13 +9,13 @@
 import Foundation
 
 protocol RoomScreenHookProtocol {
-  func configure(with userSession: UserSessionProtocol?) async
-  func update(_ viewState: RoomScreenViewState) -> RoomScreenViewState
+    func configure(with userSession: UserSessionProtocol?) async
+    func update(_ viewState: RoomScreenViewState) -> RoomScreenViewState
 }
 
 struct DefaultRoomScreenHook: RoomScreenHookProtocol {
-  func configure(with userSession: UserSessionProtocol?) async {}
-  func update(_ viewState: RoomScreenViewState) -> RoomScreenViewState {
-    viewState
-  }
+    func configure(with userSession: UserSessionProtocol?) async { }
+    func update(_ viewState: RoomScreenViewState) -> RoomScreenViewState {
+        viewState
+    }
 }

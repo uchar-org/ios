@@ -11,9 +11,9 @@ import UIKit
 
 // sourcery: AutoMockable
 protocol OrientationManagerProtocol {
-  /// Forces the current orientation for the main window, works only on iOS
-  func setOrientation(_ orientation: UIInterfaceOrientationMask)
+    /// Forces the current orientation for the main window, works only on iOS
+    func setOrientation(_ orientation: UIInterfaceOrientationMask)
 
-  /// Locks the current orientation for the main window, works only on iOS
-  func lockOrientation(_ orientation: UIInterfaceOrientationMask)
+    /// Locks the current orientation for the main window, works only on iOS
+    func lockOrientation(_ orientation: UIInterfaceOrientationMask)
 }

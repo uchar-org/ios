@@ -9,66 +9,62 @@
 import SwiftUI
 
 struct RoomListFiltersEmptyStateView: View {
-  let state: RoomListFiltersState
+    let state: RoomListFiltersState
 
-  private var emptyStateTitle: String {
-    if state.activeFilters.count == 1 {
-      switch state.activeFilters[0] {
-      case .unreads:
-        return L10n.screenRoomlistFilterUnreadsEmptyStateTitle
-      case .people:
-        return L10n.screenRoomlistFilterPeopleEmptyStateTitle
-      case .rooms:
-        return L10n.screenRoomlistFilterRoomsEmptyStateTitle
-      case .favourites:
-        return L10n.screenRoomlistFilterFavouritesEmptyStateTitle
-      case .invites:
-        return L10n.screenRoomlistFilterInvitesEmptyStateTitle
-      case .lowPriority:
-        return L10n.screenRoomlistFilterLowPriorityEmptyStateTitle
-      }
+    private var emptyStateTitle: String {
+        if state.activeFilters.count == 1 {
+            switch state.activeFilters[0] {
+            case .unreads:
+                return L10n.screenRoomlistFilterUnreadsEmptyStateTitle
+            case .people:
+                return L10n.screenRoomlistFilterPeopleEmptyStateTitle
+            case .rooms:
+                return L10n.screenRoomlistFilterRoomsEmptyStateTitle
+            case .favourites:
+                return L10n.screenRoomlistFilterFavouritesEmptyStateTitle
+            case .invites:
+                return L10n.screenRoomlistFilterInvitesEmptyStateTitle
+            case .lowPriority:
+                return L10n.screenRoomlistFilterLowPriorityEmptyStateTitle
+            }
+        }
+        return L10n.screenRoomlistFilterMixedEmptyStateTitle
     }
-    return L10n.screenRoomlistFilterMixedEmptyStateTitle
-  }
 
-  private var emptyStateSubtitle: String {
-    if state.activeFilters.first == .favourites {
-      return L10n.screenRoomlistFilterFavouritesEmptyStateSubtitle
+    private var emptyStateSubtitle: String {
+        if state.activeFilters.first == .favourites {
+            return L10n.screenRoomlistFilterFavouritesEmptyStateSubtitle
+        }
+        return L10n.screenRoomlistFilterMixedEmptyStateSubtitle
     }
-    return L10n.screenRoomlistFilterMixedEmptyStateSubtitle
-  }
 
-  var body: some View {
-    VStack(spacing: 24) {
-      Text(emptyStateTitle)
-        .multilineTextAlignment(.center)
-        .font(.compound.headingSMSemibold)
-        .foregroundColor(.compound.textPrimary)
+    var body: some View {
+        VStack(spacing: 24) {
+            Text(emptyStateTitle)
+                .multilineTextAlignment(.center)
+                .font(.compound.headingSMSemibold)
+                .foregroundColor(.compound.textPrimary)
 
-      Text(emptyStateSubtitle)
-        .multilineTextAlignment(.center)
-        .font(.compound.bodyMD)
-        .foregroundColor(.compound.textSecondary)
+            Text(emptyStateSubtitle)
+                .multilineTextAlignment(.center)
+                .font(.compound.bodyMD)
+                .foregroundColor(.compound.textSecondary)
+        }
+        .padding(.horizontal, 60)
     }
-    .padding(.horizontal, 60)
-  }
 }
 
 struct RoomListFiltersEmptyStateView_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    VStack(spacing: 24) {
-      ForEach(RoomListFilter.allCases) { filter in
-        RoomListFiltersEmptyStateView(
-          state: .init(
-            activeFilters: [filter],
-            appSettings: ServiceLocator.shared.settings))
-      }
-      RoomListFiltersEmptyStateView(
-        state: .init(
-          activeFilters: [.people, .favourites],
-          appSettings: ServiceLocator.shared.settings))
+    static var previews: some View {
+        VStack(spacing: 24) {
+            ForEach(RoomListFilter.allCases) { filter in
+                RoomListFiltersEmptyStateView(state: .init(activeFilters: [filter],
+                                                           appSettings: ServiceLocator.shared.settings))
+            }
+            RoomListFiltersEmptyStateView(state: .init(activeFilters: [.people, .favourites],
+                                                       appSettings: ServiceLocator.shared.settings))
+        }
+        .padding(.bottom)
+        .previewLayout(.sizeThatFits)
     }
-    .padding(.bottom)
-    .previewLayout(.sizeThatFits)
-  }
 }

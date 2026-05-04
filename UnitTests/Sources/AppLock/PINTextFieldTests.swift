@@ -6,19 +6,18 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+@testable import ElementX
 import Testing
 
-@testable import ElementX
-
 struct PINTextFieldTests {
-  @Test
-  func sanitize() {
-    let textField = PINTextField(pinCode: .constant(""))
-    #expect(textField.sanitize("2") == "2")
-    #expect(textField.sanitize("2023") == "2023")
-    #expect(textField.sanitize("20233") == "2023")
-    #expect(textField.sanitize("20x") == "20")
-    #expect(textField.sanitize("20!") == "20")
-    #expect(textField.sanitize("boop") == "")
-  }
+    @Test
+    func sanitize() {
+        let textField = PINTextField(pinCode: .constant(""))
+        #expect(textField.sanitize("2") == "2")
+        #expect(textField.sanitize("2023") == "2023")
+        #expect(textField.sanitize("20233") == "2023")
+        #expect(textField.sanitize("20x") == "20")
+        #expect(textField.sanitize("20!") == "20")
+        #expect(textField.sanitize("boop") == "")
+    }
 }

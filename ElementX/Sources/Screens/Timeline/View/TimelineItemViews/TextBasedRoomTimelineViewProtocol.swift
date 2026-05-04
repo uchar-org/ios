@@ -8,7 +8,7 @@
 
 // periphery: ignore - markdown protocol
 protocol TextBasedRoomTimelineViewProtocol {
-  associatedtype TimelineItemType: TextBasedRoomTimelineItem
+    associatedtype TimelineItemType: TextBasedRoomTimelineItem
 
-  var timelineItem: TimelineItemType { get }
+    var timelineItem: TimelineItemType { get }
 }

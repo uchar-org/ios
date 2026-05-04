@@ -10,10 +10,10 @@ import Combine
 
 @MainActor
 protocol SpaceScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<SpaceScreenViewModelAction, Never> { get }
-  var context: SpaceScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<SpaceScreenViewModelAction, Never> { get }
+    var context: SpaceScreenViewModelType.Context { get }
 
-  func stop()
+    func stop()
 
-  func resetRoomList()
+    func resetRoomList()
 }

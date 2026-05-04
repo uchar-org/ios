@@ -11,41 +11,36 @@ import UIKit
 @testable import Kingfisher
 
 class MockImageCache: ImageCache, @unchecked Sendable {
-  var retrievedImagesInMemory = [String: UIImage]()
-  var retrievedImages = [String: UIImage]()
-  var storedImages = [String: UIImage]()
+    var retrievedImagesInMemory = [String: UIImage]()
+    var retrievedImages = [String: UIImage]()
+    var storedImages = [String: UIImage]()
 
-  override func retrieveImageInMemoryCache(forKey key: String, options: KingfisherParsedOptionsInfo)
-    -> KFCrossPlatformImage?
-  {
-    retrievedImagesInMemory[key]
-  }
-
-  override func retrieveImage(
-    forKey key: String, options: KingfisherOptionsInfo? = nil,
-    callbackQueue: CallbackQueue = .mainCurrentOrAsync,
-    completionHandler: ((Result<ImageCacheResult, KingfisherError>) -> Void)?
-  ) {
-    if let image = retrievedImages[key] {
-      completionHandler?(.success(ImageCacheResult.disk(image)))
-    } else {
-      let error = KingfisherError.cacheError(reason: .imageNotExisting(key: key))
-      completionHandler?(.failure(error))
+    override func retrieveImageInMemoryCache(forKey key: String, options: KingfisherParsedOptionsInfo)
+        -> KFCrossPlatformImage? {
+        retrievedImagesInMemory[key]
     }
-  }
 
-  override func store(
-    _ image: KFCrossPlatformImage,
-    original: Data? = nil,
-    forKey key: String,
-    processorIdentifier identifier: String = "",
-    forcedExtension: String? = nil,
-    cacheSerializer serializer: CacheSerializer = DefaultCacheSerializer.default,
-    toDisk: Bool = true,
-    callbackQueue: CallbackQueue = .untouch,
-    completionHandler: ((CacheStoreResult) -> Void)? = nil
-  ) {
-    storedImages[key] = image
-    completionHandler?(.init(memoryCacheResult: .success(()), diskCacheResult: .success(())))
-  }
+    override func retrieveImage(forKey key: String, options: KingfisherOptionsInfo? = nil,
+                                callbackQueue: CallbackQueue = .mainCurrentOrAsync,
+                                completionHandler: ((Result<ImageCacheResult, KingfisherError>) -> Void)?) {
+        if let image = retrievedImages[key] {
+            completionHandler?(.success(ImageCacheResult.disk(image)))
+        } else {
+            let error = KingfisherError.cacheError(reason: .imageNotExisting(key: key))
+            completionHandler?(.failure(error))
+        }
+    }
+
+    override func store(_ image: KFCrossPlatformImage,
+                        original: Data? = nil,
+                        forKey key: String,
+                        processorIdentifier identifier: String = "",
+                        forcedExtension: String? = nil,
+                        cacheSerializer serializer: CacheSerializer = DefaultCacheSerializer.default,
+                        toDisk: Bool = true,
+                        callbackQueue: CallbackQueue = .untouch,
+                        completionHandler: ((CacheStoreResult) -> Void)? = nil) {
+        storedImages[key] = image
+        completionHandler?(.init(memoryCacheResult: .success(()), diskCacheResult: .success(())))
+    }
 }

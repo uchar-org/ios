@@ -11,15 +11,15 @@ import SwiftUI
 /// but ignores it when running the tests, which allows you to still use it's content directly in preview tests
 /// and render the preview with `sizeThatFits` layout.
 struct PreviewScrollView<Content: View>: View {
-  var content: () -> Content
+    var content: () -> Content
 
-  var body: some View {
-    if ProcessInfo.isRunningTests {
-      content()
-    } else {
-      ScrollView {
-        content()
-      }
+    var body: some View {
+        if ProcessInfo.isRunningTests {
+            content()
+        } else {
+            ScrollView {
+                content()
+            }
+        }
     }
-  }
 }

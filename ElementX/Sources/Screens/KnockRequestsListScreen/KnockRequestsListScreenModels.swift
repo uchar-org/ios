@@ -8,93 +8,92 @@
 
 import Foundation
 
-enum KnockRequestsListScreenViewModelAction {}
+enum KnockRequestsListScreenViewModelAction { }
 
 struct KnockRequestsListScreenViewState: BindableState {
-  var requestsState: KnockRequestsListState = .loading
+    var requestsState: KnockRequestsListState = .loading
 
-  var displayedRequests: [KnockRequestCellInfo] {
-    guard case .loaded(let requests) = requestsState else {
-      return []
+    var displayedRequests: [KnockRequestCellInfo] {
+        guard case .loaded(let requests) = requestsState else {
+            return []
+        }
+        return requests.filter { !handledEventIDs.contains($0.id) }
     }
-    return requests.filter { !handledEventIDs.contains($0.id) }
-  }
 
-  var isLoading: Bool {
-    switch requestsState {
-    case .loading:
-      true
-    default:
-      false
+    var isLoading: Bool {
+        switch requestsState {
+        case .loading:
+            true
+        default:
+            false
+        }
     }
-  }
 
-  // If you are in this view one of these must have been true so by default we assume all of them to be true
-  var canAccept = true
-  var canDecline = true
-  var canBan = true
-  var isKnockableRoom = true
-  var handledEventIDs: Set<String> = []
+    // If you are in this view one of these must have been true so by default we assume all of them to be true
+    var canAccept = true
+    var canDecline = true
+    var canBan = true
+    var isKnockableRoom = true
+    var handledEventIDs: Set<String> = []
 
-  /// If all the permissions are denied or the join rule changes while we are in the view
-  /// we want to stop displaying any request
-  var shouldDisplayRequests: Bool {
-    !displayedRequests.isEmpty && isKnockableRoom && (canAccept || canDecline || canBan)
-  }
+    /// If all the permissions are denied or the join rule changes while we are in the view
+    /// we want to stop displaying any request
+    var shouldDisplayRequests: Bool {
+        !displayedRequests.isEmpty && isKnockableRoom && (canAccept || canDecline || canBan)
+    }
 
-  var shouldDisplayAcceptAllButton: Bool {
-    !isLoading && shouldDisplayRequests && displayedRequests.count > 1
-  }
+    var shouldDisplayAcceptAllButton: Bool {
+        !isLoading && shouldDisplayRequests && displayedRequests.count > 1
+    }
 
-  var shouldDisplayEmptyView: Bool {
-    !isLoading && !shouldDisplayRequests
-  }
+    var shouldDisplayEmptyView: Bool {
+        !isLoading && !shouldDisplayRequests
+    }
 
-  var bindings = KnockRequestsListStateBindings()
+    var bindings = KnockRequestsListStateBindings()
 }
 
 struct KnockRequestsListStateBindings {
-  var alertInfo: AlertInfo<KnockRequestsListAlertType>?
+    var alertInfo: AlertInfo<KnockRequestsListAlertType>?
 }
 
 enum KnockRequestsListAlertType {
-  case acceptAllRequests
-  case declineRequest
-  case declineAndBan
-  case acceptAllFailed
-  case acceptFailed
-  case declineFailed
+    case acceptAllRequests
+    case declineRequest
+    case declineAndBan
+    case acceptAllFailed
+    case acceptFailed
+    case declineFailed
 }
 
 enum KnockRequestsListScreenViewAction {
-  case acceptAllRequests
-  case acceptRequest(eventID: String)
-  case declineRequest(eventID: String)
-  case ban(eventID: String)
+    case acceptAllRequests
+    case acceptRequest(eventID: String)
+    case declineRequest(eventID: String)
+    case ban(eventID: String)
 }
 
 enum KnockRequestsListState: Equatable {
-  case loading
-  case loaded([KnockRequestCellInfo])
+    case loading
+    case loaded([KnockRequestCellInfo])
 
-  init(from state: KnockRequestsState) {
-    switch state {
-    case .loading:
-      self = .loading
-    case .loaded(let requests):
-      self = .loaded(requests.map(KnockRequestCellInfo.init))
+    init(from state: KnockRequestsState) {
+        switch state {
+        case .loading:
+            self = .loading
+        case .loaded(let requests):
+            self = .loaded(requests.map(KnockRequestCellInfo.init))
+        }
     }
-  }
 }
 
-extension KnockRequestCellInfo {
-  fileprivate init(from proxy: KnockRequestProxyProtocol) {
-    self.init(
-      eventID: proxy.eventID,
-      userID: proxy.userID,
-      displayName: proxy.displayName,
-      avatarURL: proxy.avatarURL,
-      timestamp: proxy.formattedTimestamp,
-      reason: proxy.reason)
-  }
+private extension KnockRequestCellInfo {
+    init(from proxy: KnockRequestProxyProtocol) {
+        self.init(eventID: proxy.eventID,
+                  userID: proxy.userID,
+                  displayName: proxy.displayName,
+                  avatarURL: proxy.avatarURL,
+                  timestamp: proxy.formattedTimestamp,
+                  reason: proxy.reason)
+    }
 }

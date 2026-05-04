@@ -9,18 +9,18 @@ import Compound
 import SwiftUI
 
 struct TitleAndIconScreen: View {
-  var body: some View {
-    ScreenContent(navigationTitle: "Title & Icon") {
-      TitleAndIcon_Previews.states
+    var body: some View {
+        ScreenContent(navigationTitle: "Title & Icon") {
+            TitleAndIcon_Previews.states
+        }
     }
-  }
 }
 
 struct TitleAndIconScreen_Previews: PreviewProvider {
-  static var previews: some View {
-    NavigationStack {
-      TitleAndIconScreen()
+    static var previews: some View {
+        NavigationStack {
+            TitleAndIconScreen()
+        }
+        .previewLayout(.fixed(width: 375, height: 700))
     }
-    .previewLayout(.fixed(width: 375, height: 700))
-  }
 }

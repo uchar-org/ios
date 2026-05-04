@@ -10,98 +10,91 @@ import Combine
 import SwiftUI
 
 enum BugReportScreenCoordinatorAction {
-  case cancel
-  case viewLogs
-  case finish
+    case cancel
+    case viewLogs
+    case finish
 }
 
 struct BugReportScreenCoordinatorParameters {
-  let bugReportService: BugReportServiceProtocol
-  let userSession: UserSessionProtocol?
+    let bugReportService: BugReportServiceProtocol
+    let userSession: UserSessionProtocol?
 
-  let userIndicatorController: UserIndicatorControllerProtocol?
-  let screenshot: UIImage?
-  let isModallyPresented: Bool
+    let userIndicatorController: UserIndicatorControllerProtocol?
+    let screenshot: UIImage?
+    let isModallyPresented: Bool
 }
 
 final class BugReportScreenCoordinator: CoordinatorProtocol {
-  private let parameters: BugReportScreenCoordinatorParameters
-  private var viewModel: BugReportScreenViewModelProtocol
-  private var cancellables = Set<AnyCancellable>()
+    private let parameters: BugReportScreenCoordinatorParameters
+    private var viewModel: BugReportScreenViewModelProtocol
+    private var cancellables = Set<AnyCancellable>()
 
-  private let actionsSubject: PassthroughSubject<BugReportScreenCoordinatorAction, Never> = .init()
-  var actions: AnyPublisher<BugReportScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
+    private let actionsSubject: PassthroughSubject<BugReportScreenCoordinatorAction, Never> = .init()
+    var actions: AnyPublisher<BugReportScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
 
-  init(parameters: BugReportScreenCoordinatorParameters) {
-    self.parameters = parameters
+    init(parameters: BugReportScreenCoordinatorParameters) {
+        self.parameters = parameters
 
-    viewModel = BugReportScreenViewModel(
-      bugReportService: parameters.bugReportService,
-      clientProxy: parameters.userSession?.clientProxy,
-      screenshot: parameters.screenshot,
-      isModallyPresented: parameters.isModallyPresented)
-  }
+        viewModel = BugReportScreenViewModel(bugReportService: parameters.bugReportService,
+                                             clientProxy: parameters.userSession?.clientProxy,
+                                             screenshot: parameters.screenshot,
+                                             isModallyPresented: parameters.isModallyPresented)
+    }
 
-  // MARK: - Public
+    // MARK: - Public
 
-  func start() {
-    viewModel
-      .actions
-      .sink { [weak self] action in
-        guard let self else { return }
+    func start() {
+        viewModel
+            .actions
+            .sink { [weak self] action in
+                guard let self else { return }
 
-        MXLog.info("BugReportViewModel did complete with result: \(action).")
-        switch action {
-        case .cancel:
-          actionsSubject.send(.cancel)
-        case .viewLogs:
-          actionsSubject.send(.viewLogs)
-        case .submitStarted(let progressPublisher):
-          startLoading(label: L10n.commonSending, progressPublisher: progressPublisher)
-        case .submitFinished:
-          stopLoading()
-          actionsSubject.send(.finish)
-        case .submitFailed(let error):
-          stopLoading()
-          showError(label: error.localizedDescription)
-        }
-      }
-      .store(in: &cancellables)
-  }
+                MXLog.info("BugReportViewModel did complete with result: \(action).")
+                switch action {
+                case .cancel:
+                    actionsSubject.send(.cancel)
+                case .viewLogs:
+                    actionsSubject.send(.viewLogs)
+                case .submitStarted(let progressPublisher):
+                    startLoading(label: L10n.commonSending, progressPublisher: progressPublisher)
+                case .submitFinished:
+                    stopLoading()
+                    actionsSubject.send(.finish)
+                case .submitFailed(let error):
+                    stopLoading()
+                    showError(label: error.localizedDescription)
+                }
+            }
+            .store(in: &cancellables)
+    }
 
-  func stop() {
-    stopLoading()
-  }
+    func stop() {
+        stopLoading()
+    }
 
-  func toPresentable() -> AnyView {
-    AnyView(BugReportScreen(context: viewModel.context))
-  }
+    func toPresentable() -> AnyView {
+        AnyView(BugReportScreen(context: viewModel.context))
+    }
 
-  // MARK: - Private
+    // MARK: - Private
 
-  private static let loadingIndicatorIdentifier = "\(BugReportScreenCoordinator.self)-Loading"
+    private static let loadingIndicatorIdentifier = "\(BugReportScreenCoordinator.self)-Loading"
 
-  private func startLoading(
-    label: String = L10n.commonLoading, progressPublisher: CurrentValuePublisher<Double, Never>
-  ) {
-    parameters.userIndicatorController?.submitIndicator(
-      UserIndicator(
-        id: Self.loadingIndicatorIdentifier,
-        type: .modal(
-          progress: .published(progressPublisher), interactiveDismissDisabled: false,
-          allowsInteraction: true),
-        title: label,
-        persistent: true))
-  }
+    private func startLoading(label: String = L10n.commonLoading, progressPublisher: CurrentValuePublisher<Double, Never>) {
+        parameters.userIndicatorController?.submitIndicator(UserIndicator(id: Self.loadingIndicatorIdentifier,
+                                                                          type: .modal(progress: .published(progressPublisher), interactiveDismissDisabled: false,
+                                                                                       allowsInteraction: true),
+                                                                          title: label,
+                                                                          persistent: true))
+    }
 
-  private func stopLoading() {
-    parameters.userIndicatorController?.retractIndicatorWithId(Self.loadingIndicatorIdentifier)
-  }
+    private func stopLoading() {
+        parameters.userIndicatorController?.retractIndicatorWithId(Self.loadingIndicatorIdentifier)
+    }
 
-  private func showError(label: String) {
-    parameters.userIndicatorController?.submitIndicator(
-      UserIndicator(title: label, iconName: "xmark"))
-  }
+    private func showError(label: String) {
+        parameters.userIndicatorController?.submitIndicator(UserIndicator(title: label, iconName: "xmark"))
+    }
 }

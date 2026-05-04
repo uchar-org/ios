@@ -9,18 +9,18 @@
 import UIKit
 
 struct StickerRoomTimelineItem: EventBasedTimelineItemProtocol, Equatable {
-  let id: TimelineItemIdentifier
-  let body: String
-  let timestamp: Date
-  let isOutgoing: Bool
-  let isEditable: Bool
-  let canBeRepliedTo: Bool
+    let id: TimelineItemIdentifier
+    let body: String
+    let timestamp: Date
+    let isOutgoing: Bool
+    let isEditable: Bool
+    let canBeRepliedTo: Bool
 
-  let sender: TimelineItemSender
+    let sender: TimelineItemSender
 
-  let imageInfo: ImageInfoProxy
+    let imageInfo: ImageInfoProxy
 
-  var blurhash: String?
+    var blurhash: String?
 
-  var properties = RoomTimelineItemProperties()
+    var properties = RoomTimelineItemProperties()
 }

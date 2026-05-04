@@ -9,11 +9,11 @@
 import Foundation
 
 protocol AppSettingsHookProtocol {
-  func configure(_ appSettings: AppSettings) -> AppSettings
+    func configure(_ appSettings: AppSettings) -> AppSettings
 }
 
 struct DefaultAppSettingsHook: AppSettingsHookProtocol {
-  func configure(_ appSettings: AppSettings) -> AppSettings {
-    appSettings
-  }
+    func configure(_ appSettings: AppSettings) -> AppSettings {
+        appSettings
+    }
 }

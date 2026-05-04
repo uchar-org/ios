@@ -9,75 +9,75 @@
 import SwiftUI
 
 enum SpaceScreenViewModelAction {
-  case selectSpace(SpaceRoomListProxyProtocol)
-  case selectUnjoinedSpace(SpaceServiceRoom)
-  case selectRoom(roomID: String)
-  case leftSpace
-  case presentRolesAndPermissions(roomProxy: JoinedRoomProxyProtocol)
-  case presentTransferOwnership(roomProxy: JoinedRoomProxyProtocol)
-  case displayMembers(roomProxy: JoinedRoomProxyProtocol)
-  case displaySpaceSettings(roomProxy: JoinedRoomProxyProtocol)
-  case addExistingChildren
-  case displayCreateChildRoomFlow(space: SpaceServiceRoom)
+    case selectSpace(SpaceRoomListProxyProtocol)
+    case selectUnjoinedSpace(SpaceServiceRoom)
+    case selectRoom(roomID: String)
+    case leftSpace
+    case presentRolesAndPermissions(roomProxy: JoinedRoomProxyProtocol)
+    case presentTransferOwnership(roomProxy: JoinedRoomProxyProtocol)
+    case displayMembers(roomProxy: JoinedRoomProxyProtocol)
+    case displaySpaceSettings(roomProxy: JoinedRoomProxyProtocol)
+    case addExistingChildren
+    case displayCreateChildRoomFlow(space: SpaceServiceRoom)
 }
 
 struct SpaceScreenViewState: BindableState {
-  var space: SpaceServiceRoom
+    var space: SpaceServiceRoom
 
-  var permalink: URL?
-  var roomProxy: JoinedRoomProxyProtocol?
+    var permalink: URL?
+    var roomProxy: JoinedRoomProxyProtocol?
 
-  var paginationState: PaginationState = .idle
-  var rooms: [SpaceServiceRoom]
-  var selectedSpaceRoomID: String?
-  var joiningRoomIDs: Set<String> = []
+    var paginationState: PaginationState = .idle
+    var rooms: [SpaceServiceRoom]
+    var selectedSpaceRoomID: String?
+    var joiningRoomIDs: Set<String> = []
 
-  var canEditBaseInfo = false
-  var canEditRolesAndPermissions = false
-  var canEditSecurityAndPrivacy = false
-  var canEditChildren = false
+    var canEditBaseInfo = false
+    var canEditRolesAndPermissions = false
+    var canEditSecurityAndPrivacy = false
+    var canEditChildren = false
 
-  var editMode: EditMode = .inactive
-  var editModeSelectedIDs: Set<String> = []
-  var editModeRemovedIDs: Set<String> = []
+    var editMode: EditMode = .inactive
+    var editModeSelectedIDs: Set<String> = []
+    var editModeRemovedIDs: Set<String> = []
 
-  var bindings = SpaceScreenViewStateBindings()
+    var bindings = SpaceScreenViewStateBindings()
 
-  var shouldShowEmptyState: Bool {
-    rooms.isEmpty && paginationState == .endReached && canEditChildren
-  }
-
-  var visibleRooms: [SpaceServiceRoom] {
-    if editMode == .inactive {
-      rooms
-    } else {
-      rooms.filter { !$0.isSpace && !editModeRemovedIDs.contains($0.id) }
+    var shouldShowEmptyState: Bool {
+        rooms.isEmpty && paginationState == .endReached && canEditChildren
     }
-  }
 
-  var isSpaceManagementEnabled: Bool {
-    canEditBaseInfo || canEditRolesAndPermissions || canEditSecurityAndPrivacy
-  }
+    var visibleRooms: [SpaceServiceRoom] {
+        if editMode == .inactive {
+            rooms
+        } else {
+            rooms.filter { !$0.isSpace && !editModeRemovedIDs.contains($0.id) }
+        }
+    }
 
-  func isSpaceIDSelected(_ spaceID: String) -> Bool {
-    selectedSpaceRoomID == spaceID || editModeSelectedIDs.contains(spaceID)
-  }
+    var isSpaceManagementEnabled: Bool {
+        canEditBaseInfo || canEditRolesAndPermissions || canEditSecurityAndPrivacy
+    }
+
+    func isSpaceIDSelected(_ spaceID: String) -> Bool {
+        selectedSpaceRoomID == spaceID || editModeSelectedIDs.contains(spaceID)
+    }
 }
 
 struct SpaceScreenViewStateBindings {
-  var isPresentingRemoveChildrenConfirmation = false
-  var leaveSpaceViewModel: LeaveSpaceViewModel?
+    var isPresentingRemoveChildrenConfirmation = false
+    var leaveSpaceViewModel: LeaveSpaceViewModel?
 }
 
 enum SpaceScreenViewAction {
-  case spaceAction(SpaceRoomCell.Action)
-  case leaveSpace
-  case spaceSettings(roomProxy: JoinedRoomProxyProtocol)
-  case displayMembers(roomProxy: JoinedRoomProxyProtocol)
-  case addExistingRooms
-  case createChildRoom
-  case manageChildren
-  case removeSelectedChildren
-  case confirmRemoveSelectedChildren
-  case finishManagingChildren
+    case spaceAction(SpaceRoomCell.Action)
+    case leaveSpace
+    case spaceSettings(roomProxy: JoinedRoomProxyProtocol)
+    case displayMembers(roomProxy: JoinedRoomProxyProtocol)
+    case addExistingRooms
+    case createChildRoom
+    case manageChildren
+    case removeSelectedChildren
+    case confirmRemoveSelectedChildren
+    case finishManagingChildren
 }

@@ -9,31 +9,29 @@
 import MatrixRustSDK
 
 struct LocationRoomTimelineItemContent: Hashable {
-  let body: String
-  let geoURI: GeoURI?
-  let kind: StaticLocationKind
+    let body: String
+    let geoURI: GeoURI?
+    let kind: StaticLocationKind
 
-  init(
-    body: String,
-    geoURI: GeoURI? = nil,
-    kind: StaticLocationKind = .sender
-  ) {
-    self.body = body
-    self.geoURI = geoURI
-    self.kind = kind
-  }
+    init(body: String,
+         geoURI: GeoURI? = nil,
+         kind: StaticLocationKind = .sender) {
+        self.body = body
+        self.geoURI = geoURI
+        self.kind = kind
+    }
 }
 
 enum StaticLocationKind {
-  case sender
-  case pin
+    case sender
+    case pin
 
-  init(from asset: AssetType?) {
-    switch asset {
-    case .pin:
-      self = .pin
-    default:
-      self = .sender
+    init(from asset: AssetType?) {
+        switch asset {
+        case .pin:
+            self = .pin
+        default:
+            self = .sender
+        }
     }
-  }
 }

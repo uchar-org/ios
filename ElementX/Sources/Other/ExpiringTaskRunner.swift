@@ -9,37 +9,37 @@
 import Foundation
 
 enum ExpiringTaskRunnerError: Error {
-  case timeout
+    case timeout
 }
 
 actor ExpiringTaskRunner<T: Sendable> {
-  private var continuation: CheckedContinuation<T, Error>?
+    private var continuation: CheckedContinuation<T, Error>?
 
-  private var task: () async throws -> T
+    private var task: () async throws -> T
 
-  init(_ task: @escaping () async throws -> T) {
-    self.task = task
-  }
-
-  func run(timeout: Duration) async throws -> T {
-    try await withCheckedThrowingContinuation {
-      continuation = $0
-
-      Task {
-        try? await Task.sleep(for: timeout)
-        continuation?.resume(with: .failure(ExpiringTaskRunnerError.timeout))
-        continuation = nil
-      }
-
-      Task {
-        do {
-          let result = try await task()
-          continuation?.resume(with: .success(result))
-        } catch {
-          continuation?.resume(with: .failure(error))
-        }
-        continuation = nil
-      }
+    init(_ task: @escaping () async throws -> T) {
+        self.task = task
     }
-  }
+
+    func run(timeout: Duration) async throws -> T {
+        try await withCheckedThrowingContinuation {
+            continuation = $0
+
+            Task {
+                try? await Task.sleep(for: timeout)
+                continuation?.resume(with: .failure(ExpiringTaskRunnerError.timeout))
+                continuation = nil
+            }
+
+            Task {
+                do {
+                    let result = try await task()
+                    continuation?.resume(with: .success(result))
+                } catch {
+                    continuation?.resume(with: .failure(error))
+                }
+                continuation = nil
+            }
+        }
+    }
 }

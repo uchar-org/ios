@@ -9,37 +9,37 @@
 import Foundation
 
 struct AnalyticsSettingsScreenViewState: BindableState {
-  /// Attributed strings created from localized HTML.
-  let strings: AnalyticsSettingsScreenStrings
-  var bindings: AnalyticsSettingsScreenViewStateBindings
+    /// Attributed strings created from localized HTML.
+    let strings: AnalyticsSettingsScreenStrings
+    var bindings: AnalyticsSettingsScreenViewStateBindings
 }
 
 struct AnalyticsSettingsScreenViewStateBindings {
-  var enableAnalytics: Bool
+    var enableAnalytics: Bool
 }
 
 enum AnalyticsSettingsScreenViewAction {
-  case toggleAnalytics
+    case toggleAnalytics
 }
 
 struct AnalyticsSettingsScreenStrings {
-  let sectionFooter: AttributedString
+    let sectionFooter: AttributedString
 
-  init(termsURL: URL?) {
-    let content = AttributedString(L10n.screenAnalyticsPromptHelpUsImprove)
+    init(termsURL: URL?) {
+        let content = AttributedString(L10n.screenAnalyticsPromptHelpUsImprove)
 
-    if let termsURL {
-      // Create the 'read terms' with a placeholder.
-      let linkPlaceholder = "{link}"
-      var readTerms = AttributedString(L10n.screenAnalyticsSettingsReadTerms(linkPlaceholder))
-      var linkString = AttributedString(L10n.screenAnalyticsSettingsReadTermsContentLink)
-      linkString.link = termsURL
-      linkString.bold()
-      readTerms.replace(linkPlaceholder, with: linkString)
+        if let termsURL {
+            // Create the 'read terms' with a placeholder.
+            let linkPlaceholder = "{link}"
+            var readTerms = AttributedString(L10n.screenAnalyticsSettingsReadTerms(linkPlaceholder))
+            var linkString = AttributedString(L10n.screenAnalyticsSettingsReadTermsContentLink)
+            linkString.link = termsURL
+            linkString.bold()
+            readTerms.replace(linkPlaceholder, with: linkString)
 
-      sectionFooter = content + "\n\n" + readTerms
-    } else {
-      sectionFooter = content
+            sectionFooter = content + "\n\n" + readTerms
+        } else {
+            sectionFooter = content
+        }
     }
-  }
 }

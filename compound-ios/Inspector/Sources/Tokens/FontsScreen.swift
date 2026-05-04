@@ -10,32 +10,32 @@ import Compound
 import SwiftUI
 
 struct FontsScreen: View {
-  var body: some View {
-    ScreenContent(navigationTitle: "Fonts") {
-      ForEach(Font.compound.allValues, id: \.name) { font in
-        FontItem(font: font.value, name: font.name)
-      }
+    var body: some View {
+        ScreenContent(navigationTitle: "Fonts") {
+            ForEach(Font.compound.allValues, id: \.name) { font in
+                FontItem(font: font.value, name: font.name)
+            }
+        }
     }
-  }
 }
 
 struct FontItem: View {
-  let font: Font
-  let name: String
+    let font: Font
+    let name: String
 
-  var body: some View {
-    Text(name)
-      .font(font)
-      .foregroundColor(.compound.textPrimary)
-      .frame(maxWidth: .infinity, alignment: .leading)
-  }
+    var body: some View {
+        Text(name)
+            .font(font)
+            .foregroundColor(.compound.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
 }
 
 struct FontsScreen_Previews: PreviewProvider {
-  static var previews: some View {
-    NavigationStack {
-      FontsScreen()
+    static var previews: some View {
+        NavigationStack {
+            FontsScreen()
+        }
+        .previewLayout(.fixed(width: 375, height: 750))
     }
-    .previewLayout(.fixed(width: 375, height: 750))
-  }
 }

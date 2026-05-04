@@ -10,15 +10,15 @@ import Foundation
 import MatrixRustSDK
 
 struct RoomNotificationSettingsProxyMockConfiguration {
-  var mode: RoomNotificationModeProxy = .allMessages
-  var isDefault = true
+    var mode: RoomNotificationModeProxy = .allMessages
+    var isDefault = true
 }
 
 extension RoomNotificationSettingsProxyMock {
-  convenience init(with configuration: RoomNotificationSettingsProxyMockConfiguration) {
-    self.init()
+    convenience init(with configuration: RoomNotificationSettingsProxyMockConfiguration) {
+        self.init()
 
-    isDefault = configuration.isDefault
-    mode = configuration.mode
-  }
+        isDefault = configuration.isDefault
+        mode = configuration.mode
+    }
 }

@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol BugReportScreenViewModelProtocol {
-  var actions: AnyPublisher<BugReportScreenViewModelAction, Never> { get }
-  var context: BugReportScreenViewModelType.Context { get }
+    var actions: AnyPublisher<BugReportScreenViewModelAction, Never> { get }
+    var context: BugReportScreenViewModelType.Context { get }
 }

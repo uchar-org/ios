@@ -10,77 +10,76 @@ import Combine
 import SwiftUI
 
 struct JoinRoomScreenCoordinatorParameters {
-  let source: JoinRoomScreenSource
-  let userSession: UserSessionProtocol
-  let userIndicatorController: UserIndicatorControllerProtocol
-  let appSettings: AppSettings
+    let source: JoinRoomScreenSource
+    let userSession: UserSessionProtocol
+    let userIndicatorController: UserIndicatorControllerProtocol
+    let appSettings: AppSettings
 }
 
 enum JoinRoomScreenSource {
-  case generic(roomID: String, via: [String])
-  case space(SpaceServiceRoom)
+    case generic(roomID: String, via: [String])
+    case space(SpaceServiceRoom)
 
-  func roomIDAndVia() -> (roomID: String, via: [String]) {
-    switch self {
-    case .generic(roomID: let roomID, via: let via):
-      return (roomID: roomID, via: via)
-    case .space(let spaceServiceRoom):
-      return (roomID: spaceServiceRoom.id, via: spaceServiceRoom.via)
+    func roomIDAndVia() -> (roomID: String, via: [String]) {
+        switch self {
+        case .generic(roomID: let roomID, via: let via):
+            return (roomID: roomID, via: via)
+        case .space(let spaceServiceRoom):
+            return (roomID: spaceServiceRoom.id, via: spaceServiceRoom.via)
+        }
     }
-  }
 }
 
 enum JoinRoomScreenJoinDetails {
-  case roomID(String)
-  case space(SpaceRoomListProxyProtocol)
+    case roomID(String)
+    case space(SpaceRoomListProxyProtocol)
 }
 
 enum JoinRoomScreenCoordinatorAction {
-  case joined(JoinRoomScreenJoinDetails)
-  case cancelled
-  case presentDeclineAndBlock(userID: String)
+    case joined(JoinRoomScreenJoinDetails)
+    case cancelled
+    case presentDeclineAndBlock(userID: String)
 }
 
 final class JoinRoomScreenCoordinator: CoordinatorProtocol {
-  private let viewModel: JoinRoomScreenViewModelProtocol
+    private let viewModel: JoinRoomScreenViewModelProtocol
 
-  private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
 
-  private let actionsSubject: PassthroughSubject<JoinRoomScreenCoordinatorAction, Never> = .init()
-  var actionsPublisher: AnyPublisher<JoinRoomScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(parameters: JoinRoomScreenCoordinatorParameters) {
-    viewModel = JoinRoomScreenViewModel(
-      source: parameters.source,
-      appSettings: parameters.appSettings,
-      userSession: parameters.userSession,
-      userIndicatorController: parameters.userIndicatorController)
-  }
-
-  func start() {
-    viewModel.actionsPublisher.sink { [weak self] action in
-      MXLog.info("Coordinator: received view model action: \(action)")
-
-      guard let self else { return }
-      switch action {
-      case .joined(let details):
-        actionsSubject.send(.joined(details))
-      case .dismiss:
-        actionsSubject.send(.cancelled)
-      case .presentDeclineAndBlock(let userID):
-        actionsSubject.send(.presentDeclineAndBlock(userID: userID))
-      }
+    private let actionsSubject: PassthroughSubject<JoinRoomScreenCoordinatorAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<JoinRoomScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-    .store(in: &cancellables)
-  }
 
-  func stop() {
-    viewModel.stop()
-  }
+    init(parameters: JoinRoomScreenCoordinatorParameters) {
+        viewModel = JoinRoomScreenViewModel(source: parameters.source,
+                                            appSettings: parameters.appSettings,
+                                            userSession: parameters.userSession,
+                                            userIndicatorController: parameters.userIndicatorController)
+    }
 
-  func toPresentable() -> AnyView {
-    AnyView(JoinRoomScreen(context: viewModel.context))
-  }
+    func start() {
+        viewModel.actionsPublisher.sink { [weak self] action in
+            MXLog.info("Coordinator: received view model action: \(action)")
+
+            guard let self else { return }
+            switch action {
+            case .joined(let details):
+                actionsSubject.send(.joined(details))
+            case .dismiss:
+                actionsSubject.send(.cancelled)
+            case .presentDeclineAndBlock(let userID):
+                actionsSubject.send(.presentDeclineAndBlock(userID: userID))
+            }
+        }
+        .store(in: &cancellables)
+    }
+
+    func stop() {
+        viewModel.stop()
+    }
+
+    func toPresentable() -> AnyView {
+        AnyView(JoinRoomScreen(context: viewModel.context))
+    }
 }

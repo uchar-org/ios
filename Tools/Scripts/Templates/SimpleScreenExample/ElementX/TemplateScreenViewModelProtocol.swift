@@ -9,6 +9,6 @@ import Combine
 
 @MainActor
 protocol TemplateScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<TemplateScreenViewModelAction, Never> { get }
-  var context: TemplateScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<TemplateScreenViewModelAction, Never> { get }
+    var context: TemplateScreenViewModelType.Context { get }
 }

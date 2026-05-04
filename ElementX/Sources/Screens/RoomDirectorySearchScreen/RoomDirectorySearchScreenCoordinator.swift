@@ -10,49 +10,48 @@ import Combine
 import SwiftUI
 
 struct RoomDirectorySearchScreenCoordinatorParameters {
-  let userSession: UserSessionProtocol
-  let userIndicatorController: UserIndicatorControllerProtocol
+    let userSession: UserSessionProtocol
+    let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum RoomDirectorySearchScreenCoordinatorAction {
-  case selectAlias(String)
-  case selectRoomID(String)
-  case dismiss
+    case selectAlias(String)
+    case selectRoomID(String)
+    case dismiss
 }
 
 final class RoomDirectorySearchScreenCoordinator: CoordinatorProtocol {
-  private let viewModel: RoomDirectorySearchScreenViewModelProtocol
+    private let viewModel: RoomDirectorySearchScreenViewModelProtocol
 
-  private var cancellables = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
 
-  private let actionsSubject:
-    PassthroughSubject<RoomDirectorySearchScreenCoordinatorAction, Never> = .init()
-  var actionsPublisher: AnyPublisher<RoomDirectorySearchScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(parameters: RoomDirectorySearchScreenCoordinatorParameters) {
-    viewModel = RoomDirectorySearchScreenViewModel(
-      userSession: parameters.userSession,
-      userIndicatorController: parameters.userIndicatorController)
-  }
-
-  func start() {
-    viewModel.actionsPublisher.sink { [weak self] action in
-      guard let self else { return }
-      switch action {
-      case .selectAlias(let alias):
-        actionsSubject.send(.selectAlias(alias))
-      case .selectRoomID(let roomID):
-        actionsSubject.send(.selectRoomID(roomID))
-      case .dismiss:
-        actionsSubject.send(.dismiss)
-      }
+    private let actionsSubject:
+        PassthroughSubject<RoomDirectorySearchScreenCoordinatorAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<RoomDirectorySearchScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-    .store(in: &cancellables)
-  }
 
-  func toPresentable() -> AnyView {
-    AnyView(RoomDirectorySearchScreen(context: viewModel.context))
-  }
+    init(parameters: RoomDirectorySearchScreenCoordinatorParameters) {
+        viewModel = RoomDirectorySearchScreenViewModel(userSession: parameters.userSession,
+                                                       userIndicatorController: parameters.userIndicatorController)
+    }
+
+    func start() {
+        viewModel.actionsPublisher.sink { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .selectAlias(let alias):
+                actionsSubject.send(.selectAlias(alias))
+            case .selectRoomID(let roomID):
+                actionsSubject.send(.selectRoomID(roomID))
+            case .dismiss:
+                actionsSubject.send(.dismiss)
+            }
+        }
+        .store(in: &cancellables)
+    }
+
+    func toPresentable() -> AnyView {
+        AnyView(RoomDirectorySearchScreen(context: viewModel.context))
+    }
 }

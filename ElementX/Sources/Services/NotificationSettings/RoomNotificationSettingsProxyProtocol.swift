@@ -11,6 +11,6 @@ import MatrixRustSDK
 
 // sourcery: AutoMockable
 protocol RoomNotificationSettingsProxyProtocol {
-  var mode: RoomNotificationModeProxy { get }
-  var isDefault: Bool { get }
+    var mode: RoomNotificationModeProxy { get }
+    var isDefault: Bool { get }
 }

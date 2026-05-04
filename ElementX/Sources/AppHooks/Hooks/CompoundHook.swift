@@ -9,9 +9,9 @@
 import Compound
 
 protocol CompoundHookProtocol {
-  @MainActor func override(colors: CompoundColors, uiColors: CompoundUIColors)
+    @MainActor func override(colors: CompoundColors, uiColors: CompoundUIColors)
 }
 
 struct DefaultCompoundHook: CompoundHookProtocol {
-  func override(colors: CompoundColors, uiColors: CompoundUIColors) {}
+    func override(colors: CompoundColors, uiColors: CompoundUIColors) { }
 }

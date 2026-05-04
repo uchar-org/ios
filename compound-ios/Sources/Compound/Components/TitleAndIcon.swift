@@ -15,93 +15,88 @@ import SwiftUI
 /// changed and is generally easier to use global padding within the screen
 /// than it is to add/subtract additional padding to some arbitrary defaults.
 public struct TitleAndIcon: View {
-  private let title: String
-  private let subtitle: String?
-  private let icon: KeyPath<CompoundIcons, Image>
-  private let iconStyle: BigIcon.Style
-  private let button: ButtonDetails?
+    private let title: String
+    private let subtitle: String?
+    private let icon: KeyPath<CompoundIcons, Image>
+    private let iconStyle: BigIcon.Style
+    private let button: ButtonDetails?
 
-  public init(
-    title: String,
-    subtitle: String? = nil,
-    icon: KeyPath<CompoundIcons, Image>,
-    iconStyle: BigIcon.Style,
-    button: ButtonDetails? = nil
-  ) {
-    self.title = title
-    self.subtitle = subtitle
-    self.icon = icon
-    self.iconStyle = iconStyle
-    self.button = button
-  }
-
-  public var body: some View {
-    VStack(spacing: 16) {
-      BigIcon(icon: icon, style: iconStyle)
-
-      VStack(spacing: 8) {
-        Text(title)
-          .foregroundColor(.compound.textPrimary)
-          .font(.compound.headingMDBold)
-          .multilineTextAlignment(.center)
-
-        if let subtitle {
-          Text(subtitle)
-            .foregroundColor(.compound.textSecondary)
-            .font(.compound.bodyMD)
-            .multilineTextAlignment(.center)
-        }
-      }
-
-      if let button {
-        Button(button.title, action: button.action)
-          .buttonStyle(.compound(.tertiary, size: .small))
-      }
+    public init(title: String,
+                subtitle: String? = nil,
+                icon: KeyPath<CompoundIcons, Image>,
+                iconStyle: BigIcon.Style,
+                button: ButtonDetails? = nil) {
+        self.title = title
+        self.subtitle = subtitle
+        self.icon = icon
+        self.iconStyle = iconStyle
+        self.button = button
     }
-  }
+
+    public var body: some View {
+        VStack(spacing: 16) {
+            BigIcon(icon: icon, style: iconStyle)
+
+            VStack(spacing: 8) {
+                Text(title)
+                    .foregroundColor(.compound.textPrimary)
+                    .font(.compound.headingMDBold)
+                    .multilineTextAlignment(.center)
+
+                if let subtitle {
+                    Text(subtitle)
+                        .foregroundColor(.compound.textSecondary)
+                        .font(.compound.bodyMD)
+                        .multilineTextAlignment(.center)
+                }
+            }
+
+            if let button {
+                Button(button.title, action: button.action)
+                    .buttonStyle(.compound(.tertiary, size: .small))
+            }
+        }
+    }
 }
 
-extension TitleAndIcon {
-  /// Everything required to construct the `TitleAndIcon` view's optional button.
-  public struct ButtonDetails {
-    public let title: String
-    public let action: () -> Void
+public extension TitleAndIcon {
+    /// Everything required to construct the `TitleAndIcon` view's optional button.
+    struct ButtonDetails {
+        public let title: String
+        public let action: () -> Void
 
-    public init(title: String, action: @escaping () -> Void) {
-      self.title = title
-      self.action = action
+        public init(title: String, action: @escaping () -> Void) {
+            self.title = title
+            self.action = action
+        }
     }
-  }
 }
 
 // MARK: - Previews
 
 public struct TitleAndIcon_Previews: PreviewProvider, TestablePreview {
-  public static var previews: some View {
-    states
-  }
-
-  public static var states: some View {
-    VStack(spacing: 84) {
-      TitleAndIcon(
-        title: "Headline",
-        icon: \.circle,
-        iconStyle: .defaultSolid)
-
-      TitleAndIcon(
-        title: "Headline",
-        subtitle: "Description goes here",
-        icon: \.circle,
-        iconStyle: .defaultSolid)
-
-      TitleAndIcon(
-        title: "Headline",
-        subtitle: "Description goes here",
-        icon: \.circle,
-        iconStyle: .defaultSolid,
-        button: .init(title: "Learn more") {})
+    public static var previews: some View {
+        states
     }
-    .padding(24)
-    .padding(.bottom, 16)
-  }
+
+    public static var states: some View {
+        VStack(spacing: 84) {
+            TitleAndIcon(title: "Headline",
+                         icon: \.circle,
+                         iconStyle: .defaultSolid)
+
+            TitleAndIcon(title: "Headline",
+                         subtitle: "Description goes here",
+                         icon: \.circle,
+                         iconStyle: .defaultSolid)
+
+            TitleAndIcon(title: "Headline",
+                         subtitle: "Description goes here",
+                         icon: \.circle,
+                         iconStyle: .defaultSolid,
+                         button: .init(title: "Learn more") { })
+        }
+        .padding(24)
+        .padding(.bottom, 16)
+    }
 }

@@ -11,77 +11,63 @@ import Foundation
 import SwiftState
 
 protocol StateMachineFactoryProtocol {
-  func makeUserSessionFlowStateMachine(state: UserSessionFlowCoordinator.State) -> StateMachine<
-    UserSessionFlowCoordinator.State, UserSessionFlowCoordinator.Event
-  >
-  func makeChatsTabFlowStateMachine() -> ChatsTabFlowCoordinatorStateMachine
-  func makeMembersFlowStateMachine(state: RoomMembersFlowCoordinator.State) -> StateMachine<
-    RoomMembersFlowCoordinator.State, RoomMembersFlowCoordinator.Event
-  >
+    func makeUserSessionFlowStateMachine(state: UserSessionFlowCoordinator.State) -> StateMachine<UserSessionFlowCoordinator.State, UserSessionFlowCoordinator.Event>
+    func makeChatsTabFlowStateMachine() -> ChatsTabFlowCoordinatorStateMachine
+    func makeMembersFlowStateMachine(state: RoomMembersFlowCoordinator.State) -> StateMachine<RoomMembersFlowCoordinator.State, RoomMembersFlowCoordinator.Event>
 }
 
 struct StateMachineFactory: StateMachineFactoryProtocol {
-  func makeUserSessionFlowStateMachine(state: UserSessionFlowCoordinator.State) -> StateMachine<
-    UserSessionFlowCoordinator.State, UserSessionFlowCoordinator.Event
-  > {
-    .init(state: state)
-  }
+    func makeUserSessionFlowStateMachine(state: UserSessionFlowCoordinator.State) -> StateMachine<UserSessionFlowCoordinator.State, UserSessionFlowCoordinator.Event> {
+        .init(state: state)
+    }
 
-  func makeChatsTabFlowStateMachine() -> ChatsTabFlowCoordinatorStateMachine {
-    .init()
-  }
+    func makeChatsTabFlowStateMachine() -> ChatsTabFlowCoordinatorStateMachine {
+        .init()
+    }
 
-  func makeMembersFlowStateMachine(state: RoomMembersFlowCoordinator.State) -> StateMachine<
-    RoomMembersFlowCoordinator.State, RoomMembersFlowCoordinator.Event
-  > {
-    .init(state: state)
-  }
+    func makeMembersFlowStateMachine(state: RoomMembersFlowCoordinator.State) -> StateMachine<RoomMembersFlowCoordinator.State, RoomMembersFlowCoordinator.Event> {
+        .init(state: state)
+    }
 }
 
 // MARK: For testing
 
 class PublishedStateMachineFactory: StateMachineFactoryProtocol {
-  let baseFactory = StateMachineFactory()
+    let baseFactory = StateMachineFactory()
 
-  // MARK: UserSessionFlowCoordinator
+    // MARK: UserSessionFlowCoordinator
 
-  let userSessionFlowStatePublisher = PassthroughSubject<UserSessionFlowCoordinator.State, Never>()
+    let userSessionFlowStatePublisher = PassthroughSubject<UserSessionFlowCoordinator.State, Never>()
 
-  func makeUserSessionFlowStateMachine(state: UserSessionFlowCoordinator.State) -> StateMachine<
-    UserSessionFlowCoordinator.State, UserSessionFlowCoordinator.Event
-  > {
-    let stateMachine = baseFactory.makeUserSessionFlowStateMachine(state: state)
-    stateMachine.addAnyHandler(.any => .any) { [weak self] in
-      self?.userSessionFlowStatePublisher.send($0.toState)
+    func makeUserSessionFlowStateMachine(state: UserSessionFlowCoordinator.State) -> StateMachine<UserSessionFlowCoordinator.State, UserSessionFlowCoordinator.Event> {
+        let stateMachine = baseFactory.makeUserSessionFlowStateMachine(state: state)
+        stateMachine.addAnyHandler(.any => .any) { [weak self] in
+            self?.userSessionFlowStatePublisher.send($0.toState)
+        }
+        return stateMachine
     }
-    return stateMachine
-  }
 
-  // MARK: ChatsTabFlowCoordinator
+    // MARK: ChatsTabFlowCoordinator
 
-  let chatsTabFlowStatePublisher = PassthroughSubject<
-    ChatsTabFlowCoordinatorStateMachine.State, Never
-  >()
+    let chatsTabFlowStatePublisher = PassthroughSubject<ChatsTabFlowCoordinatorStateMachine.State, Never>()
 
-  func makeChatsTabFlowStateMachine() -> ChatsTabFlowCoordinatorStateMachine {
-    let stateMachine = baseFactory.makeChatsTabFlowStateMachine()
-    stateMachine.addTransitionHandler { [weak self] in
-      self?.chatsTabFlowStatePublisher.send($0.toState)
+    func makeChatsTabFlowStateMachine() -> ChatsTabFlowCoordinatorStateMachine {
+        let stateMachine = baseFactory.makeChatsTabFlowStateMachine()
+        stateMachine.addTransitionHandler { [weak self] in
+            self?.chatsTabFlowStatePublisher.send($0.toState)
+        }
+        return stateMachine
     }
-    return stateMachine
-  }
 
-  // MARK: MembersFlowCoordinator
+    // MARK: MembersFlowCoordinator
 
-  let membersFlowStatePublisher = PassthroughSubject<RoomMembersFlowCoordinator.State, Never>()
+    let membersFlowStatePublisher = PassthroughSubject<RoomMembersFlowCoordinator.State, Never>()
 
-  func makeMembersFlowStateMachine(state: RoomMembersFlowCoordinator.State) -> StateMachine<
-    RoomMembersFlowCoordinator.State, RoomMembersFlowCoordinator.Event
-  > {
-    let stateMachine = baseFactory.makeMembersFlowStateMachine(state: state)
-    stateMachine.addAnyHandler(.any => .any) { [weak self] in
-      self?.membersFlowStatePublisher.send($0.toState)
+    func makeMembersFlowStateMachine(state: RoomMembersFlowCoordinator.State) -> StateMachine<RoomMembersFlowCoordinator.State, RoomMembersFlowCoordinator.Event> {
+        let stateMachine = baseFactory.makeMembersFlowStateMachine(state: state)
+        stateMachine.addAnyHandler(.any => .any) { [weak self] in
+            self?.membersFlowStatePublisher.send($0.toState)
+        }
+        return stateMachine
     }
-    return stateMachine
-  }
 }

@@ -9,12 +9,10 @@
 import Foundation
 
 enum UserDiscoveryErrorType: Error {
-  case failedSearchingUsers
+    case failedSearchingUsers
 }
 
 // sourcery: AutoMockable
 protocol UserDiscoveryServiceProtocol {
-  func searchProfiles(with searchQuery: String) async -> Result<
-    [UserProfileProxy], UserDiscoveryErrorType
-  >
+    func searchProfiles(with searchQuery: String) async -> Result<[UserProfileProxy], UserDiscoveryErrorType>
 }

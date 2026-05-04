@@ -9,36 +9,36 @@ import Combine
 import Foundation
 
 enum ManageAuthorizedSpacesScreenViewModelAction {
-  case dismiss
+    case dismiss
 }
 
 struct ManageAuthorizedSpacesScreenViewState: BindableState {
-  let authorizedSpacesSelection: AuthorizedSpacesSelection
-  var selectedIDs: Set<String>
+    let authorizedSpacesSelection: AuthorizedSpacesSelection
+    var selectedIDs: Set<String>
 
-  var hasChanges: Bool {
-    authorizedSpacesSelection.initialSelectedIDs != selectedIDs
-  }
+    var hasChanges: Bool {
+        authorizedSpacesSelection.initialSelectedIDs != selectedIDs
+    }
 
-  var isDoneButtonDisabled: Bool {
-    selectedIDs.isEmpty || !hasChanges
-  }
+    var isDoneButtonDisabled: Bool {
+        selectedIDs.isEmpty || !hasChanges
+    }
 
-  init(authorizedSpacesSelection: AuthorizedSpacesSelection) {
-    self.authorizedSpacesSelection = authorizedSpacesSelection
-    selectedIDs = authorizedSpacesSelection.initialSelectedIDs
-  }
+    init(authorizedSpacesSelection: AuthorizedSpacesSelection) {
+        self.authorizedSpacesSelection = authorizedSpacesSelection
+        selectedIDs = authorizedSpacesSelection.initialSelectedIDs
+    }
 }
 
 enum ManageAuthorizedSpacesScreenViewAction {
-  case cancel
-  case done
-  case toggle(spaceID: String)
+    case cancel
+    case done
+    case toggle(spaceID: String)
 }
 
 struct AuthorizedSpacesSelection {
-  let joinedSpaces: [SpaceServiceRoom]
-  let unknownSpacesIDs: [String]
-  let initialSelectedIDs: Set<String>
-  let selectedIDs: PassthroughSubject<Set<String>, Never> = .init()
+    let joinedSpaces: [SpaceServiceRoom]
+    let unknownSpacesIDs: [String]
+    let initialSelectedIDs: Set<String>
+    let selectedIDs: PassthroughSubject<Set<String>, Never> = .init()
 }

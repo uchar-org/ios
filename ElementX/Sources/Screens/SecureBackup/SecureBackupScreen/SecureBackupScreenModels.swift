@@ -9,27 +9,27 @@
 import Foundation
 
 enum SecureBackupScreenViewModelAction {
-  case manageRecoveryKey
-  case disableKeyBackup
+    case manageRecoveryKey
+    case disableKeyBackup
 }
 
 struct SecureBackupScreenViewState: BindableState {
-  let chatBackupDetailsURL: URL
-  var recoveryState = SecureBackupRecoveryState.unknown
-  var keyBackupState = SecureBackupKeyBackupState.unknown
-  var bindings: SecureBackupScreenViewStateBindings
+    let chatBackupDetailsURL: URL
+    var recoveryState = SecureBackupRecoveryState.unknown
+    var keyBackupState = SecureBackupKeyBackupState.unknown
+    var bindings: SecureBackupScreenViewStateBindings
 
-  var keyStorageToggleDescription: String? {
-    keyBackupState.keyStorageToggleState ? nil : L10n.screenChatBackupKeyStorageDisabledError
-  }
+    var keyStorageToggleDescription: String? {
+        keyBackupState.keyStorageToggleState ? nil : L10n.screenChatBackupKeyStorageDisabledError
+    }
 }
 
 struct SecureBackupScreenViewStateBindings {
-  var keyStorageEnabled: Bool
-  var alertInfo: AlertInfo<UUID>?
+    var keyStorageEnabled: Bool
+    var alertInfo: AlertInfo<UUID>?
 }
 
 enum SecureBackupScreenViewAction {
-  case recoveryKey
-  case keyStorageToggled(Bool)
+    case recoveryKey
+    case keyStorageToggled(Bool)
 }

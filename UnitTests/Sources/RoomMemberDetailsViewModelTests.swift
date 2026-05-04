@@ -6,228 +6,215 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Testing
-
 @testable import ElementX
+import Testing
 
 @MainActor
 struct RoomMemberDetailsViewModelTests {
-  var clientProxy: ClientProxy!
-  var viewModel: RoomMemberDetailsScreenViewModelProtocol!
-  var roomProxyMock: JoinedRoomProxyMock!
-  var roomMemberProxyMock: RoomMemberProxyMock!
-  var context: RoomMemberDetailsScreenViewModelType.Context {
-    viewModel.context
-  }
-
-  @Test
-  mutating func initialState() async throws {
-    setup(roomMemberProxyMock: .mockAlice)
-
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
-
-    #expect(context.viewState.memberDetails == RoomMemberDetails(withProxy: roomMemberProxyMock))
-    #expect(context.ignoreUserAlert == nil)
-    #expect(context.alertInfo == nil)
-  }
-
-  @Test
-  mutating func ignoreSuccess() async throws {
-    setup(roomMemberProxyMock: .mockAlice)
-
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
-
-    context.send(viewAction: .showIgnoreAlert)
-    #expect(context.ignoreUserAlert == .init(action: .ignore))
-    context.send(viewAction: .ignoreConfirmed)
-    let deferred = deferFulfillment(context.$viewState) { state in
-      state.memberDetails?.isIgnored == true
+    var clientProxy: ClientProxy!
+    var viewModel: RoomMemberDetailsScreenViewModelProtocol!
+    var roomProxyMock: JoinedRoomProxyMock!
+    var roomMemberProxyMock: RoomMemberProxyMock!
+    var context: RoomMemberDetailsScreenViewModelType.Context {
+        viewModel.context
     }
-    try await deferred.fulfill()
 
-    let memberDetails = try #require(
-      context.viewState.memberDetails,
-      "Member details should be loaded at this point")
-    #expect(memberDetails.isIgnored)
-    #expect(!context.viewState.isProcessingIgnoreRequest)
-    try await Task.sleep(for: .milliseconds(100))
-    #expect(roomProxyMock.updateMembersCalled)
-  }
+    @Test
+    mutating func initialState() async throws {
+        setup(roomMemberProxyMock: .mockAlice)
 
-  @Test
-  mutating func ignoreFailure() async throws {
-    let clientProxy = ClientProxyMock(.init())
-    clientProxy.ignoreUserReturnValue = .failure(.sdkError(ClientProxyMockError.generic))
-    setup(roomMemberProxyMock: .mockAlice, clientProxy: clientProxy)
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
 
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
-
-    context.send(viewAction: .showIgnoreAlert)
-    #expect(context.ignoreUserAlert == .init(action: .ignore))
-    context.send(viewAction: .ignoreConfirmed)
-    let deferred = deferFulfillment(context.$viewState) { state in
-      state.bindings.alertInfo != nil
+        #expect(context.viewState.memberDetails == RoomMemberDetails(withProxy: roomMemberProxyMock))
+        #expect(context.ignoreUserAlert == nil)
+        #expect(context.alertInfo == nil)
     }
-    try await deferred.fulfill()
 
-    let memberDetails = try #require(
-      context.viewState.memberDetails,
-      "Member details should be loaded at this point")
-    #expect(!memberDetails.isIgnored)
-    #expect(context.alertInfo != nil)
+    @Test
+    mutating func ignoreSuccess() async throws {
+        setup(roomMemberProxyMock: .mockAlice)
 
-    try await Task.sleep(for: .milliseconds(100))
-    #expect(!roomProxyMock.updateMembersCalled)
-  }
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
 
-  @Test
-  mutating func unignoreSuccess() async throws {
-    setup(roomMemberProxyMock: .mockIgnored)
+        context.send(viewAction: .showIgnoreAlert)
+        #expect(context.ignoreUserAlert == .init(action: .ignore))
+        context.send(viewAction: .ignoreConfirmed)
+        let deferred = deferFulfillment(context.$viewState) { state in
+            state.memberDetails?.isIgnored == true
+        }
+        try await deferred.fulfill()
 
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
-
-    context.send(viewAction: .showUnignoreAlert)
-    #expect(context.ignoreUserAlert == .init(action: .unignore))
-    context.send(viewAction: .unignoreConfirmed)
-    let deferred = deferFulfillment(context.$viewState) { state in
-      state.memberDetails?.isIgnored == false
+        let memberDetails = try #require(context.viewState.memberDetails,
+                                         "Member details should be loaded at this point")
+        #expect(memberDetails.isIgnored)
+        #expect(!context.viewState.isProcessingIgnoreRequest)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(roomProxyMock.updateMembersCalled)
     }
-    try await deferred.fulfill()
 
-    let memberDetails = try #require(
-      context.viewState.memberDetails,
-      "Member details should be loaded at this point")
-    #expect(!memberDetails.isIgnored)
+    @Test
+    mutating func ignoreFailure() async throws {
+        let clientProxy = ClientProxyMock(.init())
+        clientProxy.ignoreUserReturnValue = .failure(.sdkError(ClientProxyMockError.generic))
+        setup(roomMemberProxyMock: .mockAlice, clientProxy: clientProxy)
 
-    try await Task.sleep(for: .milliseconds(100))
-    #expect(roomProxyMock.updateMembersCalled)
-  }
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
 
-  @Test
-  mutating func unignoreFailure() async throws {
-    let clientProxy = ClientProxyMock(.init())
-    clientProxy.unignoreUserReturnValue = .failure(.sdkError(ClientProxyMockError.generic))
-    setup(roomMemberProxyMock: .mockIgnored, clientProxy: clientProxy)
+        context.send(viewAction: .showIgnoreAlert)
+        #expect(context.ignoreUserAlert == .init(action: .ignore))
+        context.send(viewAction: .ignoreConfirmed)
+        let deferred = deferFulfillment(context.$viewState) { state in
+            state.bindings.alertInfo != nil
+        }
+        try await deferred.fulfill()
 
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
+        let memberDetails = try #require(context.viewState.memberDetails,
+                                         "Member details should be loaded at this point")
+        #expect(!memberDetails.isIgnored)
+        #expect(context.alertInfo != nil)
 
-    context.send(viewAction: .showUnignoreAlert)
-    #expect(context.ignoreUserAlert == .init(action: .unignore))
-    context.send(viewAction: .unignoreConfirmed)
-    let deferred = deferFulfillment(context.$viewState) { state in
-      state.bindings.alertInfo != nil
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!roomProxyMock.updateMembersCalled)
     }
-    try await deferred.fulfill()
 
-    let memberDetails = try #require(
-      context.viewState.memberDetails,
-      "Member details should be loaded at this point")
-    #expect(memberDetails.isIgnored)
-    #expect(context.alertInfo != nil)
+    @Test
+    mutating func unignoreSuccess() async throws {
+        setup(roomMemberProxyMock: .mockIgnored)
 
-    try await Task.sleep(for: .milliseconds(100))
-    #expect(!roomProxyMock.updateMembersCalled)
-  }
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
 
-  @Test
-  mutating func initialStateAccountOwner() async throws {
-    setup(roomMemberProxyMock: .mockMe)
+        context.send(viewAction: .showUnignoreAlert)
+        #expect(context.ignoreUserAlert == .init(action: .unignore))
+        context.send(viewAction: .unignoreConfirmed)
+        let deferred = deferFulfillment(context.$viewState) { state in
+            state.memberDetails?.isIgnored == false
+        }
+        try await deferred.fulfill()
 
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
+        let memberDetails = try #require(context.viewState.memberDetails,
+                                         "Member details should be loaded at this point")
+        #expect(!memberDetails.isIgnored)
 
-    #expect(context.viewState.memberDetails == RoomMemberDetails(withProxy: roomMemberProxyMock))
-    #expect(context.ignoreUserAlert == nil)
-    #expect(context.alertInfo == nil)
-  }
-
-  @Test
-  mutating func initialStateIgnoredUser() async throws {
-    setup(roomMemberProxyMock: .mockIgnored)
-
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
-
-    #expect(context.viewState.memberDetails == RoomMemberDetails(withProxy: roomMemberProxyMock))
-    #expect(context.ignoreUserAlert == nil)
-    #expect(context.alertInfo == nil)
-  }
-
-  // MARK: - History Sharing
-
-  @Test
-  mutating func inviteConfirmationFetchesIdentity() async throws {
-    let clientProxy = ClientProxyMock(.init())
-    setup(roomMemberProxyMock: .mockBob, clientProxy: clientProxy)
-
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
-
-    clientProxy.directRoomForUserIDReturnValue = .success(nil)
-    clientProxy.userIdentityForFallBackToServerReturnValue = .success(
-      UserIdentityProxyMock(configuration: .init(verificationState: .notVerified)))
-
-    // The user identity becomes known, i.e. not unknown.
-    let deferred = deferFulfillment(
-      viewModel.context.$viewState.compactMap(\.bindings.inviteConfirmationUser)
-    ) {
-      !$0.isUnknown
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(roomProxyMock.updateMembersCalled)
     }
-    context.send(viewAction: .openDirectChat)
-    try await deferred.fulfill()
 
-    #expect(clientProxy.userIdentityForFallBackToServerCalled)
-  }
+    @Test
+    mutating func unignoreFailure() async throws {
+        let clientProxy = ClientProxyMock(.init())
+        clientProxy.unignoreUserReturnValue = .failure(.sdkError(ClientProxyMockError.generic))
+        setup(roomMemberProxyMock: .mockIgnored, clientProxy: clientProxy)
 
-  @Test
-  mutating func inviteConfirmationFallsBackToUnknownIdentityOnFailure() async throws {
-    let clientProxy = ClientProxyMock(.init())
-    setup(roomMemberProxyMock: .mockBob, clientProxy: clientProxy)
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
 
-    let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
-    try await waitForMemberToLoad.fulfill()
+        context.send(viewAction: .showUnignoreAlert)
+        #expect(context.ignoreUserAlert == .init(action: .unignore))
+        context.send(viewAction: .unignoreConfirmed)
+        let deferred = deferFulfillment(context.$viewState) { state in
+            state.bindings.alertInfo != nil
+        }
+        try await deferred.fulfill()
 
-    clientProxy.directRoomForUserIDReturnValue = .success(nil)
-    clientProxy.userIdentityForFallBackToServerReturnValue = .failure(.forbiddenAccess)
+        let memberDetails = try #require(context.viewState.memberDetails,
+                                         "Member details should be loaded at this point")
+        #expect(memberDetails.isIgnored)
+        #expect(context.alertInfo != nil)
 
-    // The user identity is always unknown, i.e. never not unknown.
-    let deferred = deferFailure(
-      viewModel.context.$viewState.compactMap(\.bindings.inviteConfirmationUser),
-      timeout: .seconds(5)
-    ) {
-      !$0.isUnknown
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(!roomProxyMock.updateMembersCalled)
     }
-    context.send(viewAction: .openDirectChat)
-    try await deferred.fulfill()
 
-    #expect(clientProxy.userIdentityForFallBackToServerCalled)
-  }
+    @Test
+    mutating func initialStateAccountOwner() async throws {
+        setup(roomMemberProxyMock: .mockMe)
 
-  // MARK: - Helpers
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
 
-  private mutating func setup(
-    roomMemberProxyMock: RoomMemberProxyMock, clientProxy: ClientProxyMock? = nil
-  ) {
-    self.roomMemberProxyMock = roomMemberProxyMock
-    roomProxyMock = JoinedRoomProxyMock(.init(name: ""))
-    roomProxyMock.getMemberUserIDClosure = { _ in
-      .success(roomMemberProxyMock)
+        #expect(context.viewState.memberDetails == RoomMemberDetails(withProxy: roomMemberProxyMock))
+        #expect(context.ignoreUserAlert == nil)
+        #expect(context.alertInfo == nil)
     }
-    // swiftlint:disable:next force_unwrapping
-    let userSession =
-      clientProxy != nil
-      ? UserSessionMock(.init(clientProxy: clientProxy!)) : UserSessionMock(.init())
-    viewModel = RoomMemberDetailsScreenViewModel(
-      userID: roomMemberProxyMock.userID,
-      roomProxy: roomProxyMock,
-      userSession: userSession,
-      userIndicatorController: ServiceLocator.shared.userIndicatorController,
-      analytics: ServiceLocator.shared.analytics,
-      appSettings: ServiceLocator.shared.settings)
-  }
+
+    @Test
+    mutating func initialStateIgnoredUser() async throws {
+        setup(roomMemberProxyMock: .mockIgnored)
+
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
+
+        #expect(context.viewState.memberDetails == RoomMemberDetails(withProxy: roomMemberProxyMock))
+        #expect(context.ignoreUserAlert == nil)
+        #expect(context.alertInfo == nil)
+    }
+
+    // MARK: - History Sharing
+
+    @Test
+    mutating func inviteConfirmationFetchesIdentity() async throws {
+        let clientProxy = ClientProxyMock(.init())
+        setup(roomMemberProxyMock: .mockBob, clientProxy: clientProxy)
+
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
+
+        clientProxy.directRoomForUserIDReturnValue = .success(nil)
+        clientProxy.userIdentityForFallBackToServerReturnValue = .success(UserIdentityProxyMock(configuration: .init(verificationState: .notVerified)))
+
+        // The user identity becomes known, i.e. not unknown.
+        let deferred = deferFulfillment(viewModel.context.$viewState.compactMap(\.bindings.inviteConfirmationUser)) {
+            !$0.isUnknown
+        }
+        context.send(viewAction: .openDirectChat)
+        try await deferred.fulfill()
+
+        #expect(clientProxy.userIdentityForFallBackToServerCalled)
+    }
+
+    @Test
+    mutating func inviteConfirmationFallsBackToUnknownIdentityOnFailure() async throws {
+        let clientProxy = ClientProxyMock(.init())
+        setup(roomMemberProxyMock: .mockBob, clientProxy: clientProxy)
+
+        let waitForMemberToLoad = deferFulfillment(context.$viewState) { $0.memberDetails != nil }
+        try await waitForMemberToLoad.fulfill()
+
+        clientProxy.directRoomForUserIDReturnValue = .success(nil)
+        clientProxy.userIdentityForFallBackToServerReturnValue = .failure(.forbiddenAccess)
+
+        // The user identity is always unknown, i.e. never not unknown.
+        let deferred = deferFailure(viewModel.context.$viewState.compactMap(\.bindings.inviteConfirmationUser),
+                                    timeout: .seconds(5)) {
+            !$0.isUnknown
+        }
+        context.send(viewAction: .openDirectChat)
+        try await deferred.fulfill()
+
+        #expect(clientProxy.userIdentityForFallBackToServerCalled)
+    }
+
+    // MARK: - Helpers
+
+    private mutating func setup(roomMemberProxyMock: RoomMemberProxyMock, clientProxy: ClientProxyMock? = nil) {
+        self.roomMemberProxyMock = roomMemberProxyMock
+        roomProxyMock = JoinedRoomProxyMock(.init(name: ""))
+        roomProxyMock.getMemberUserIDClosure = { _ in
+            .success(roomMemberProxyMock)
+        }
+        // swiftlint:disable:next force_unwrapping
+        let userSession =
+            clientProxy != nil
+                ? UserSessionMock(.init(clientProxy: clientProxy!)) : UserSessionMock(.init())
+        viewModel = RoomMemberDetailsScreenViewModel(userID: roomMemberProxyMock.userID,
+                                                     roomProxy: roomProxyMock,
+                                                     userSession: userSession,
+                                                     userIndicatorController: ServiceLocator.shared.userIndicatorController,
+                                                     analytics: ServiceLocator.shared.analytics,
+                                                     appSettings: ServiceLocator.shared.settings)
+    }
 }

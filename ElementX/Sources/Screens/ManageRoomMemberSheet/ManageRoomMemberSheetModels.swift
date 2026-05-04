@@ -7,85 +7,85 @@
 //
 
 enum ManageRoomMemberSheetViewModelAction: Equatable {
-  case dismiss(shouldShowDetails: Bool)
+    case dismiss(shouldShowDetails: Bool)
 }
 
 struct ManageRoomMemberSheetViewState: BindableState {
-  let memberDetails: ManageRoomMemberDetails
-  let permissions: ManageRoomMemberPermissions
+    let memberDetails: ManageRoomMemberDetails
+    let permissions: ManageRoomMemberPermissions
 
-  var isBanUnbanDisabled: Bool {
-    // This is a best effort check, if we haven't fetched the member yet we assume we can peform the action
-    guard case .memberDetails(let member) = memberDetails else {
-      return false
+    var isBanUnbanDisabled: Bool {
+        // This is a best effort check, if we haven't fetched the member yet we assume we can peform the action
+        guard case .memberDetails(let member) = memberDetails else {
+            return false
+        }
+
+        return permissions.ownPowerLevel <= member.powerLevel
     }
 
-    return permissions.ownPowerLevel <= member.powerLevel
-  }
+    var isKickDisabled: Bool {
+        // This is a best effort check, if we haven't fetched the member yet we assume we can peform the action
+        guard case .memberDetails(let member) = memberDetails else {
+            return false
+        }
 
-  var isKickDisabled: Bool {
-    // This is a best effort check, if we haven't fetched the member yet we assume we can peform the action
-    guard case .memberDetails(let member) = memberDetails else {
-      return false
+        return !member.isActive || permissions.ownPowerLevel <= member.powerLevel
     }
 
-    return !member.isActive || permissions.ownPowerLevel <= member.powerLevel
-  }
+    var isMemberBanned: Bool {
+        // This is a best effort check, if we haven't fetched the member yet we assume the member is not banned
+        guard case .memberDetails(let member) = memberDetails else {
+            return false
+        }
 
-  var isMemberBanned: Bool {
-    // This is a best effort check, if we haven't fetched the member yet we assume the member is not banned
-    guard case .memberDetails(let member) = memberDetails else {
-      return false
+        return member.isBanned
     }
 
-    return member.isBanned
-  }
-
-  var bindings = ManageRoomMemberSheetViewStateBindings()
+    var bindings = ManageRoomMemberSheetViewStateBindings()
 }
 
 struct ManageRoomMemberSheetViewStateBindings {
-  var alertInfo: AlertInfo<ManageRoomMemberSheetViewAlertType>?
+    var alertInfo: AlertInfo<ManageRoomMemberSheetViewAlertType>?
 }
 
 enum ManageRoomMemberSheetViewAlertType {
-  case kick
-  case ban
-  case unban
+    case kick
+    case ban
+    case unban
 }
 
 enum ManageRoomMemberSheetViewAction {
-  case kick
-  case ban
-  case unban
-  case displayDetails
+    case kick
+    case ban
+    case unban
+    case displayDetails
 }
 
 enum ManageRoomMemberDetails {
-  case memberDetails(roomMember: RoomMemberDetails)
-  case loadingMemberDetails(sender: TimelineItemSender)
+    case memberDetails(roomMember: RoomMemberDetails)
+    case loadingMemberDetails(sender: TimelineItemSender)
 
-  var id: String {
-    switch self {
-    case .memberDetails(let roomMember):
-      roomMember.id
-    case .loadingMemberDetails(let sender):
-      sender.id
+    var id: String {
+        switch self {
+        case .memberDetails(let roomMember):
+            roomMember.id
+        case .loadingMemberDetails(let sender):
+            sender.id
+        }
     }
-  }
 
-  var name: String? {
-    switch self {
-    case .memberDetails(let roomMember):
-      roomMember.name
-    case .loadingMemberDetails(let sender):
-      sender.displayName
+    var name: String? {
+        switch self {
+        case .memberDetails(let roomMember):
+            roomMember.name
+        case .loadingMemberDetails(let sender):
+            sender.displayName
+        }
     }
-  }
 }
 
 struct ManageRoomMemberPermissions {
-  let canKick: Bool
-  let canBan: Bool
-  let ownPowerLevel: RoomPowerLevel
+    let canKick: Bool
+    let canBan: Bool
+    let ownPowerLevel: RoomPowerLevel
 }

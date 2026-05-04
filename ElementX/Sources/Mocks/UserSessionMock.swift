@@ -10,21 +10,19 @@ import Combine
 import Foundation
 
 struct UserSessionMockConfiguration {
-  var clientProxy: ClientProxyProtocol = ClientProxyMock(.init())
+    var clientProxy: ClientProxyProtocol = ClientProxyMock(.init())
 }
 
 extension UserSessionMock {
-  convenience init(_ configuration: UserSessionMockConfiguration) {
-    self.init()
+    convenience init(_ configuration: UserSessionMockConfiguration) {
+        self.init()
 
-    clientProxy = configuration.clientProxy
-    mediaProvider = MediaProviderMock(configuration: .init())
-    voiceMessageMediaManager = VoiceMessageMediaManagerMock()
+        clientProxy = configuration.clientProxy
+        mediaProvider = MediaProviderMock(configuration: .init())
+        voiceMessageMediaManager = VoiceMessageMediaManagerMock()
 
-    sessionSecurityStatePublisher = CurrentValueSubject<SessionSecurityState, Never>(
-      .init(verificationState: .verified, recoveryState: .enabled)
-    ).asCurrentValuePublisher()
+        sessionSecurityStatePublisher = CurrentValueSubject<SessionSecurityState, Never>(.init(verificationState: .verified, recoveryState: .enabled)).asCurrentValuePublisher()
 
-    liveLocationManager = LiveLocationManagerMock(.init())
-  }
+        liveLocationManager = LiveLocationManagerMock(.init())
+    }
 }

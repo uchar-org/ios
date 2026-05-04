@@ -10,10 +10,10 @@ import Combine
 
 @MainActor
 protocol PinnedEventsTimelineScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<PinnedEventsTimelineScreenViewModelAction, Never> { get }
-  var context: PinnedEventsTimelineScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<PinnedEventsTimelineScreenViewModelAction, Never> { get }
+    var context: PinnedEventsTimelineScreenViewModelType.Context { get }
 
-  func stop()
+    func stop()
 
-  func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
+    func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
 }

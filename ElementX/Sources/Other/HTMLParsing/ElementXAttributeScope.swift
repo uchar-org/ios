@@ -9,102 +9,100 @@
 import Foundation
 
 enum BlockquoteAttribute: AttributedStringKey {
-  typealias Value = Bool
-  static let name = "MXBlockquoteAttribute"
+    typealias Value = Bool
+    static let name = "MXBlockquoteAttribute"
 }
 
 enum UserIDAttribute: AttributedStringKey {
-  typealias Value = String
-  static let name = "MXUserIDAttribute"
+    typealias Value = String
+    static let name = "MXUserIDAttribute"
 }
 
 /// This attribute is used to help the composer convert a mention into to a markdown link before sending
 /// the message. It doesn't interact mention pills, as these fetch display names live from the room.
 enum UserDisplayNameAttribute: AttributedStringKey {
-  typealias Value = String
-  static let name = "MXUserDisplayNameAttribute"
+    typealias Value = String
+    static let name = "MXUserDisplayNameAttribute"
 }
 
 enum RoomDisplayNameAttribute: AttributedStringKey {
-  typealias Value = String
-  static let name = "MXRoomDisplayNameAttribute"
+    typealias Value = String
+    static let name = "MXRoomDisplayNameAttribute"
 }
 
 enum RoomIDAttribute: AttributedStringKey {
-  typealias Value = String
-  static let name = "MXRoomIDAttribute"
+    typealias Value = String
+    static let name = "MXRoomIDAttribute"
 }
 
 enum RoomAliasAttribute: AttributedStringKey {
-  typealias Value = String
-  static let name = "MXRoomAliasAttribute"
+    typealias Value = String
+    static let name = "MXRoomAliasAttribute"
 }
 
 enum EventOnRoomIDAttribute: AttributedStringKey {
-  struct Value: Hashable {
-    let roomID: String
-    let eventID: String
-  }
+    struct Value: Hashable {
+        let roomID: String
+        let eventID: String
+    }
 
-  static let name = "MXEventOnRoomIDAttribute"
+    static let name = "MXEventOnRoomIDAttribute"
 }
 
 enum EventOnRoomAliasAttribute: AttributedStringKey {
-  struct Value: Hashable {
-    let alias: String
-    let eventID: String
-  }
+    struct Value: Hashable {
+        let alias: String
+        let eventID: String
+    }
 
-  static let name = "MXEventOnRoomAliasAttribute"
+    static let name = "MXEventOnRoomAliasAttribute"
 }
 
 enum AllUsersMentionAttribute: AttributedStringKey {
-  typealias Value = Bool
-  static let name = "MXAllUsersMentionAttribute"
+    typealias Value = Bool
+    static let name = "MXAllUsersMentionAttribute"
 }
 
 enum CodeBlockAttribute: AttributedStringKey {
-  typealias Value = Bool
-  static let name = "MXCodeBlockAttribute"
+    typealias Value = Bool
+    static let name = "MXCodeBlockAttribute"
 }
 
 enum InlineCodeAttribute: AttributedStringKey {
-  typealias Value = Bool
-  static let name = "MXInlineCodeAttribute"
+    typealias Value = Bool
+    static let name = "MXInlineCodeAttribute"
 }
 
 // periphery: ignore - required to make NSAttributedString to AttributedString conversion even if not used directly
 extension AttributeScopes {
-  struct ElementXAttributes: AttributeScope {
-    let blockquote: BlockquoteAttribute
+    struct ElementXAttributes: AttributeScope {
+        let blockquote: BlockquoteAttribute
 
-    let userID: UserIDAttribute
-    let userDisplayName: UserDisplayNameAttribute
-    let roomDisplayName: RoomDisplayNameAttribute
-    let roomID: RoomIDAttribute
-    let roomAlias: RoomAliasAttribute
-    let eventOnRoomID: EventOnRoomIDAttribute
-    let eventOnRoomAlias: EventOnRoomAliasAttribute
+        let userID: UserIDAttribute
+        let userDisplayName: UserDisplayNameAttribute
+        let roomDisplayName: RoomDisplayNameAttribute
+        let roomID: RoomIDAttribute
+        let roomAlias: RoomAliasAttribute
+        let eventOnRoomID: EventOnRoomIDAttribute
+        let eventOnRoomAlias: EventOnRoomAliasAttribute
 
-    let allUsersMention: AllUsersMentionAttribute
+        let allUsersMention: AllUsersMentionAttribute
 
-    let codeBlock: CodeBlockAttribute
-    let inlineCode: InlineCodeAttribute
+        let codeBlock: CodeBlockAttribute
+        let inlineCode: InlineCodeAttribute
 
-    let swiftUI: SwiftUIAttributes
-    let uiKit: UIKitAttributes
-  }
+        let swiftUI: SwiftUIAttributes
+        let uiKit: UIKitAttributes
+    }
 
-  var elementX: ElementXAttributes.Type {
-    ElementXAttributes.self
-  }
+    var elementX: ElementXAttributes.Type {
+        ElementXAttributes.self
+    }
 }
 
 // periphery: ignore - required to make NSAttributedString to AttributedString conversion even if not used directly
 extension AttributeDynamicLookup {
-  subscript<T: AttributedStringKey>(
-    dynamicMember keyPath: KeyPath<AttributeScopes.ElementXAttributes, T>
-  ) -> T {
-    self[T.self]
-  }
+    subscript<T: AttributedStringKey>(dynamicMember keyPath: KeyPath<AttributeScopes.ElementXAttributes, T>) -> T {
+        self[T.self]
+    }
 }

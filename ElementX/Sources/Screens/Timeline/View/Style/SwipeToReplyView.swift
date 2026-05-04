@@ -10,26 +10,25 @@ import Compound
 import SwiftUI
 
 struct SwipeToReplyView: View {
-  let timelineItem: RoomTimelineItemProtocol
+    let timelineItem: RoomTimelineItemProtocol
 
-  var body: some View {
-    CompoundIcon(\.reply)
-      .foregroundColor(.compound.iconPrimary)
-      .accessibilityHidden(true)
-  }
+    var body: some View {
+        CompoundIcon(\.reply)
+            .foregroundColor(.compound.iconPrimary)
+            .accessibilityHidden(true)
+    }
 }
 
 struct SwipeToReplyView_Previews: PreviewProvider, TestablePreview {
-  static let timelineItem = TextRoomTimelineItem(
-    id: .randomEvent,
-    timestamp: .mock,
-    isOutgoing: true,
-    isEditable: true,
-    canBeRepliedTo: true,
-    sender: .init(id: ""),
-    content: .init(body: ""))
+    static let timelineItem = TextRoomTimelineItem(id: .randomEvent,
+                                                   timestamp: .mock,
+                                                   isOutgoing: true,
+                                                   isEditable: true,
+                                                   canBeRepliedTo: true,
+                                                   sender: .init(id: ""),
+                                                   content: .init(body: ""))
 
-  static var previews: some View {
-    SwipeToReplyView(timelineItem: timelineItem)
-  }
+    static var previews: some View {
+        SwipeToReplyView(timelineItem: timelineItem)
+    }
 }

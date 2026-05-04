@@ -11,26 +11,26 @@ import PostHog
 
 // sourcery: AutoMockable
 protocol PHGPostHogProtocol {
-  func optIn()
+    func optIn()
 
-  func optOut()
+    func optOut()
 
-  func reset()
+    func reset()
 
-  func capture(_ event: String, properties: [String: Any]?, userProperties: [String: Any]?)
+    func capture(_ event: String, properties: [String: Any]?, userProperties: [String: Any]?)
 
-  func screen(_ screenTitle: String, properties: [String: Any]?)
+    func screen(_ screenTitle: String, properties: [String: Any]?)
 }
 
 protocol PostHogFactory {
-  func createPostHog(config: PostHogConfig) -> PHGPostHogProtocol
+    func createPostHog(config: PostHogConfig) -> PHGPostHogProtocol
 }
 
 class DefaultPostHogFactory: PostHogFactory {
-  func createPostHog(config: PostHogConfig) -> PHGPostHogProtocol {
-    PostHogSDK.shared.setup(config)
-    return PostHogSDK.shared
-  }
+    func createPostHog(config: PostHogConfig) -> PHGPostHogProtocol {
+        PostHogSDK.shared.setup(config)
+        return PostHogSDK.shared
+    }
 }
 
-extension PostHogSDK: PHGPostHogProtocol {}
+extension PostHogSDK: PHGPostHogProtocol { }

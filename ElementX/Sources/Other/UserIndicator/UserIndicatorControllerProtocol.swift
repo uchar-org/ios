@@ -10,15 +10,15 @@ import UIKit
 
 // sourcery: AutoMockable
 protocol UserIndicatorControllerProtocol: CoordinatorProtocol {
-  func submitIndicator(_ indicator: UserIndicator, delay: Duration?)
-  func retractIndicatorWithId(_ id: String)
-  func retractAllIndicators()
+    func submitIndicator(_ indicator: UserIndicator, delay: Duration?)
+    func retractIndicatorWithId(_ id: String)
+    func retractAllIndicators()
 
-  var window: UIWindow? { get set }
+    var window: UIWindow? { get set }
 }
 
 extension UserIndicatorControllerProtocol {
-  func submitIndicator(_ indicator: UserIndicator) {
-    submitIndicator(indicator, delay: nil)
-  }
+    func submitIndicator(_ indicator: UserIndicator) {
+        submitIndicator(indicator, delay: nil)
+    }
 }

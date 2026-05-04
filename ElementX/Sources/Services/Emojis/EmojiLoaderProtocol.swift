@@ -9,5 +9,5 @@
 import Foundation
 
 protocol EmojiLoaderProtocol {
-  func load() async -> [EmojiCategory]
+    func load() async -> [EmojiCategory]
 }

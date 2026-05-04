@@ -9,60 +9,60 @@
 import Foundation
 
 class MediaPlayerProvider: MediaPlayerProviderProtocol {
-  private lazy var audioPlayer = AudioPlayer()
-  private var audioPlayerStates: [String: AudioPlayerState] = [:]
+    private lazy var audioPlayer = AudioPlayer()
+    private var audioPlayerStates: [String: AudioPlayerState] = [:]
 
-  var player: AudioPlayerProtocol {
-    audioPlayer
-  }
-
-  deinit {
-    audioPlayerStates = [:]
-  }
-
-  // MARK: - AudioPlayer
-
-  func playerState(for id: AudioPlayerStateIdentifier) -> AudioPlayerState? {
-    guard let audioPlayerStateID = audioPlayerStateID(for: id) else {
-      MXLog.error("Failed to build an ID using: \(id)")
-      return nil
+    var player: AudioPlayerProtocol {
+        audioPlayer
     }
-    return audioPlayerStates[audioPlayerStateID]
-  }
 
-  func register(audioPlayerState: AudioPlayerState) {
-    guard let audioPlayerStateID = audioPlayerStateID(for: audioPlayerState.id) else {
-      MXLog.error("Failed to build a key to register this audioPlayerState: \(audioPlayerState)")
-      return
+    deinit {
+        audioPlayerStates = [:]
     }
-    audioPlayerStates[audioPlayerStateID] = audioPlayerState
-  }
 
-  func unregister(audioPlayerState: AudioPlayerState) {
-    guard let audioPlayerStateID = audioPlayerStateID(for: audioPlayerState.id) else {
-      MXLog.error("Failed to build a key to register this audioPlayerState: \(audioPlayerState)")
-      return
+    // MARK: - AudioPlayer
+
+    func playerState(for id: AudioPlayerStateIdentifier) -> AudioPlayerState? {
+        guard let audioPlayerStateID = audioPlayerStateID(for: id) else {
+            MXLog.error("Failed to build an ID using: \(id)")
+            return nil
+        }
+        return audioPlayerStates[audioPlayerStateID]
     }
-    audioPlayerStates[audioPlayerStateID] = nil
-  }
 
-  func detachAllStates(except exception: AudioPlayerState?) {
-    for key in audioPlayerStates.keys {
-      if let exception, key == audioPlayerStateID(for: exception.id) {
-        continue
-      }
-      audioPlayerStates[key]?.detachAudioPlayer()
+    func register(audioPlayerState: AudioPlayerState) {
+        guard let audioPlayerStateID = audioPlayerStateID(for: audioPlayerState.id) else {
+            MXLog.error("Failed to build a key to register this audioPlayerState: \(audioPlayerState)")
+            return
+        }
+        audioPlayerStates[audioPlayerStateID] = audioPlayerState
     }
-  }
 
-  // MARK: - Private
-
-  private func audioPlayerStateID(for identifier: AudioPlayerStateIdentifier) -> String? {
-    switch identifier {
-    case .timelineItemIdentifier(let timelineItemIdentifier):
-      return timelineItemIdentifier.eventID
-    case .recorderPreview:
-      return "recorderPreviewAudioPlayerState"
+    func unregister(audioPlayerState: AudioPlayerState) {
+        guard let audioPlayerStateID = audioPlayerStateID(for: audioPlayerState.id) else {
+            MXLog.error("Failed to build a key to register this audioPlayerState: \(audioPlayerState)")
+            return
+        }
+        audioPlayerStates[audioPlayerStateID] = nil
     }
-  }
+
+    func detachAllStates(except exception: AudioPlayerState?) {
+        for key in audioPlayerStates.keys {
+            if let exception, key == audioPlayerStateID(for: exception.id) {
+                continue
+            }
+            audioPlayerStates[key]?.detachAudioPlayer()
+        }
+    }
+
+    // MARK: - Private
+
+    private func audioPlayerStateID(for identifier: AudioPlayerStateIdentifier) -> String? {
+        switch identifier {
+        case .timelineItemIdentifier(let timelineItemIdentifier):
+            return timelineItemIdentifier.eventID
+        case .recorderPreview:
+            return "recorderPreviewAudioPlayerState"
+        }
+    }
 }

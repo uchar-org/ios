@@ -10,45 +10,45 @@ import Foundation
 import MatrixRustSDK
 
 final class RoomMemberProxy: RoomMemberProxyProtocol {
-  private let member: RoomMember
+    private let member: RoomMember
 
-  init(member: RoomMember) {
-    self.member = member
-  }
-
-  var userID: String {
-    member.userId
-  }
-
-  var displayName: String? {
-    member.displayName
-  }
-
-  var disambiguatedDisplayName: String? {
-    guard let displayName else {
-      return nil
+    init(member: RoomMember) {
+        self.member = member
     }
 
-    return member.isNameAmbiguous ? "\(displayName) (\(userID))" : displayName
-  }
+    var userID: String {
+        member.userId
+    }
 
-  var avatarURL: URL? {
-    member.avatarUrl.flatMap(URL.init(string:))
-  }
+    var displayName: String? {
+        member.displayName
+    }
 
-  var membership: MembershipState {
-    member.membership
-  }
+    var disambiguatedDisplayName: String? {
+        guard let displayName else {
+            return nil
+        }
 
-  var membershipChangeReason: String? {
-    member.membershipChangeReason
-  }
+        return member.isNameAmbiguous ? "\(displayName) (\(userID))" : displayName
+    }
 
-  var isIgnored: Bool {
-    member.isIgnored
-  }
+    var avatarURL: URL? {
+        member.avatarUrl.flatMap(URL.init(string:))
+    }
 
-  var powerLevel: RoomPowerLevel {
-    .init(rustPowerLevel: member.powerLevel)
-  }
+    var membership: MembershipState {
+        member.membership
+    }
+
+    var membershipChangeReason: String? {
+        member.membershipChangeReason
+    }
+
+    var isIgnored: Bool {
+        member.isIgnored
+    }
+
+    var powerLevel: RoomPowerLevel {
+        .init(rustPowerLevel: member.powerLevel)
+    }
 }

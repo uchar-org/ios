@@ -9,33 +9,33 @@
 import Foundation
 
 enum SecureBackupLogoutConfirmationScreenViewModelAction {
-  case cancel
-  case settings
-  case logout
+    case cancel
+    case settings
+    case logout
 }
 
 enum SecureBackupLogoutConfirmationScreenViewMode: Equatable {
-  case saveRecoveryKey
-  case waitingToStart(hasStalled: Bool)
-  case backupOngoing(progress: Double)
-  case offline
+    case saveRecoveryKey
+    case waitingToStart(hasStalled: Bool)
+    case backupOngoing(progress: Double)
+    case offline
 }
 
 struct SecureBackupLogoutConfirmationScreenViewState: BindableState {
-  var mode: SecureBackupLogoutConfirmationScreenViewMode
-  var bindings = SecureBackupLogoutConfirmationScreenBindings()
+    var mode: SecureBackupLogoutConfirmationScreenViewMode
+    var bindings = SecureBackupLogoutConfirmationScreenBindings()
 }
 
 struct SecureBackupLogoutConfirmationScreenBindings {
-  var alertInfo: AlertInfo<SecureBackupLogoutConfirmationScreenAlertType>?
+    var alertInfo: AlertInfo<SecureBackupLogoutConfirmationScreenAlertType>?
 }
 
 enum SecureBackupLogoutConfirmationScreenAlertType {
-  case backupUploadFailed
+    case backupUploadFailed
 }
 
 enum SecureBackupLogoutConfirmationScreenViewAction {
-  case cancel
-  case settings
-  case logout
+    case cancel
+    case settings
+    case logout
 }

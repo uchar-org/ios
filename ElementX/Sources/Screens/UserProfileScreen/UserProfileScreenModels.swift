@@ -9,46 +9,46 @@
 import Foundation
 
 enum UserProfileScreenViewModelAction {
-  case openDirectChat(roomID: String)
-  case startCall(roomProxy: JoinedRoomProxyProtocol, isVoiceCall: Bool)
-  case dismiss
+    case openDirectChat(roomID: String)
+    case startCall(roomProxy: JoinedRoomProxyProtocol, isVoiceCall: Bool)
+    case dismiss
 }
 
 struct UserProfileScreenViewState: BindableState {
-  let userID: String
-  let isOwnUser: Bool
-  let isPresentedModally: Bool
+    let userID: String
+    let isOwnUser: Bool
+    let isPresentedModally: Bool
 
-  var userProfile: UserProfileProxy?
-  var isIdentityKnown = false
-  var isVerified: Bool?
-  var permalink: URL?
-  var dmRoomID: String?
+    var userProfile: UserProfileProxy?
+    var isIdentityKnown = false
+    var isVerified: Bool?
+    var permalink: URL?
+    var dmRoomID: String?
 
-  var bindings: UserProfileScreenViewStateBindings
+    var bindings: UserProfileScreenViewStateBindings
 
-  var showVerifiedBadge: Bool {
-    isVerified == true  // We purposely show the badge on your own account for consistency with Web.
-  }
+    var showVerifiedBadge: Bool {
+        isVerified == true // We purposely show the badge on your own account for consistency with Web.
+    }
 }
 
 struct UserProfileScreenViewStateBindings {
-  var alertInfo: AlertInfo<UserProfileScreenAlertType>?
-  var inviteConfirmationUser: UserToInvite?
+    var alertInfo: AlertInfo<UserProfileScreenAlertType>?
+    var inviteConfirmationUser: UserToInvite?
 
-  /// A media item that will be previewed with QuickLook.
-  var mediaPreviewItem: MediaPreviewItem?
+    /// A media item that will be previewed with QuickLook.
+    var mediaPreviewItem: MediaPreviewItem?
 }
 
 enum UserProfileScreenViewAction {
-  case displayAvatar(URL)
-  case openDirectChat
-  case createDirectChat
-  case startCall(roomID: String, isVoiceCall: Bool)
-  case dismiss
+    case displayAvatar(URL)
+    case openDirectChat
+    case createDirectChat
+    case startCall(roomID: String, isVoiceCall: Bool)
+    case dismiss
 }
 
 enum UserProfileScreenAlertType: Hashable {
-  case failedOpeningDirectChat
-  case unknown
+    case failedOpeningDirectChat
+    case unknown
 }

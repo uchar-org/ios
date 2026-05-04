@@ -10,23 +10,23 @@ import Compound
 import SwiftUI
 
 class BlankFormCoordinator: CoordinatorProtocol {
-  func toPresentable() -> AnyView {
-    AnyView(BlankForm())
-  }
+    func toPresentable() -> AnyView {
+        AnyView(BlankForm())
+    }
 }
 
 /// An empty Form used for UI tests, behind a sheet.
 private struct BlankForm: View {
-  var body: some View {
-    Form {
-      Text("Nothing to see here.")
+    var body: some View {
+        Form {
+            Text("Nothing to see here.")
+        }
+        .compoundList()
     }
-    .compoundList()
-  }
 }
 
 struct BlankForm_Previews: PreviewProvider {
-  static var previews: some View {
-    BlankForm()
-  }
+    static var previews: some View {
+        BlankForm()
+    }
 }

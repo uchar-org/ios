@@ -9,7 +9,7 @@
 import Foundation
 
 enum NotificationSettingsChatType {
-  /// A one-to-one chat is a chat with exactly two active members
-  case oneToOneChat
-  case groupChat
+    /// A one-to-one chat is a chat with exactly two active members
+    case oneToOneChat
+    case groupChat
 }

@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol SessionVerificationScreenViewModelProtocol {
-  var actions: AnyPublisher<SessionVerificationScreenViewModelAction, Never> { get }
-  var context: SessionVerificationViewModelType.Context { get }
+    var actions: AnyPublisher<SessionVerificationScreenViewModelAction, Never> { get }
+    var context: SessionVerificationViewModelType.Context { get }
 
-  func stop()
+    func stop()
 }

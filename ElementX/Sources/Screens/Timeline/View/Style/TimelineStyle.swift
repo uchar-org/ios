@@ -10,23 +10,23 @@ import Foundation
 import SwiftUI
 
 enum TimelineGroupStyle: Hashable {
-  case single
-  case first
-  case middle
-  case last
+    case single
+    case first
+    case middle
+    case last
 
-  var shouldShowSenderDetails: Bool {
-    switch self {
-    case .single, .first:
-      return true
-    default:
-      return false
+    var shouldShowSenderDetails: Bool {
+        switch self {
+        case .single, .first:
+            return true
+        default:
+            return false
+        }
     }
-  }
 }
 
 // MARK: - Environment
 
 extension EnvironmentValues {
-  @Entry var timelineGroupStyle: TimelineGroupStyle = .single
+    @Entry var timelineGroupStyle: TimelineGroupStyle = .single
 }

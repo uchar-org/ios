@@ -10,31 +10,30 @@ import Combine
 import Foundation
 
 extension TimelineProxyMock {
-  struct Configuration {
-    var isAutoUpdating = false
-    var timelineStartReached = false
-  }
-
-  @MainActor
-  convenience init(_ configuration: Configuration) {
-    self.init()
-
-    sendMessageEventContentReturnValue = .success(())
-    paginateBackwardsRequestSizeReturnValue = .success(())
-    paginateForwardsRequestSizeReturnValue = .success(())
-    sendReadReceiptForTypeReturnValue = .success(())
-    createPollQuestionAnswersPollKindReturnValue = .success(())
-    editPollOriginalQuestionAnswersPollKindReturnValue = .success(())
-
-    if configuration.isAutoUpdating {
-      underlyingTimelineItemProvider = AutoUpdatingTimelineItemProviderMock()
-    } else {
-      let timelineItemProvider = TimelineItemProviderMock()
-      timelineItemProvider.paginationState = .init(
-        backward: configuration.timelineStartReached ? .endReached : .idle, forward: .endReached)
-      timelineItemProvider.underlyingMembershipChangePublisher = PassthroughSubject()
-        .eraseToAnyPublisher()
-      underlyingTimelineItemProvider = timelineItemProvider
+    struct Configuration {
+        var isAutoUpdating = false
+        var timelineStartReached = false
     }
-  }
+
+    @MainActor
+    convenience init(_ configuration: Configuration) {
+        self.init()
+
+        sendMessageEventContentReturnValue = .success(())
+        paginateBackwardsRequestSizeReturnValue = .success(())
+        paginateForwardsRequestSizeReturnValue = .success(())
+        sendReadReceiptForTypeReturnValue = .success(())
+        createPollQuestionAnswersPollKindReturnValue = .success(())
+        editPollOriginalQuestionAnswersPollKindReturnValue = .success(())
+
+        if configuration.isAutoUpdating {
+            underlyingTimelineItemProvider = AutoUpdatingTimelineItemProviderMock()
+        } else {
+            let timelineItemProvider = TimelineItemProviderMock()
+            timelineItemProvider.paginationState = .init(backward: configuration.timelineStartReached ? .endReached : .idle, forward: .endReached)
+            timelineItemProvider.underlyingMembershipChangePublisher = PassthroughSubject()
+                .eraseToAnyPublisher()
+            underlyingTimelineItemProvider = timelineItemProvider
+        }
+    }
 }

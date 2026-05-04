@@ -11,17 +11,17 @@ import HyperionCore
 import SwiftUI
 
 struct ListScreen: View {
-  var body: some View {
-    ListRow_Previews.previews
-      .navigationTitle("Lists")
-  }
+    var body: some View {
+        ListRow_Previews.previews
+            .navigationTitle("Lists")
+    }
 }
 
 struct ListScreen_Previews: PreviewProvider {
-  static var previews: some View {
-    NavigationStack {
-      ListScreen()
+    static var previews: some View {
+        NavigationStack {
+            ListScreen()
+        }
+        .previewLayout(.fixed(width: 375, height: 700))
     }
-    .previewLayout(.fixed(width: 375, height: 700))
-  }
 }

@@ -9,12 +9,12 @@
 import Foundation
 
 enum NotificationPermissionsScreenViewAction {
-  case enable
-  case notNow
+    case enable
+    case notNow
 }
 
 enum NotificationPermissionsScreenViewModelAction {
-  case done
+    case done
 }
 
-struct NotificationPermissionsScreenViewState: BindableState {}
+struct NotificationPermissionsScreenViewState: BindableState { }

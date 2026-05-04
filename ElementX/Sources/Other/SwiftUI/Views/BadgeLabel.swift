@@ -10,100 +10,94 @@ import Compound
 import SwiftUI
 
 struct BadgeLabel: View {
-  enum Style {
-    case accent
-    case info
-    case `default`
-  }
+    enum Style {
+        case accent
+        case info
+        case `default`
+    }
 
-  let title: String
-  let icon: KeyPath<CompoundIcons, Image>
-  let style: Style
-
-  var body: some View {
-    Label(
-      title,
-      icon: icon,
-      iconSize: .xSmall,
-      relativeTo: .compound.bodySM
-    )
-    .labelStyle(LabelStyle(style: style))
-  }
-
-  private struct LabelStyle: SwiftUI.LabelStyle {
+    let title: String
+    let icon: KeyPath<CompoundIcons, Image>
     let style: Style
 
-    var titleColor: Color {
-      switch style {
-      case .accent: .compound.textBadgeAccent
-      case .info: .compound.textBadgeInfo
-      case .default: .compound.textPrimary
-      }
+    var body: some View {
+        Label(title,
+              icon: icon,
+              iconSize: .xSmall,
+              relativeTo: .compound.bodySM)
+            .labelStyle(LabelStyle(style: style))
     }
 
-    var iconColor: Color {
-      switch style {
-      case .accent: .compound.iconAccentPrimary
-      case .info: .compound.iconInfoPrimary
-      case .default: .compound.iconPrimary
-      }
-    }
+    private struct LabelStyle: SwiftUI.LabelStyle {
+        let style: Style
 
-    var backgroundColor: Color {
-      switch style {
-      case .accent: .compound.bgBadgeAccent
-      case .info: .compound.bgBadgeInfo
-      case .default: .compound.bgBadgeDefault
-      }
-    }
-
-    var borderColor: Color {
-      switch style {
-      case .default: .compound.borderInteractiveSecondary
-      default: .clear
-      }
-    }
-
-    func makeBody(configuration: Configuration) -> some View {
-      HStack(spacing: 4) {
-        configuration.icon
-          .foregroundStyle(iconColor)
-        configuration.title
-          .foregroundStyle(titleColor)
-      }
-      .font(.compound.bodySM)
-      .padding(.leading, 8)
-      .padding(.trailing, 12)
-      .padding(.vertical, 4)
-      .background {
-        Capsule().fill(backgroundColor).overlay {
-          Capsule().stroke(borderColor)
+        var titleColor: Color {
+            switch style {
+            case .accent: .compound.textBadgeAccent
+            case .info: .compound.textBadgeInfo
+            case .default: .compound.textPrimary
+            }
         }
-      }
+
+        var iconColor: Color {
+            switch style {
+            case .accent: .compound.iconAccentPrimary
+            case .info: .compound.iconInfoPrimary
+            case .default: .compound.iconPrimary
+            }
+        }
+
+        var backgroundColor: Color {
+            switch style {
+            case .accent: .compound.bgBadgeAccent
+            case .info: .compound.bgBadgeInfo
+            case .default: .compound.bgBadgeDefault
+            }
+        }
+
+        var borderColor: Color {
+            switch style {
+            case .default: .compound.borderInteractiveSecondary
+            default: .clear
+            }
+        }
+
+        func makeBody(configuration: Configuration) -> some View {
+            HStack(spacing: 4) {
+                configuration.icon
+                    .foregroundStyle(iconColor)
+                configuration.title
+                    .foregroundStyle(titleColor)
+            }
+            .font(.compound.bodySM)
+            .padding(.leading, 8)
+            .padding(.trailing, 12)
+            .padding(.vertical, 4)
+            .background {
+                Capsule().fill(backgroundColor).overlay {
+                    Capsule().stroke(borderColor)
+                }
+            }
+        }
     }
-  }
 }
 
 struct BadgeLabel_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    VStack(spacing: 10) {
-      BadgeLabel(
-        title: "Encrypted",
-        icon: \.lockSolid,
-        style: .accent)
-      BadgeLabel(
-        title: "Not encrypted",
-        icon: \.lockSolid,
-        style: .info)
-      BadgeLabel(
-        title: "1234",
-        icon: \.userProfile,
-        style: .default)
-      BadgeLabel(
-        title:
-          "Very long text that potentially will wrap around in constrained environments, maybe into two or three lines, depending on the exact length of the text",
-        icon: \.userProfile,
-        style: .default)
+    static var previews: some View {
+        VStack(spacing: 10) {
+            BadgeLabel(title: "Encrypted",
+                       icon: \.lockSolid,
+                       style: .accent)
+            BadgeLabel(title: "Not encrypted",
+                       icon: \.lockSolid,
+                       style: .info)
+            BadgeLabel(title: "1234",
+                       icon: \.userProfile,
+                       style: .default)
+            BadgeLabel(title:
+                "Very long text that potentially will wrap around in constrained environments, maybe into two or three lines, depending on the exact length of the text",
+                icon: \.userProfile,
+                style: .default)
+        }
     }
-  }
 }

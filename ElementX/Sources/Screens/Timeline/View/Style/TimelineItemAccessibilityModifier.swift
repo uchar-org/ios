@@ -9,43 +9,41 @@
 import SwiftUI
 
 private struct TimelineItemAccessibilityModifier: ViewModifier {
-  let timelineItem: RoomTimelineItemProtocol
-  let action: () -> Void
+    let timelineItem: RoomTimelineItemProtocol
+    let action: () -> Void
 
-  func body(content: Content) -> some View {
-    switch timelineItem {
-    case is PollRoomTimelineItem:
-      content
-        .accessibilityActions {
-          Button(L10n.commonMessageActions) {
-            action()
-          }
-        }
-    case let timelineItem as EventBasedTimelineItemProtocol:
-      content
-        .accessibilityRepresentation {
-          VStack(spacing: 8) {
-            Text(timelineItem.sender.displayName ?? timelineItem.sender.id)
+    func body(content: Content) -> some View {
+        switch timelineItem {
+        case is PollRoomTimelineItem:
             content
-          }
+                .accessibilityActions {
+                    Button(L10n.commonMessageActions) {
+                        action()
+                    }
+                }
+        case let timelineItem as EventBasedTimelineItemProtocol:
+            content
+                .accessibilityRepresentation {
+                    VStack(spacing: 8) {
+                        Text(timelineItem.sender.displayName ?? timelineItem.sender.id)
+                        content
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityActions {
+                    Button(L10n.commonMessageActions) {
+                        action()
+                    }
+                }
+        default:
+            content
+                .accessibilityElement(children: .combine)
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityActions {
-          Button(L10n.commonMessageActions) {
-            action()
-          }
-        }
-    default:
-      content
-        .accessibilityElement(children: .combine)
     }
-  }
 }
 
 extension View {
-  func timelineItemAccessibility(
-    _ timelineItem: RoomTimelineItemProtocol, action: @escaping () -> Void
-  ) -> some View {
-    modifier(TimelineItemAccessibilityModifier(timelineItem: timelineItem, action: action))
-  }
+    func timelineItemAccessibility(_ timelineItem: RoomTimelineItemProtocol, action: @escaping () -> Void) -> some View {
+        modifier(TimelineItemAccessibilityModifier(timelineItem: timelineItem, action: action))
+    }
 }

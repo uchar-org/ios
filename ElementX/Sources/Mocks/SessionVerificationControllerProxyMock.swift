@@ -9,95 +9,93 @@
 import Combine
 
 extension SessionVerificationControllerProxyMock {
-  static let emojis = [
-    SessionVerificationEmoji(symbol: "🦋", description: "Butterfly"),
-    SessionVerificationEmoji(symbol: "🐘", description: "Elephant"),
-    SessionVerificationEmoji(symbol: "🦋", description: "Butterfly"),
-    SessionVerificationEmoji(symbol: "🎂", description: "Cake"),
-    SessionVerificationEmoji(symbol: "🎂", description: "Cake"),
-    SessionVerificationEmoji(symbol: "🏁", description: "Flag"),
-    SessionVerificationEmoji(symbol: "🌏", description: "Globe"),
-  ]
+    static let emojis = [
+        SessionVerificationEmoji(symbol: "🦋", description: "Butterfly"),
+        SessionVerificationEmoji(symbol: "🐘", description: "Elephant"),
+        SessionVerificationEmoji(symbol: "🦋", description: "Butterfly"),
+        SessionVerificationEmoji(symbol: "🎂", description: "Cake"),
+        SessionVerificationEmoji(symbol: "🎂", description: "Cake"),
+        SessionVerificationEmoji(symbol: "🏁", description: "Flag"),
+        SessionVerificationEmoji(symbol: "🌏", description: "Globe")
+    ]
 
-  static func configureMock(
-    actions: PassthroughSubject<SessionVerificationControllerProxyAction, Never> = .init(),
-    isVerified: Bool = false,
-    otherDeviceStartsSasVerification: Bool = false,
-    requestDelay: Duration = .seconds(1)
-  ) -> SessionVerificationControllerProxyMock {
-    let mock = SessionVerificationControllerProxyMock()
-    mock.underlyingActions = actions
+    static func configureMock(actions: PassthroughSubject<SessionVerificationControllerProxyAction, Never> = .init(),
+                              isVerified: Bool = false,
+                              otherDeviceStartsSasVerification: Bool = false,
+                              requestDelay: Duration = .seconds(1)) -> SessionVerificationControllerProxyMock {
+        let mock = SessionVerificationControllerProxyMock()
+        mock.underlyingActions = actions
 
-    mock.acknowledgeVerificationRequestDetailsReturnValue = .success(())
+        mock.acknowledgeVerificationRequestDetailsReturnValue = .success(())
 
-    mock.requestDeviceVerificationClosure = { [weak mock] in
-      Task.detached {
-        guard let mock else { return }
+        mock.requestDeviceVerificationClosure = { [weak mock] in
+            Task.detached {
+                guard let mock else { return }
 
-        try await Task.sleep(for: requestDelay)
+                try await Task.sleep(for: requestDelay)
 
-        mock.actions.send(.acceptedVerificationRequest)
+                mock.actions.send(.acceptedVerificationRequest)
 
-        if otherDeviceStartsSasVerification {
-          try await Task.sleep(for: requestDelay)
-          mock.actions.send(.startedSasVerification)
-          try await Task.sleep(for: requestDelay)
-          mock.actions.send(.receivedVerificationData(emojis))
+                if otherDeviceStartsSasVerification {
+                    try await Task.sleep(for: requestDelay)
+                    mock.actions.send(.startedSasVerification)
+                    try await Task.sleep(for: requestDelay)
+                    mock.actions.send(.receivedVerificationData(emojis))
+                }
+            }
+
+            return .success(())
         }
-      }
 
-      return .success(())
-    }
+        mock.startSasVerificationClosure = { [weak mock] in
+            Task.detached {
+                guard let mock else { return }
 
-    mock.startSasVerificationClosure = { [weak mock] in
-      Task.detached {
-        guard let mock else { return }
+                try await Task.sleep(for: requestDelay)
+                mock.actions.send(.startedSasVerification)
 
-        try await Task.sleep(for: requestDelay)
-        mock.actions.send(.startedSasVerification)
+                Task.detached {
+                    try await Task.sleep(for: requestDelay)
+                    mock.actions.send(.receivedVerificationData(emojis))
+                }
+            }
 
-        Task.detached {
-          try await Task.sleep(for: requestDelay)
-          mock.actions.send(.receivedVerificationData(emojis))
+            return .success(())
         }
-      }
 
-      return .success(())
+        mock.approveVerificationClosure = { [weak mock] in
+            Task.detached {
+                guard let mock else { return }
+
+                try await Task.sleep(for: requestDelay)
+                mock.actions.send(.finished)
+            }
+
+            return .success(())
+        }
+
+        mock.declineVerificationClosure = { [weak mock] in
+            Task.detached {
+                guard let mock else { return }
+
+                try await Task.sleep(for: requestDelay)
+                mock.actions.send(.cancelled)
+            }
+
+            return .success(())
+        }
+
+        mock.cancelVerificationClosure = { [weak mock] in
+            Task.detached {
+                guard let mock else { return }
+
+                try await Task.sleep(for: requestDelay)
+                mock.actions.send(.cancelled)
+            }
+
+            return .success(())
+        }
+
+        return mock
     }
-
-    mock.approveVerificationClosure = { [weak mock] in
-      Task.detached {
-        guard let mock else { return }
-
-        try await Task.sleep(for: requestDelay)
-        mock.actions.send(.finished)
-      }
-
-      return .success(())
-    }
-
-    mock.declineVerificationClosure = { [weak mock] in
-      Task.detached {
-        guard let mock else { return }
-
-        try await Task.sleep(for: requestDelay)
-        mock.actions.send(.cancelled)
-      }
-
-      return .success(())
-    }
-
-    mock.cancelVerificationClosure = { [weak mock] in
-      Task.detached {
-        guard let mock else { return }
-
-        try await Task.sleep(for: requestDelay)
-        mock.actions.send(.cancelled)
-      }
-
-      return .success(())
-    }
-
-    return mock
-  }
 }

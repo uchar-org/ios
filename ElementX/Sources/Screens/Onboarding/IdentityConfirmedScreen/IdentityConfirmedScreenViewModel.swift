@@ -9,31 +9,28 @@
 import Combine
 import SwiftUI
 
-typealias IdentityConfirmedScreenViewModelType = StateStoreViewModel<
-  IdentityConfirmedScreenViewState, IdentityConfirmedScreenViewAction
->
+typealias IdentityConfirmedScreenViewModelType = StateStoreViewModel<IdentityConfirmedScreenViewState, IdentityConfirmedScreenViewAction>
 
 class IdentityConfirmedScreenViewModel: IdentityConfirmedScreenViewModelType,
-  IdentityConfirmedScreenViewModelProtocol
-{
-  private let actionsSubject: PassthroughSubject<IdentityConfirmedScreenViewModelAction, Never> =
-    .init()
-  var actionsPublisher: AnyPublisher<IdentityConfirmedScreenViewModelAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init() {
-    super.init(initialViewState: .init())
-  }
-
-  // MARK: - Public
-
-  override func process(viewAction: IdentityConfirmedScreenViewAction) {
-    MXLog.info("View model: received view action: \(viewAction)")
-
-    switch viewAction {
-    case .done:
-      actionsSubject.send(.done)
+    IdentityConfirmedScreenViewModelProtocol {
+    private let actionsSubject: PassthroughSubject<IdentityConfirmedScreenViewModelAction, Never> =
+        .init()
+    var actionsPublisher: AnyPublisher<IdentityConfirmedScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-  }
+
+    init() {
+        super.init(initialViewState: .init())
+    }
+
+    // MARK: - Public
+
+    override func process(viewAction: IdentityConfirmedScreenViewAction) {
+        MXLog.info("View model: received view action: \(viewAction)")
+
+        switch viewAction {
+        case .done:
+            actionsSubject.send(.done)
+        }
+    }
 }

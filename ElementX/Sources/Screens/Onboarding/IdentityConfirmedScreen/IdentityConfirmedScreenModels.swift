@@ -9,11 +9,11 @@
 import Foundation
 
 enum IdentityConfirmedScreenViewModelAction {
-  case done
+    case done
 }
 
-struct IdentityConfirmedScreenViewState: BindableState {}
+struct IdentityConfirmedScreenViewState: BindableState { }
 
 enum IdentityConfirmedScreenViewAction {
-  case done
+    case done
 }

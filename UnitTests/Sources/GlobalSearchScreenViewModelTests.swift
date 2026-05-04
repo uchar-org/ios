@@ -7,46 +7,44 @@
 //
 
 import Combine
-import Testing
-
 @testable import ElementX
+import Testing
 
 @MainActor
 struct GlobalSearchScreenViewModelTests {
-  var viewModel: GlobalSearchScreenViewModelProtocol!
-  var context: GlobalSearchScreenViewModelType.Context!
+    var viewModel: GlobalSearchScreenViewModelProtocol!
+    var context: GlobalSearchScreenViewModelType.Context!
 
-  init() {
-    viewModel = GlobalSearchScreenViewModel(
-      roomSummaryProvider: RoomSummaryProviderMock(.init(state: .loaded(.mockRooms))),
-      mediaProvider: MediaProviderMock(configuration: .init()))
-    context = viewModel.context
-  }
-
-  @Test
-  mutating func searching() async throws {
-    let deferred = deferFulfillment(context.$viewState) { state in
-      state.rooms.count == 1
+    init() {
+        viewModel = GlobalSearchScreenViewModel(roomSummaryProvider: RoomSummaryProviderMock(.init(state: .loaded(.mockRooms))),
+                                                mediaProvider: MediaProviderMock(configuration: .init()))
+        context = viewModel.context
     }
 
-    context.searchQuery = "Second"
+    @Test
+    mutating func searching() async throws {
+        let deferred = deferFulfillment(context.$viewState) { state in
+            state.rooms.count == 1
+        }
 
-    try await deferred.fulfill()
-  }
+        context.searchQuery = "Second"
 
-  @Test
-  func roomSelection() async throws {
-    let deferred = deferFulfillment(viewModel.actions) { action in
-      switch action {
-      case .select(let roomID):
-        return roomID == "2"
-      default:
-        return false
-      }
+        try await deferred.fulfill()
     }
 
-    context.send(viewAction: .select(roomID: "2"))
+    @Test
+    func roomSelection() async throws {
+        let deferred = deferFulfillment(viewModel.actions) { action in
+            switch action {
+            case .select(let roomID):
+                return roomID == "2"
+            default:
+                return false
+            }
+        }
 
-    try await deferred.fulfill()
-  }
+        context.send(viewAction: .select(roomID: "2"))
+
+        try await deferred.fulfill()
+    }
 }

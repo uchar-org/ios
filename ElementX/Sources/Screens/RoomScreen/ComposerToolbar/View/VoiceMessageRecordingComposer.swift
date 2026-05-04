@@ -11,26 +11,26 @@ import Foundation
 import SwiftUI
 
 struct VoiceMessageRecordingComposer: View {
-  @ObservedObject var recorderState: AudioRecorderState
+    @ObservedObject var recorderState: AudioRecorderState
 
-  var body: some View {
-    VoiceMessageRecordingView(recorderState: recorderState)
-      .padding(.vertical, Compound.supportsGlass ? 14 : 8)
-      .padding(.horizontal, Compound.supportsGlass ? 16 : 12)
-      .background {
-        RoundedRectangle(cornerRadius: Compound.supportsGlass ? 21 : 12)
-          .fill(.compound.bgSubtleSecondary)
-      }
-  }
+    var body: some View {
+        VoiceMessageRecordingView(recorderState: recorderState)
+            .padding(.vertical, Compound.supportsGlass ? 14 : 8)
+            .padding(.horizontal, Compound.supportsGlass ? 16 : 12)
+            .background {
+                RoundedRectangle(cornerRadius: Compound.supportsGlass ? 21 : 12)
+                    .fill(.compound.bgSubtleSecondary)
+            }
+    }
 }
 
 // MARK: - Previews
 
 struct VoiceMessageRecordingComposer_Previews: PreviewProvider, TestablePreview {
-  static let recorderState = AudioRecorderState()
+    static let recorderState = AudioRecorderState()
 
-  static var previews: some View {
-    VoiceMessageRecordingComposer(recorderState: recorderState)
-      .fixedSize(horizontal: false, vertical: true)
-  }
+    static var previews: some View {
+        VoiceMessageRecordingComposer(recorderState: recorderState)
+            .fixedSize(horizontal: false, vertical: true)
+    }
 }

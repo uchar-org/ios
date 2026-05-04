@@ -9,27 +9,25 @@
 import Foundation
 
 class PollInteractionHandler: PollInteractionHandlerProtocol {
-  let analyticsService: AnalyticsService
-  let timelineController: TimelineControllerProtocol
+    let analyticsService: AnalyticsService
+    let timelineController: TimelineControllerProtocol
 
-  init(analyticsService: AnalyticsService, timelineController: TimelineControllerProtocol) {
-    self.analyticsService = analyticsService
-    self.timelineController = timelineController
-  }
+    init(analyticsService: AnalyticsService, timelineController: TimelineControllerProtocol) {
+        self.analyticsService = analyticsService
+        self.timelineController = timelineController
+    }
 
-  func sendPollResponse(pollStartID: String, optionID: String) async -> Result<Void, Error> {
-    let sendPollResponseResult = await timelineController.sendPollResponse(
-      pollStartID: pollStartID, answers: [optionID])
-    analyticsService.trackPollVote()
+    func sendPollResponse(pollStartID: String, optionID: String) async -> Result<Void, Error> {
+        let sendPollResponseResult = await timelineController.sendPollResponse(pollStartID: pollStartID, answers: [optionID])
+        analyticsService.trackPollVote()
 
-    return sendPollResponseResult.mapError { $0 }
-  }
+        return sendPollResponseResult.mapError { $0 }
+    }
 
-  func endPoll(pollStartID: String) async -> Result<Void, Error> {
-    let endPollResult = await timelineController.endPoll(
-      pollStartID: pollStartID,
-      text: "The poll with event id: \(pollStartID) has ended")
-    analyticsService.trackPollEnd()
-    return endPollResult.mapError { $0 }
-  }
+    func endPoll(pollStartID: String) async -> Result<Void, Error> {
+        let endPollResult = await timelineController.endPoll(pollStartID: pollStartID,
+                                                             text: "The poll with event id: \(pollStartID) has ended")
+        analyticsService.trackPollEnd()
+        return endPollResult.mapError { $0 }
+    }
 }

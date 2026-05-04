@@ -10,10 +10,10 @@ import Combine
 
 @MainActor
 protocol ThreadTimelineScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<ThreadTimelineScreenViewModelAction, Never> { get }
-  var context: ThreadTimelineScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<ThreadTimelineScreenViewModelAction, Never> { get }
+    var context: ThreadTimelineScreenViewModelType.Context { get }
 
-  func stop()
+    func stop()
 
-  func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
+    func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel)
 }

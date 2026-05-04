@@ -10,24 +10,24 @@ import UIKit
 import UniformTypeIdentifiers
 
 struct FileRoomTimelineItem: EventBasedMessageTimelineItemProtocol, Equatable {
-  let id: TimelineItemIdentifier
-  let timestamp: Date
-  let isOutgoing: Bool
-  let isEditable: Bool
-  let canBeRepliedTo: Bool
-  var shouldBoost = false
+    let id: TimelineItemIdentifier
+    let timestamp: Date
+    let isOutgoing: Bool
+    let isEditable: Bool
+    let canBeRepliedTo: Bool
+    var shouldBoost = false
 
-  let sender: TimelineItemSender
+    let sender: TimelineItemSender
 
-  let content: FileRoomTimelineItemContent
+    let content: FileRoomTimelineItemContent
 
-  var properties = RoomTimelineItemProperties()
+    var properties = RoomTimelineItemProperties()
 
-  var body: String {
-    content.caption ?? content.filename
-  }
+    var body: String {
+        content.caption ?? content.filename
+    }
 
-  var contentType: EventBasedMessageTimelineItemContentType {
-    .file(content)
-  }
+    var contentType: EventBasedMessageTimelineItemContentType {
+        .file(content)
+    }
 }

@@ -8,7 +8,7 @@
 import Foundation
 
 extension ProcessInfo {
-  var isRunningTests: Bool {
-    environment["XCTestBundlePath"] != nil
-  }
+    var isRunningTests: Bool {
+        environment["XCTestBundlePath"] != nil
+    }
 }

@@ -9,14 +9,11 @@
 import MatrixRustSDK
 
 protocol TracingHookProtocol {
-  func update(
-    _ configuration: TracingConfiguration,
-    with rageshakeURL: RemotePreference<RageshakeConfiguration>)
+    func update(_ configuration: TracingConfiguration,
+                with rageshakeURL: RemotePreference<RageshakeConfiguration>)
 }
 
 struct DefaultTracingHook: TracingHookProtocol {
-  func update(
-    _ configuration: TracingConfiguration,
-    with rageshakeURL: RemotePreference<RageshakeConfiguration>
-  ) {}
+    func update(_ configuration: TracingConfiguration,
+                with rageshakeURL: RemotePreference<RageshakeConfiguration>) { }
 }

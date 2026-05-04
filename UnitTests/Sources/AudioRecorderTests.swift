@@ -7,42 +7,41 @@
 //
 
 import Combine
+@testable import ElementX
 import Foundation
 import Testing
 
-@testable import ElementX
-
 @MainActor
 struct AudioRecorderTests {
-  private var audioRecorder: AudioRecorder!
-  private var audioSessionMock: AudioSessionMock!
+    private var audioRecorder: AudioRecorder!
+    private var audioSessionMock: AudioSessionMock!
 
-  init() async {
-    audioSessionMock = AudioSessionMock()
-    audioSessionMock.requestRecordPermissionClosure = { completion in
-      completion(true)
-    }
-    audioRecorder = AudioRecorder(audioSession: audioSessionMock)
-  }
-
-  @Test
-  mutating func recordWithoutPermission() async throws {
-    audioSessionMock.requestRecordPermissionClosure = { completion in
-      completion(false)
+    init() async {
+        audioSessionMock = AudioSessionMock()
+        audioSessionMock.requestRecordPermissionClosure = { completion in
+            completion(true)
+        }
+        audioRecorder = AudioRecorder(audioSession: audioSessionMock)
     }
 
-    let deferred = deferFulfillment(audioRecorder.actions) { action in
-      switch action {
-      case .didFailWithError(.recordPermissionNotGranted):
-        return true
-      default:
-        return false
-      }
+    @Test
+    mutating func recordWithoutPermission() async throws {
+        audioSessionMock.requestRecordPermissionClosure = { completion in
+            completion(false)
+        }
+
+        let deferred = deferFulfillment(audioRecorder.actions) { action in
+            switch action {
+            case .didFailWithError(.recordPermissionNotGranted):
+                return true
+            default:
+                return false
+            }
+        }
+        let url = URL.temporaryDirectory.appendingPathComponent("test-voice-message")
+            .appendingPathExtension("m4a")
+        await audioRecorder.record(audioFileURL: url)
+        try await deferred.fulfill()
+        #expect(!audioRecorder.isRecording)
     }
-    let url = URL.temporaryDirectory.appendingPathComponent("test-voice-message")
-      .appendingPathExtension("m4a")
-    await audioRecorder.record(audioFileURL: url)
-    try await deferred.fulfill()
-    #expect(!audioRecorder.isRecording)
-  }
 }

@@ -9,34 +9,33 @@
 import SwiftUI
 
 struct StateRoomTimelineView: View {
-  let timelineItem: StateRoomTimelineItem
+    let timelineItem: StateRoomTimelineItem
 
-  var body: some View {
-    Text(timelineItem.body)
-      .font(.compound.bodySM)
-      .multilineTextAlignment(.center)
-      .foregroundColor(.compound.textSecondary)
-      .frame(maxWidth: .infinity, alignment: .center)
-      .padding(.horizontal, 36.0)
-      .padding(.vertical, 8.0)
-  }
+    var body: some View {
+        Text(timelineItem.body)
+            .font(.compound.bodySM)
+            .multilineTextAlignment(.center)
+            .foregroundColor(.compound.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, 36.0)
+            .padding(.vertical, 8.0)
+    }
 }
 
 struct StateRoomTimelineView_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    body
-  }
+    static var previews: some View {
+        body
+    }
 
-  static var body: some View {
-    StateRoomTimelineView(timelineItem: item)
-  }
+    static var body: some View {
+        StateRoomTimelineView(timelineItem: item)
+    }
 
-  static let item = StateRoomTimelineItem(
-    id: .randomVirtual,
-    body: "Alice joined",
-    timestamp: .mock,
-    isOutgoing: false,
-    isEditable: false,
-    canBeRepliedTo: true,
-    sender: .init(id: ""))
+    static let item = StateRoomTimelineItem(id: .randomVirtual,
+                                            body: "Alice joined",
+                                            timestamp: .mock,
+                                            isOutgoing: false,
+                                            isEditable: false,
+                                            canBeRepliedTo: true,
+                                            sender: .init(id: ""))
 }

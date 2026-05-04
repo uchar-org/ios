@@ -9,86 +9,73 @@
 import SwiftUI
 
 struct ReadReceiptCell: View {
-  let readReceipt: ReadReceipt
-  let memberState: RoomMemberState?
-  let mediaProvider: MediaProviderProtocol?
+    let readReceipt: ReadReceipt
+    let memberState: RoomMemberState?
+    let mediaProvider: MediaProviderProtocol?
 
-  private var title: String {
-    memberState?.displayName ?? readReceipt.userID
-  }
-
-  private var subtitle: String {
-    guard title != readReceipt.userID else {
-      return ""
+    private var title: String {
+        memberState?.displayName ?? readReceipt.userID
     }
-    return readReceipt.userID
-  }
 
-  var body: some View {
-    HStack(spacing: 12) {
-      LoadableAvatarImage(
-        url: memberState?.avatarURL,
-        name: memberState?.displayName,
-        contentID: readReceipt.userID,
-        avatarSize: .user(on: .readReceiptSheet),
-        mediaProvider: mediaProvider
-      )
-      .accessibilityHidden(true)
-      VStack(alignment: .leading, spacing: 0) {
-        HStack(spacing: 12) {
-          Text(title)
-            .font(.compound.bodyMDSemibold)
-            .foregroundColor(.compound.textPrimary)
-            .lineLimit(1)
-            .frame(maxWidth: .infinity, alignment: .leading)
-          if let formattedTimestamp = readReceipt.formattedTimestamp {
-            Text(formattedTimestamp)
-              .font(.compound.bodyXS)
-              .foregroundColor(.compound.textSecondary)
-              .lineLimit(1)
-          }
+    private var subtitle: String {
+        guard title != readReceipt.userID else {
+            return ""
         }
-        Text(subtitle)
-          .font(.compound.bodySM)
-          .foregroundColor(.compound.textSecondary)
-          .lineLimit(1)
-      }
+        return readReceipt.userID
     }
-    .accessibilityElement(children: .combine)
-    .padding(.vertical, 8)
-    .padding(.horizontal, 16)
-  }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            LoadableAvatarImage(url: memberState?.avatarURL,
+                                name: memberState?.displayName,
+                                contentID: readReceipt.userID,
+                                avatarSize: .user(on: .readReceiptSheet),
+                                mediaProvider: mediaProvider)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 12) {
+                    Text(title)
+                        .font(.compound.bodyMDSemibold)
+                        .foregroundColor(.compound.textPrimary)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if let formattedTimestamp = readReceipt.formattedTimestamp {
+                        Text(formattedTimestamp)
+                            .font(.compound.bodyXS)
+                            .foregroundColor(.compound.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                Text(subtitle)
+                    .font(.compound.bodySM)
+                    .foregroundColor(.compound.textSecondary)
+                    .lineLimit(1)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+    }
 }
 
 struct ReadReceiptCell_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    ReadReceiptCell(
-      readReceipt: .init(
-        userID: "@test:matrix.org",
-        formattedTimestamp: "10:00"),
-      memberState: .init(
-        displayName: "Test",
-        avatarURL: nil),
-      mediaProvider: MediaProviderMock(configuration: .init())
-    )
-    .previewDisplayName("No Image")
-    ReadReceiptCell(
-      readReceipt: .init(
-        userID: "@test:matrix.org",
-        formattedTimestamp: "10:00"),
-      memberState: .init(
-        displayName: "Test",
-        avatarURL: .mockMXCUserAvatar),
-      mediaProvider: MediaProviderMock(configuration: .init())
-    )
-    .previewDisplayName("With Image")
-    ReadReceiptCell(
-      readReceipt: .init(
-        userID: "@test:matrix.org",
-        formattedTimestamp: "10:00"),
-      memberState: nil,
-      mediaProvider: MediaProviderMock(configuration: .init())
-    )
-    .previewDisplayName("Loading Member")
-  }
+    static var previews: some View {
+        ReadReceiptCell(readReceipt: .init(userID: "@test:matrix.org",
+                                           formattedTimestamp: "10:00"),
+                        memberState: .init(displayName: "Test",
+                                           avatarURL: nil),
+                        mediaProvider: MediaProviderMock(configuration: .init()))
+            .previewDisplayName("No Image")
+        ReadReceiptCell(readReceipt: .init(userID: "@test:matrix.org",
+                                           formattedTimestamp: "10:00"),
+                        memberState: .init(displayName: "Test",
+                                           avatarURL: .mockMXCUserAvatar),
+                        mediaProvider: MediaProviderMock(configuration: .init()))
+            .previewDisplayName("With Image")
+        ReadReceiptCell(readReceipt: .init(userID: "@test:matrix.org",
+                                           formattedTimestamp: "10:00"),
+                        memberState: nil,
+                        mediaProvider: MediaProviderMock(configuration: .init()))
+            .previewDisplayName("Loading Member")
+    }
 }

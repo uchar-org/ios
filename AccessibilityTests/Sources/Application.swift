@@ -9,24 +9,24 @@
 import XCTest
 
 enum Application {
-  static func launch(viewID: String) -> XCUIApplication {
-    checkEnvironments()
+    static func launch(viewID: String) -> XCUIApplication {
+        checkEnvironments()
 
-    let app = XCUIApplication()
+        let app = XCUIApplication()
 
-    let launchEnvironment = [
-      "ACCESSIBILITY_VIEW": viewID
-    ]
+        let launchEnvironment = [
+            "ACCESSIBILITY_VIEW": viewID
+        ]
 
-    app.launchEnvironment = launchEnvironment
-    app.launch()
-    return app
-  }
-
-  private static func checkEnvironments() {
-    guard UIDevice.current.userInterfaceIdiom == .phone else {
-      XCTFail("Accessibility tests should be run on a phone.")
-      fatalError("Accessibility tests should be run on a phone.")
+        app.launchEnvironment = launchEnvironment
+        app.launch()
+        return app
     }
-  }
+
+    private static func checkEnvironments() {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
+            XCTFail("Accessibility tests should be run on a phone.")
+            fatalError("Accessibility tests should be run on a phone.")
+        }
+    }
 }

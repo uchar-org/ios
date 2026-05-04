@@ -10,22 +10,22 @@ import Foundation
 
 // sourcery: AutoMockable
 protocol RoomDirectorySearchProxyProtocol {
-  var resultsPublisher: CurrentValuePublisher<[RoomDirectorySearchResult], Never> { get }
+    var resultsPublisher: CurrentValuePublisher<[RoomDirectorySearchResult], Never> { get }
 
-  func search(query: String?) async -> Result<Void, RoomDirectorySearchError>
-  func nextPage() async -> Result<Void, RoomDirectorySearchError>
+    func search(query: String?) async -> Result<Void, RoomDirectorySearchError>
+    func nextPage() async -> Result<Void, RoomDirectorySearchError>
 }
 
 enum RoomDirectorySearchError: Error {
-  case searchFailed
-  case nextPageQueryFailed
+    case searchFailed
+    case nextPageQueryFailed
 }
 
 struct RoomDirectorySearchResult: Identifiable {
-  let id: String
-  let alias: String?
-  let name: String?
-  let topic: String?
-  let avatar: RoomAvatar
-  let canBeJoined: Bool
+    let id: String
+    let alias: String?
+    let name: String?
+    let topic: String?
+    let avatar: RoomAvatar
+    let canBeJoined: Bool
 }

@@ -10,9 +10,9 @@ import Combine
 
 @MainActor
 protocol SoftLogoutScreenViewModelProtocol {
-  var actions: AnyPublisher<SoftLogoutScreenViewModelAction, Never> { get }
-  var context: SoftLogoutScreenViewModelType.Context { get }
+    var actions: AnyPublisher<SoftLogoutScreenViewModelAction, Never> { get }
+    var context: SoftLogoutScreenViewModelType.Context { get }
 
-  /// Display an error to the user.
-  @MainActor func displayError(_ type: SoftLogoutScreenErrorType)
+    /// Display an error to the user.
+    @MainActor func displayError(_ type: SoftLogoutScreenErrorType)
 }

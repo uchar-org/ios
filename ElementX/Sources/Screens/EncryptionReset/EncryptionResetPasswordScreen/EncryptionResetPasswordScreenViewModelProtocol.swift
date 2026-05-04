@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol EncryptionResetPasswordScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<EncryptionResetPasswordScreenViewModelAction, Never> { get }
-  var context: EncryptionResetPasswordScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<EncryptionResetPasswordScreenViewModelAction, Never> { get }
+    var context: EncryptionResetPasswordScreenViewModelType.Context { get }
 }

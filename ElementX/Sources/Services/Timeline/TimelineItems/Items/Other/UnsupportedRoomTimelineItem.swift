@@ -9,18 +9,18 @@
 import UIKit
 
 struct UnsupportedRoomTimelineItem: EventBasedTimelineItemProtocol, Equatable {
-  let id: TimelineItemIdentifier
-  let body: String
+    let id: TimelineItemIdentifier
+    let body: String
 
-  let eventType: String
-  let error: String
+    let eventType: String
+    let error: String
 
-  let timestamp: Date
-  let isOutgoing: Bool
-  let isEditable: Bool
-  let canBeRepliedTo: Bool
+    let timestamp: Date
+    let isOutgoing: Bool
+    let isEditable: Bool
+    let canBeRepliedTo: Bool
 
-  let sender: TimelineItemSender
+    let sender: TimelineItemSender
 
-  var properties = RoomTimelineItemProperties()
+    var properties = RoomTimelineItemProperties()
 }

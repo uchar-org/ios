@@ -8,38 +8,38 @@
 import SwiftUI
 
 struct PlaybackSpeedButton: View {
-  let speed: AudioPlaybackSpeed
-  let onTap: () -> Void
+    let speed: AudioPlaybackSpeed
+    let onTap: () -> Void
 
-  var body: some View {
-    Button(action: onTap) {
-      ZStack {
-        Text(speed.placeholder)
-          .font(.compound.bodyXSSemibold)
-          .hidden()
+    var body: some View {
+        Button(action: onTap) {
+            ZStack {
+                Text(speed.placeholder)
+                    .font(.compound.bodyXSSemibold)
+                    .hidden()
 
-        Text(speed.label)
-          .font(.compound.bodyXSSemibold)
-          .foregroundColor(.compound.iconSecondary)
-      }
-      .padding(.horizontal, 8)
-      .padding(.vertical, 2)
-      .background(.compound.bgCanvasDefault, in: RoundedRectangle(cornerRadius: 12))
+                Text(speed.label)
+                    .font(.compound.bodyXSSemibold)
+                    .foregroundColor(.compound.iconSecondary)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(.compound.bgCanvasDefault, in: RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L10n.a11yPlaybackSpeed)
+        .accessibilityValue(speed.label)
     }
-    .buttonStyle(.plain)
-    .accessibilityLabel(L10n.a11yPlaybackSpeed)
-    .accessibilityValue(speed.label)
-  }
 }
 
 struct PlaybackSpeedButton_Previews: PreviewProvider, TestablePreview {
-  static var previews: some View {
-    HStack(spacing: 8) {
-      ForEach(AudioPlaybackSpeed.allCases, id: \.self) { speed in
-        PlaybackSpeedButton(speed: speed) {}
-      }
+    static var previews: some View {
+        HStack(spacing: 8) {
+            ForEach(AudioPlaybackSpeed.allCases, id: \.self) { speed in
+                PlaybackSpeedButton(speed: speed) { }
+            }
+        }
+        .padding()
+        .background(Color.gray)
     }
-    .padding()
-    .background(Color.gray)
-  }
 }

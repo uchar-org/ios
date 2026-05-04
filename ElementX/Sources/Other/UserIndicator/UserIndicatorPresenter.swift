@@ -9,24 +9,24 @@
 import SwiftUI
 
 struct UserIndicatorPresenter: View {
-  @ObservedObject var userIndicatorController: UserIndicatorController
+    @ObservedObject var userIndicatorController: UserIndicatorController
 
-  var body: some View {
-    indicatorViewFor(indicator: userIndicatorController.activeIndicator)
-      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-      .animation(.elementDefault, value: userIndicatorController.activeIndicator)
-  }
-
-  private func indicatorViewFor(indicator: UserIndicator?) -> some View {
-    ZStack {  // Need a container to properly animate transitions
-      if let indicator {
-        switch indicator.type {
-        case .toast:
-          UserIndicatorToastView(indicator: indicator)
-        case .modal:
-          UserIndicatorModalView(indicator: indicator)
-        }
-      }
+    var body: some View {
+        indicatorViewFor(indicator: userIndicatorController.activeIndicator)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .animation(.elementDefault, value: userIndicatorController.activeIndicator)
     }
-  }
+
+    private func indicatorViewFor(indicator: UserIndicator?) -> some View {
+        ZStack { // Need a container to properly animate transitions
+            if let indicator {
+                switch indicator.type {
+                case .toast:
+                    UserIndicatorToastView(indicator: indicator)
+                case .modal:
+                    UserIndicatorModalView(indicator: indicator)
+                }
+            }
+        }
+    }
 }

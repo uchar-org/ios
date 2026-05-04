@@ -9,66 +9,63 @@
 import Foundation
 
 final class UserDiscoveryService: UserDiscoveryServiceProtocol {
-  private let clientProxy: ClientProxyProtocol
+    private let clientProxy: ClientProxyProtocol
 
-  init(clientProxy: ClientProxyProtocol) {
-    self.clientProxy = clientProxy
-  }
-
-  func searchProfiles(with searchQuery: String) async -> Result<
-    [UserProfileProxy], UserDiscoveryErrorType
-  > {
-    async let queriedProfile = profileIfPossible(with: searchQuery)
-
-    do {
-      async let searchedUsers = clientProxy.searchUsers(searchTerm: searchQuery, limit: 10).get()
-      let users = try await merge(queriedProfile: queriedProfile, searchResults: searchedUsers)
-      return .success(filterAccountOwner(users))
-    } catch {
-      // we want to show the profile (if any) even if the search fails
-      if let queriedProfile = await queriedProfile {
-        return .success([queriedProfile])
-      } else {
-        return .failure(.failedSearchingUsers)
-      }
-    }
-  }
-
-  private func merge(queriedProfile: UserProfileProxy?, searchResults: SearchUsersResultsProxy)
-    -> [UserProfileProxy]
-  {
-    let searchResults = searchResults.results
-
-    guard let queriedProfile else {
-      return searchResults
+    init(clientProxy: ClientProxyProtocol) {
+        self.clientProxy = clientProxy
     }
 
-    let filteredSearchResult = searchResults.filter {
-      $0.userID != queriedProfile.userID
+    func searchProfiles(with searchQuery: String) async -> Result<[UserProfileProxy], UserDiscoveryErrorType> {
+        async let queriedProfile = profileIfPossible(with: searchQuery)
+
+        do {
+            async let searchedUsers = clientProxy.searchUsers(searchTerm: searchQuery, limit: 10).get()
+            let users = try await merge(queriedProfile: queriedProfile, searchResults: searchedUsers)
+            return .success(filterAccountOwner(users))
+        } catch {
+            // we want to show the profile (if any) even if the search fails
+            if let queriedProfile = await queriedProfile {
+                return .success([queriedProfile])
+            } else {
+                return .failure(.failedSearchingUsers)
+            }
+        }
     }
 
-    return [queriedProfile] + filteredSearchResult
-  }
+    private func merge(queriedProfile: UserProfileProxy?, searchResults: SearchUsersResultsProxy)
+        -> [UserProfileProxy] {
+        let searchResults = searchResults.results
 
-  private func profileIfPossible(with searchQuery: String) async -> UserProfileProxy? {
-    guard searchQuery.isMatrixIdentifier, searchQuery != clientProxy.userID else {
-      return nil
+        guard let queriedProfile else {
+            return searchResults
+        }
+
+        let filteredSearchResult = searchResults.filter {
+            $0.userID != queriedProfile.userID
+        }
+
+        return [queriedProfile] + filteredSearchResult
     }
 
-    let getProfileResult = try? await clientProxy.profile(for: searchQuery).get()
+    private func profileIfPossible(with searchQuery: String) async -> UserProfileProxy? {
+        guard searchQuery.isMatrixIdentifier, searchQuery != clientProxy.userID else {
+            return nil
+        }
 
-    // fallback to a "local profile" if the profile api fails
-    return getProfileResult ?? .init(userID: searchQuery)
-  }
+        let getProfileResult = try? await clientProxy.profile(for: searchQuery).get()
 
-  private func filterAccountOwner(_ profiles: [UserProfileProxy]) -> [UserProfileProxy] {
-    let accountOwnerID = clientProxy.userID
-    return profiles.filter { $0.userID != accountOwnerID }
-  }
+        // fallback to a "local profile" if the profile api fails
+        return getProfileResult ?? .init(userID: searchQuery)
+    }
+
+    private func filterAccountOwner(_ profiles: [UserProfileProxy]) -> [UserProfileProxy] {
+        let accountOwnerID = clientProxy.userID
+        return profiles.filter { $0.userID != accountOwnerID }
+    }
 }
 
-extension String {
-  fileprivate var isMatrixIdentifier: Bool {
-    MatrixEntityRegex.isMatrixUserIdentifier(self)
-  }
+private extension String {
+    var isMatrixIdentifier: Bool {
+        MatrixEntityRegex.isMatrixUserIdentifier(self)
+    }
 }

@@ -10,56 +10,52 @@ import Combine
 import SwiftUI
 
 struct NotificationSettingsEditScreenCoordinatorParameters {
-  weak var navigationStackCoordinator: NavigationStackCoordinator?
-  let chatType: NotificationSettingsChatType
-  let userSession: UserSessionProtocol
+    weak var navigationStackCoordinator: NavigationStackCoordinator?
+    let chatType: NotificationSettingsChatType
+    let userSession: UserSessionProtocol
 }
 
 final class NotificationSettingsEditScreenCoordinator: CoordinatorProtocol {
-  private let parameters: NotificationSettingsEditScreenCoordinatorParameters
-  private var viewModel: NotificationSettingsEditScreenViewModelProtocol
-  private var cancellables = Set<AnyCancellable>()
+    private let parameters: NotificationSettingsEditScreenCoordinatorParameters
+    private var viewModel: NotificationSettingsEditScreenViewModelProtocol
+    private var cancellables = Set<AnyCancellable>()
 
-  init(parameters: NotificationSettingsEditScreenCoordinatorParameters) {
-    self.parameters = parameters
+    init(parameters: NotificationSettingsEditScreenCoordinatorParameters) {
+        self.parameters = parameters
 
-    viewModel = NotificationSettingsEditScreenViewModel(
-      chatType: parameters.chatType,
-      userSession: parameters.userSession)
-  }
-
-  func start() {
-    viewModel.fetchInitialContent()
-
-    viewModel.actions.sink { [weak self] action in
-      guard let self else { return }
-      switch action {
-      case .requestRoomNotificationSettingsPresentation(let roomID):
-        Task { await self.presentRoomNotificationSettings(roomID: roomID) }
-      }
+        viewModel = NotificationSettingsEditScreenViewModel(chatType: parameters.chatType,
+                                                            userSession: parameters.userSession)
     }
-    .store(in: &cancellables)
-  }
 
-  func toPresentable() -> AnyView {
-    AnyView(NotificationSettingsEditScreen(context: viewModel.context))
-  }
+    func start() {
+        viewModel.fetchInitialContent()
 
-  // MARK: - Private
+        viewModel.actions.sink { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .requestRoomNotificationSettingsPresentation(let roomID):
+                Task { await self.presentRoomNotificationSettings(roomID: roomID) }
+            }
+        }
+        .store(in: &cancellables)
+    }
 
-  private func presentRoomNotificationSettings(roomID: String) async {
-    guard
-      case .joined(let roomProxy) = await parameters.userSession.clientProxy.roomForIdentifier(
-        roomID)
-    else { return }
+    func toPresentable() -> AnyView {
+        AnyView(NotificationSettingsEditScreen(context: viewModel.context))
+    }
 
-    let roomNotificationSettingsParameters = RoomNotificationSettingsScreenCoordinatorParameters(
-      navigationStackCoordinator: parameters.navigationStackCoordinator,
-      notificationSettingsProxy: parameters.userSession.clientProxy.notificationSettings,
-      roomProxy: roomProxy,
-      displayAsUserDefinedRoomSettings: true)
-    let roomNotificationSettingsCoordinator = RoomNotificationSettingsScreenCoordinator(
-      parameters: roomNotificationSettingsParameters)
-    parameters.navigationStackCoordinator?.push(roomNotificationSettingsCoordinator)
-  }
+    // MARK: - Private
+
+    private func presentRoomNotificationSettings(roomID: String) async {
+        guard
+            case .joined(let roomProxy) = await parameters.userSession.clientProxy.roomForIdentifier(roomID)
+        else { return }
+
+        let roomNotificationSettingsParameters = RoomNotificationSettingsScreenCoordinatorParameters(navigationStackCoordinator: parameters.navigationStackCoordinator,
+                                                                                                     notificationSettingsProxy: parameters.userSession.clientProxy.notificationSettings,
+                                                                                                     roomProxy: roomProxy,
+                                                                                                     displayAsUserDefinedRoomSettings: true)
+        let roomNotificationSettingsCoordinator = RoomNotificationSettingsScreenCoordinator(parameters: roomNotificationSettingsParameters)
+        parameters.navigationStackCoordinator?.push(roomNotificationSettingsCoordinator)
+    }
 }

@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol CallScreenViewModelProtocol {
-  var actions: AnyPublisher<CallScreenViewModelAction, Never> { get }
-  var context: CallScreenViewModelType.Context { get }
+    var actions: AnyPublisher<CallScreenViewModelAction, Never> { get }
+    var context: CallScreenViewModelType.Context { get }
 
-  func stop()
+    func stop()
 }

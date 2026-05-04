@@ -10,59 +10,50 @@ import Compound
 import SwiftUI
 
 struct AudioMediaEventsTimelineView: View {
-  let timelineItem: AudioRoomTimelineItem
+    let timelineItem: AudioRoomTimelineItem
 
-  var body: some View {
-    MediaFileRoomTimelineContent(
-      filename: timelineItem.content.filename,
-      fileSize: timelineItem.content.fileSize,
-      caption: timelineItem.content.caption,
-      formattedCaption: timelineItem.content.formattedCaption,
-      additionalWhitespaces: timelineItem.additionalWhitespaces(),
-      isAudioFile: true
-    )
-    .accessibilityLabel(L10n.commonAudio)
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .bubbleBackground(isOutgoing: timelineItem.isOutgoing)
-  }
+    var body: some View {
+        MediaFileRoomTimelineContent(filename: timelineItem.content.filename,
+                                     fileSize: timelineItem.content.fileSize,
+                                     caption: timelineItem.content.caption,
+                                     formattedCaption: timelineItem.content.formattedCaption,
+                                     additionalWhitespaces: timelineItem.additionalWhitespaces(),
+                                     isAudioFile: true)
+            .accessibilityLabel(L10n.commonAudio)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .bubbleBackground(isOutgoing: timelineItem.isOutgoing)
+    }
 }
 
 struct AudioMediaEventsTimelineView_Previews: PreviewProvider, TestablePreview {
-  static let viewModel = TimelineViewModel.mock
+    static let viewModel = TimelineViewModel.mock
 
-  static var previews: some View {
-    VStack(spacing: 20) {
-      AudioMediaEventsTimelineView(
-        timelineItem: makeItem(
-          filename: "audio.ogg",
-          fileSize: 2 * 1024 * 1024))
+    static var previews: some View {
+        VStack(spacing: 20) {
+            AudioMediaEventsTimelineView(timelineItem: makeItem(filename: "audio.ogg",
+                                                                fileSize: 2 * 1024 * 1024))
 
-      AudioMediaEventsTimelineView(
-        timelineItem: makeItem(
-          filename: "Best Song Ever.mp3",
-          fileSize: 7 * 1024 * 1024,
-          caption: "This song rocks!"))
+            AudioMediaEventsTimelineView(timelineItem: makeItem(filename: "Best Song Ever.mp3",
+                                                                fileSize: 7 * 1024 * 1024,
+                                                                caption: "This song rocks!"))
+        }
+        .environmentObject(viewModel.context)
     }
-    .environmentObject(viewModel.context)
-  }
 
-  static func makeItem(filename: String, fileSize: UInt, caption: String? = nil)
-    -> AudioRoomTimelineItem
-  {
-    .init(
-      id: .randomEvent,
-      timestamp: .mock,
-      isOutgoing: false,
-      isEditable: false,
-      canBeRepliedTo: true,
-      sender: .init(id: "Bob"),
-      content: .init(
-        filename: filename,
-        caption: caption,
-        duration: 300,
-        waveform: nil,
-        source: nil,
-        fileSize: fileSize,
-        contentType: nil))
-  }
+    static func makeItem(filename: String, fileSize: UInt, caption: String? = nil)
+        -> AudioRoomTimelineItem {
+        .init(id: .randomEvent,
+              timestamp: .mock,
+              isOutgoing: false,
+              isEditable: false,
+              canBeRepliedTo: true,
+              sender: .init(id: "Bob"),
+              content: .init(filename: filename,
+                             caption: caption,
+                             duration: 300,
+                             waveform: nil,
+                             source: nil,
+                             fileSize: fileSize,
+                             contentType: nil))
+    }
 }

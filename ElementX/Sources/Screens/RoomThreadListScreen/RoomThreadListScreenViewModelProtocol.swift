@@ -9,6 +9,6 @@ import Combine
 
 @MainActor
 protocol RoomThreadListScreenViewModelProtocol {
-  var actionsPublisher: AnyPublisher<RoomThreadListScreenViewModelAction, Never> { get }
-  var context: RoomThreadListScreenViewModelType.Context { get }
+    var actionsPublisher: AnyPublisher<RoomThreadListScreenViewModelAction, Never> { get }
+    var context: RoomThreadListScreenViewModelType.Context { get }
 }

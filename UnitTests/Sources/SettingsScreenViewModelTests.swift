@@ -7,42 +7,40 @@
 //
 
 import Combine
-import Testing
-
 @testable import ElementX
+import Testing
 
 @MainActor
 struct SettingsScreenViewModelTests {
-  private var viewModel: SettingsScreenViewModelProtocol
-  private var context: SettingsScreenViewModelType.Context
+    private var viewModel: SettingsScreenViewModelProtocol
+    private var context: SettingsScreenViewModelType.Context
 
-  init() {
-    let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: ""))))
-    viewModel = SettingsScreenViewModel(
-      userSession: userSession,
-      appSettings: ServiceLocator.shared.settings,
-      isBugReportServiceEnabled: true)
-    context = viewModel.context
-  }
+    init() {
+        let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: ""))))
+        viewModel = SettingsScreenViewModel(userSession: userSession,
+                                            appSettings: ServiceLocator.shared.settings,
+                                            isBugReportServiceEnabled: true)
+        context = viewModel.context
+    }
 
-  @Test
-  func logout() async throws {
-    let deferred = deferFulfillment(viewModel.actions) { $0 == .logout }
-    context.send(viewAction: .logout)
-    try await deferred.fulfill()
-  }
+    @Test
+    func logout() async throws {
+        let deferred = deferFulfillment(viewModel.actions) { $0 == .logout }
+        context.send(viewAction: .logout)
+        try await deferred.fulfill()
+    }
 
-  @Test
-  func reportBug() async throws {
-    let deferred = deferFulfillment(viewModel.actions) { $0 == .reportBug }
-    context.send(viewAction: .reportBug)
-    try await deferred.fulfill()
-  }
+    @Test
+    func reportBug() async throws {
+        let deferred = deferFulfillment(viewModel.actions) { $0 == .reportBug }
+        context.send(viewAction: .reportBug)
+        try await deferred.fulfill()
+    }
 
-  @Test
-  func analytics() async throws {
-    let deferred = deferFulfillment(viewModel.actions) { $0 == .analytics }
-    context.send(viewAction: .analytics)
-    try await deferred.fulfill()
-  }
+    @Test
+    func analytics() async throws {
+        let deferred = deferFulfillment(viewModel.actions) { $0 == .analytics }
+        context.send(viewAction: .analytics)
+        try await deferred.fulfill()
+    }
 }

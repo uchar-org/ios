@@ -10,12 +10,12 @@ import Compound
 import SwiftUI
 
 struct ComposerDisabledView: View {
-  var body: some View {
-    Text(L10n.screenRoomTimelineNoPermissionToPost)
-      .font(.compound.bodyLG)
-      .foregroundStyle(.compound.textDisabled)
-      .multilineTextAlignment(.center)
-      .padding(.vertical, 10)  // Matches the MessageComposerStyleModifier
-      .padding(.bottom, 12)
-  }
+    var body: some View {
+        Text(L10n.screenRoomTimelineNoPermissionToPost)
+            .font(.compound.bodyLG)
+            .foregroundStyle(.compound.textDisabled)
+            .multilineTextAlignment(.center)
+            .padding(.vertical, 10) // Matches the MessageComposerStyleModifier
+            .padding(.bottom, 12)
+    }
 }

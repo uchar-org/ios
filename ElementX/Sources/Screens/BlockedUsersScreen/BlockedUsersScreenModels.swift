@@ -9,21 +9,21 @@
 import Foundation
 
 struct BlockedUsersScreenViewState: BindableState {
-  var blockedUsers: [UserProfileProxy]
-  var processingUserID: String?
+    var blockedUsers: [UserProfileProxy]
+    var processingUserID: String?
 
-  var bindings = BlockedUsersScreenViewStateBindings()
+    var bindings = BlockedUsersScreenViewStateBindings()
 }
 
 struct BlockedUsersScreenViewStateBindings {
-  var alertInfo: AlertInfo<BlockedUsersScreenViewStateAlertType>?
+    var alertInfo: AlertInfo<BlockedUsersScreenViewStateAlertType>?
 }
 
 enum BlockedUsersScreenViewAction {
-  case unblockUser(UserProfileProxy)
+    case unblockUser(UserProfileProxy)
 }
 
 enum BlockedUsersScreenViewStateAlertType: Hashable {
-  case unblock
-  case error
+    case unblock
+    case error
 }

@@ -13,37 +13,36 @@ import MatrixRustSDKMocks
 
 @MainActor
 class AutoUpdatingTimelineItemProviderMock: TimelineItemProvider {
-  static var timelineListener: TimelineListener?
+    static var timelineListener: TimelineListener?
 
-  private let innerPaginationStatePublisher: PassthroughSubject<TimelinePaginationState, Never>
+    private let innerPaginationStatePublisher: PassthroughSubject<TimelinePaginationState, Never>
 
-  init() {
-    innerPaginationStatePublisher = .init()
+    init() {
+        innerPaginationStatePublisher = .init()
 
-    let timelineMock = TimelineSDKMock()
+        let timelineMock = TimelineSDKMock()
 
-    timelineMock.addListenerListenerClosure = { listener in
-      Self.timelineListener = listener
-      return TaskHandleSDKMock()
+        timelineMock.addListenerListenerClosure = { listener in
+            Self.timelineListener = listener
+            return TaskHandleSDKMock()
+        }
+
+        super.init(timeline: timelineMock,
+                   kind: .live,
+                   paginationStatePublisher: innerPaginationStatePublisher.eraseToAnyPublisher())
+
+        Task.detached {
+            for _ in 0...100 {
+                try? await Task.sleep(for: .seconds(1))
+
+                let timelineItem = TimelineItemSDKMock()
+                timelineItem.asEventReturnValue = EventTimelineItem.mockMessage
+                timelineItem.uniqueIdReturnValue = .init(id: UUID().uuidString)
+
+                let diff = TimelineDiff.append(values: [timelineItem])
+
+                await Self.timelineListener?.onUpdate(diff: [diff])
+            }
+        }
     }
-
-    super.init(
-      timeline: timelineMock,
-      kind: .live,
-      paginationStatePublisher: innerPaginationStatePublisher.eraseToAnyPublisher())
-
-    Task.detached {
-      for _ in 0...100 {
-        try? await Task.sleep(for: .seconds(1))
-
-        let timelineItem = TimelineItemSDKMock()
-        timelineItem.asEventReturnValue = EventTimelineItem.mockMessage
-        timelineItem.uniqueIdReturnValue = .init(id: UUID().uuidString)
-
-        let diff = TimelineDiff.append(values: [timelineItem])
-
-        await Self.timelineListener?.onUpdate(diff: [diff])
-      }
-    }
-  }
 }

@@ -11,8 +11,8 @@ import Foundation
 
 @MainActor
 protocol CreateRoomScreenViewModelProtocol {
-  var actions: AnyPublisher<CreateRoomScreenViewModelAction, Never> { get }
-  var context: CreateRoomScreenViewModelType.Context { get }
+    var actions: AnyPublisher<CreateRoomScreenViewModelAction, Never> { get }
+    var context: CreateRoomScreenViewModelType.Context { get }
 
-  func updateAvatar(fileURL: URL)
+    func updateAvatar(fileURL: URL)
 }

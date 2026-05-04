@@ -10,22 +10,22 @@ import Combine
 import Foundation
 
 enum UserSessionCallback {
-  case didReceiveAuthError(isSoftLogout: Bool)
+    case didReceiveAuthError(isSoftLogout: Bool)
 }
 
 struct SessionSecurityState: Equatable {
-  let verificationState: SessionVerificationState
-  let recoveryState: SecureBackupRecoveryState
+    let verificationState: SessionVerificationState
+    let recoveryState: SecureBackupRecoveryState
 }
 
 // sourcery: AutoMockable
 protocol UserSessionProtocol {
-  var clientProxy: ClientProxyProtocol { get }
-  var mediaProvider: MediaProviderProtocol { get }
-  var voiceMessageMediaManager: VoiceMessageMediaManagerProtocol { get }
-  var liveLocationManager: LiveLocationManagerProtocol { get }
+    var clientProxy: ClientProxyProtocol { get }
+    var mediaProvider: MediaProviderProtocol { get }
+    var voiceMessageMediaManager: VoiceMessageMediaManagerProtocol { get }
+    var liveLocationManager: LiveLocationManagerProtocol { get }
 
-  var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> { get }
+    var sessionSecurityStatePublisher: CurrentValuePublisher<SessionSecurityState, Never> { get }
 
-  var callbacks: PassthroughSubject<UserSessionCallback, Never> { get }
+    var callbacks: PassthroughSubject<UserSessionCallback, Never> { get }
 }

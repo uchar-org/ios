@@ -9,12 +9,12 @@
 import Foundation
 
 struct ReadReceipt: Hashable {
-  let userID: String
-  let formattedTimestamp: String?
+    let userID: String
+    let formattedTimestamp: String?
 }
 
 extension ReadReceipt: Identifiable {
-  var id: String {
-    userID
-  }
+    var id: String {
+        userID
+    }
 }

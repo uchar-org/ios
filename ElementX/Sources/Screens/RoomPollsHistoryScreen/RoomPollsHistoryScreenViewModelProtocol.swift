@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol RoomPollsHistoryScreenViewModelProtocol {
-  var actions: AnyPublisher<RoomPollsHistoryScreenViewModelAction, Never> { get }
-  var context: RoomPollsHistoryScreenViewModelType.Context { get }
+    var actions: AnyPublisher<RoomPollsHistoryScreenViewModelAction, Never> { get }
+    var context: RoomPollsHistoryScreenViewModelType.Context { get }
 }

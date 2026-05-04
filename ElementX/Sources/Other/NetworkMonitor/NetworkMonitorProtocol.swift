@@ -9,13 +9,13 @@
 import Foundation
 
 enum NetworkMonitorReachability {
-  case reachable
-  case unreachable
+    case reachable
+    case unreachable
 }
 
 protocol NetworkMonitorProtocol {
-  var reachabilityPublisher: CurrentValuePublisher<NetworkMonitorReachability, Never> { get }
+    var reachabilityPublisher: CurrentValuePublisher<NetworkMonitorReachability, Never> { get }
 }
 
 // sourcery: AutoMockable
-extension NetworkMonitorProtocol {}
+extension NetworkMonitorProtocol { }

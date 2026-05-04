@@ -10,15 +10,15 @@ import Foundation
 import UniformTypeIdentifiers
 
 struct ImageRoomTimelineItemContent: Hashable {
-  let filename: String
-  var caption: String?
-  var formattedCaption: AttributedString?
-  /// The original textual representation of the formatted caption directly from the event (usually HTML code)
-  var formattedCaptionHTMLString: String?
+    let filename: String
+    var caption: String?
+    var formattedCaption: AttributedString?
+    /// The original textual representation of the formatted caption directly from the event (usually HTML code)
+    var formattedCaptionHTMLString: String?
 
-  let imageInfo: ImageInfoProxy
-  let thumbnailInfo: ImageInfoProxy?
+    let imageInfo: ImageInfoProxy
+    let thumbnailInfo: ImageInfoProxy?
 
-  var blurhash: String?
-  var contentType: UTType?
+    var blurhash: String?
+    var contentType: UTType?
 }

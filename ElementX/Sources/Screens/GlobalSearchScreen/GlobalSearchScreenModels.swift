@@ -9,29 +9,29 @@
 import Foundation
 
 enum GlobalSearchScreenViewModelAction {
-  case dismiss
-  case select(roomID: String)
+    case dismiss
+    case select(roomID: String)
 }
 
 struct GlobalSearchScreenViewState: BindableState {
-  var rooms = [GlobalSearchRoom]()
-  var bindings: GlobalSearchScreenViewStateBindings
+    var rooms = [GlobalSearchRoom]()
+    var bindings: GlobalSearchScreenViewStateBindings
 }
 
 struct GlobalSearchScreenViewStateBindings {
-  var searchQuery: String
+    var searchQuery: String
 }
 
 enum GlobalSearchScreenViewAction {
-  case dismiss
-  case select(roomID: String)
-  case reachedTop
-  case reachedBottom
+    case dismiss
+    case select(roomID: String)
+    case reachedTop
+    case reachedBottom
 }
 
 struct GlobalSearchRoom: Identifiable, Equatable {
-  let id: String
-  let title: String
-  let description: String
-  let avatar: RoomAvatar
+    let id: String
+    let title: String
+    let description: String
+    let avatar: RoomAvatar
 }

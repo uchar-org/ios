@@ -13,614 +13,577 @@ import SwiftState
 import SwiftUI
 
 enum UserSessionFlowCoordinatorAction {
-  case logout
-  case clearCache
-  /// Logout and disable App Lock without any confirmation. The user forgot their PIN.
-  case forceLogout
+    case logout
+    case clearCache
+    /// Logout and disable App Lock without any confirmation. The user forgot their PIN.
+    case forceLogout
 }
 
 class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
-  enum HomeTab: Hashable { case chats, spaces, settings }
+    enum HomeTab: Hashable { case chats, spaces, settings }
 
-  private let navigationRootCoordinator: NavigationRootCoordinator
-  private let navigationTabCoordinator: NavigationTabCoordinator<HomeTab>
-  private let appLockService: AppLockServiceProtocol
-  private let flowParameters: CommonFlowParameters
+    private let navigationRootCoordinator: NavigationRootCoordinator
+    private let navigationTabCoordinator: NavigationTabCoordinator<HomeTab>
+    private let appLockService: AppLockServiceProtocol
+    private let flowParameters: CommonFlowParameters
 
-  private var userSession: UserSessionProtocol {
-    flowParameters.userSession
-  }
-
-  private let onboardingFlowCoordinator: OnboardingFlowCoordinator
-  private let onboardingStackCoordinator: NavigationStackCoordinator
-  private let chatsTabFlowCoordinator: ChatsTabFlowCoordinator
-  private let chatsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
-  private let spacesTabFlowCoordinator: SpacesTabFlowCoordinator
-  private let spacesTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
-  //    private let settingsTabStackCoordinator: NavigationStackCoordinator
-  private let settingsSplitStackCoordinator: NavigationStackCoordinator
-  private let settingScreenFlowCoordinator: SettingsFlowCoordinator
-  private let settingsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
-
-  // periphery:ignore - retaining purpose
-  private var settingsFlowCoordinator: SettingsFlowCoordinator?
-
-  enum State: StateType {
-    /// The state machine hasn't started.
-    case initial
-    /// The root screen for this flow.
-    case tabBar
-    /// Showing the settings screen.
-    case settingsScreen
-  }
-
-  enum Event: EventType {
-    /// The flow is being started.
-    case start
-
-    /// Request presentation of the settings screen.
-    case showSettingsScreen
-    /// The settings screen has been dismissed.
-    case dismissedSettingsScreen
-  }
-
-  private let stateMachine: StateMachine<State, Event>
-  private var cancellables: Set<AnyCancellable> = []
-
-  private let actionsSubject: PassthroughSubject<UserSessionFlowCoordinatorAction, Never> = .init()
-  var actionsPublisher: AnyPublisher<UserSessionFlowCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(
-    isNewLogin: Bool,
-    navigationRootCoordinator: NavigationRootCoordinator,
-    appLockService: AppLockServiceProtocol,
-    flowParameters: CommonFlowParameters
-  ) {
-    self.navigationRootCoordinator = navigationRootCoordinator
-    self.appLockService = appLockService
-    self.flowParameters = flowParameters
-
-    navigationTabCoordinator = NavigationTabCoordinator()
-    navigationRootCoordinator.setRootCoordinator(navigationTabCoordinator)
-
-    let chatsSplitCoordinator = NavigationSplitCoordinator(
-      placeholderCoordinator: PlaceholderScreenCoordinator(
-        hideBrandChrome: flowParameters.appSettings.hideBrandChrome))
-    chatsTabFlowCoordinator = ChatsTabFlowCoordinator(
-      isNewLogin: isNewLogin,
-      navigationSplitCoordinator: chatsSplitCoordinator,
-      flowParameters: flowParameters)
-    chatsTabDetails = .init(
-      tag: HomeTab.chats, title: L10n.screenHomeTabChats, icon: \.chat, selectedIcon: \.chatSolid)
-    chatsTabDetails.navigationSplitCoordinator = chatsSplitCoordinator
-
-    let spacesSplitCoordinator = NavigationSplitCoordinator(
-      placeholderCoordinator: PlaceholderScreenCoordinator(
-        hideBrandChrome: flowParameters.appSettings.hideBrandChrome))
-    spacesTabFlowCoordinator = SpacesTabFlowCoordinator(
-      navigationSplitCoordinator: spacesSplitCoordinator,
-      flowParameters: flowParameters)
-    spacesTabDetails = .init(
-      tag: HomeTab.spaces, title: L10n.screenHomeTabSpaces, icon: \.space,
-      selectedIcon: \.spaceSolid)
-    spacesTabDetails.navigationSplitCoordinator = spacesSplitCoordinator
-
-    settingsSplitStackCoordinator = NavigationStackCoordinator()
-    settingScreenFlowCoordinator = SettingsFlowCoordinator(
-      appLockService: appLockService,
-      navigationStackCoordinator: settingsSplitStackCoordinator,
-      flowParameters: flowParameters)
-
-    settingsTabDetails = .init(
-      tag: HomeTab.settings,
-      title: L10n.commonSettings,
-      icon: \.settings,
-      selectedIcon: \.settingsSolid)
-
-    onboardingStackCoordinator = NavigationStackCoordinator()
-    onboardingFlowCoordinator = OnboardingFlowCoordinator(
-      isNewLogin: isNewLogin,
-      appLockService: appLockService,
-      navigationStackCoordinator: onboardingStackCoordinator,
-      flowParameters: flowParameters)
-
-    navigationTabCoordinator.setTabs([
-      .init(coordinator: chatsSplitCoordinator, details: chatsTabDetails),
-      .init(coordinator: spacesSplitCoordinator, details: spacesTabDetails),
-      .init(coordinator: settingsSplitStackCoordinator, details: settingsTabDetails),
-    ])
-
-    stateMachine = flowParameters.stateMachineFactory.makeUserSessionFlowStateMachine(
-      state: .initial)
-    configureStateMachine()
-
-    setupObservers()
-  }
-
-  func start(animated: Bool) {
-    stateMachine.tryEvent(.start)
-    observeLanguageChanges()
-  }
-
-  func stop() {
-    chatsTabFlowCoordinator.stop()
-  }
-
-  func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
-    MXLog.info("Handling app route: \(appRoute)")
-
-    switch appRoute {
-    case .accountProvisioningLink:
-      break  // We always ignore this flow when logged in.
-    case .settings, .chatBackupSettings:
-      if ProcessInfo.processInfo.isiOSAppOnMac {
-        startSettingsFlow(detached: true)
-      } else {
-        navigationTabCoordinator.selectedTab = .settings
-        settingsFlowCoordinator?.handleAppRoute(appRoute, animated: animated)
-      }
-    case .call(let roomID, let isVoiceCall):
-      Task { await presentCallScreen(roomID: roomID, isVoiceCall: isVoiceCall) }
-    case .roomList, .room, .roomAlias, .childRoom, .childRoomAlias,
-      .roomDetails, .roomMemberDetails, .userProfile,
-      .event, .eventOnRoomAlias, .childEvent, .childEventOnRoomAlias,
-      .share, .transferOwnership, .thread, .globalSearch:
-      clearPresentedSheets(animated: animated)  // Make sure the presented route is visible.
-      chatsTabFlowCoordinator.handleAppRoute(appRoute, animated: animated)
-      if navigationTabCoordinator.selectedTab != .chats {
-        navigationTabCoordinator.selectedTab = .chats
-      }
-    }
-  }
-
-  func clearRoute(animated: Bool) {
-    clearPresentedSheets(animated: animated)
-    chatsTabFlowCoordinator.clearRoute(animated: animated)
-  }
-
-  /// Clearing routes is more complicated than it first seems. When passing routes
-  /// to the chats flow we can't clear all routes as e.g. childRoom/childEvent etc
-  /// expect to push into the existing stack. But we do need to hide any sheets that
-  /// might cover up the presented route. BUT! We probably shouldn't dismiss onboarding
-  /// or verification flows until they're complete… This needs more thought before we
-  /// codify it all into the state machine.
-  private func clearPresentedSheets(animated: Bool) {
-    switch stateMachine.state {
-    case .initial, .tabBar:
-      break
-    case .settingsScreen:
-      navigationTabCoordinator.setSheetCoordinator(nil, animated: animated)
-    }
-  }
-
-  func isDisplayingRoomScreen(withRoomID roomID: String) -> Bool {
-    guard navigationTabCoordinator.selectedTab == .chats else { return false }
-    return chatsTabFlowCoordinator.isDisplayingRoomScreen(withRoomID: roomID)
-  }
-
-  // MARK: - Private
-
-  private func observeLanguageChanges() {
-    NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] _ in
-        self?.updateTabTitles()
-      }
-      .store(in: &cancellables)
-  }
-
-  private func updateTabTitles() {
-    chatsTabDetails.title = L10n.screenHomeTabChats
-    spacesTabDetails.title = L10n.screenHomeTabSpaces
-    settingsTabDetails.title = L10n.commonSettings
-  }
-
-  private func configureStateMachine() {
-    stateMachine.addRoutes(event: .start, transitions: [.initial => .tabBar]) { [weak self] _ in
-      guard let self else { return }
-
-      chatsTabFlowCoordinator.start()
-      spacesTabFlowCoordinator.start()
-      startSettingsFlow(detached: true)
-      attemptStartingOnboarding()
+    private var userSession: UserSessionProtocol {
+        flowParameters.userSession
     }
 
-    stateMachine.addRoutes(event: .showSettingsScreen, transitions: [.tabBar => .settingsScreen]) {
-      [weak self] _ in
-      self?.startSettingsFlow(detached: false)
-    }
-    stateMachine.addRoutes(
-      event: .dismissedSettingsScreen, transitions: [.settingsScreen => .tabBar]
-    ) { [weak self] _ in
-      self?.settingsFlowCoordinator = nil
+    private let onboardingFlowCoordinator: OnboardingFlowCoordinator
+    private let onboardingStackCoordinator: NavigationStackCoordinator
+    private let chatsTabFlowCoordinator: ChatsTabFlowCoordinator
+    private let chatsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+    private let spacesTabFlowCoordinator: SpacesTabFlowCoordinator
+    private let spacesTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+    //    private let settingsTabStackCoordinator: NavigationStackCoordinator
+    private let settingsSplitStackCoordinator: NavigationStackCoordinator
+    private let settingScreenFlowCoordinator: SettingsFlowCoordinator
+    private let settingsTabDetails: NavigationTabCoordinator<HomeTab>.TabDetails
+
+    // periphery:ignore - retaining purpose
+    private var settingsFlowCoordinator: SettingsFlowCoordinator?
+
+    enum State: StateType {
+        /// The state machine hasn't started.
+        case initial
+        /// The root screen for this flow.
+        case tabBar
+        /// Showing the settings screen.
+        case settingsScreen
     }
 
-    stateMachine.addErrorHandler { context in
-      fatalError("Unexpected transition: \(context)")
-    }
-  }
+    enum Event: EventType {
+        /// The flow is being started.
+        case start
 
-  private func setupObservers() {
-    chatsTabFlowCoordinator.actionsPublisher
-      .sink { [weak self] action in
-        guard let self else { return }
-        switch action {
-        case .switchToChatsTab:
-          navigationTabCoordinator.selectedTab = .chats
-        case .showSettings:
-          handleAppRoute(.settings, animated: true)
-        case .showChatBackupSettings:
-          handleAppRoute(.chatBackupSettings, animated: true)
-        case .sessionVerification(let flow):
-          presentSessionVerificationScreen(flow: flow)
-        case .showCallScreen(let roomProxy, let isVoiceCall):
-          presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
-        case .hideCallScreenOverlay:
-          hideCallScreenOverlay()
-        case .logout:
-          Task { await self.runLogoutFlow() }
+        /// Request presentation of the settings screen.
+        case showSettingsScreen
+        /// The settings screen has been dismissed.
+        case dismissedSettingsScreen
+    }
+
+    private let stateMachine: StateMachine<State, Event>
+    private var cancellables: Set<AnyCancellable> = []
+
+    private let actionsSubject: PassthroughSubject<UserSessionFlowCoordinatorAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<UserSessionFlowCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
+
+    init(isNewLogin: Bool,
+         navigationRootCoordinator: NavigationRootCoordinator,
+         appLockService: AppLockServiceProtocol,
+         flowParameters: CommonFlowParameters) {
+        self.navigationRootCoordinator = navigationRootCoordinator
+        self.appLockService = appLockService
+        self.flowParameters = flowParameters
+
+        navigationTabCoordinator = NavigationTabCoordinator()
+        navigationRootCoordinator.setRootCoordinator(navigationTabCoordinator)
+
+        let chatsSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.appSettings.hideBrandChrome))
+        chatsTabFlowCoordinator = ChatsTabFlowCoordinator(isNewLogin: isNewLogin,
+                                                          navigationSplitCoordinator: chatsSplitCoordinator,
+                                                          flowParameters: flowParameters)
+        chatsTabDetails = .init(tag: HomeTab.chats, title: L10n.screenHomeTabChats, icon: \.chat, selectedIcon: \.chatSolid)
+        chatsTabDetails.navigationSplitCoordinator = chatsSplitCoordinator
+
+        let spacesSplitCoordinator = NavigationSplitCoordinator(placeholderCoordinator: PlaceholderScreenCoordinator(hideBrandChrome: flowParameters.appSettings.hideBrandChrome))
+        spacesTabFlowCoordinator = SpacesTabFlowCoordinator(navigationSplitCoordinator: spacesSplitCoordinator,
+                                                            flowParameters: flowParameters)
+        spacesTabDetails = .init(tag: HomeTab.spaces, title: L10n.screenHomeTabSpaces, icon: \.space,
+                                 selectedIcon: \.spaceSolid)
+        spacesTabDetails.navigationSplitCoordinator = spacesSplitCoordinator
+
+        settingsSplitStackCoordinator = NavigationStackCoordinator()
+        settingScreenFlowCoordinator = SettingsFlowCoordinator(appLockService: appLockService,
+                                                               navigationStackCoordinator: settingsSplitStackCoordinator,
+                                                               flowParameters: flowParameters)
+
+        settingsTabDetails = .init(tag: HomeTab.settings,
+                                   title: L10n.commonSettings,
+                                   icon: \.settings,
+                                   selectedIcon: \.settingsSolid)
+
+        onboardingStackCoordinator = NavigationStackCoordinator()
+        onboardingFlowCoordinator = OnboardingFlowCoordinator(isNewLogin: isNewLogin,
+                                                              appLockService: appLockService,
+                                                              navigationStackCoordinator: onboardingStackCoordinator,
+                                                              flowParameters: flowParameters)
+
+        navigationTabCoordinator.setTabs([
+            .init(coordinator: chatsSplitCoordinator, details: chatsTabDetails),
+            .init(coordinator: spacesSplitCoordinator, details: spacesTabDetails),
+            .init(coordinator: settingsSplitStackCoordinator, details: settingsTabDetails)
+        ])
+
+        stateMachine = flowParameters.stateMachineFactory.makeUserSessionFlowStateMachine(state: .initial)
+        configureStateMachine()
+
+        setupObservers()
+    }
+
+    func start(animated: Bool) {
+        stateMachine.tryEvent(.start)
+        observeLanguageChanges()
+    }
+
+    func stop() {
+        chatsTabFlowCoordinator.stop()
+    }
+
+    func handleAppRoute(_ appRoute: AppRoute, animated: Bool) {
+        MXLog.info("Handling app route: \(appRoute)")
+
+        switch appRoute {
+        case .accountProvisioningLink:
+            break // We always ignore this flow when logged in.
+        case .settings, .chatBackupSettings:
+            if ProcessInfo.processInfo.isiOSAppOnMac {
+                startSettingsFlow(detached: true)
+            } else {
+                navigationTabCoordinator.selectedTab = .settings
+                settingsFlowCoordinator?.handleAppRoute(appRoute, animated: animated)
+            }
+        case .call(let roomID, let isVoiceCall):
+            Task { await presentCallScreen(roomID: roomID, isVoiceCall: isVoiceCall) }
+        case .roomList, .room, .roomAlias, .childRoom, .childRoomAlias,
+             .roomDetails, .roomMemberDetails, .userProfile,
+             .event, .eventOnRoomAlias, .childEvent, .childEventOnRoomAlias,
+             .share, .transferOwnership, .thread, .globalSearch:
+            clearPresentedSheets(animated: animated) // Make sure the presented route is visible.
+            chatsTabFlowCoordinator.handleAppRoute(appRoute, animated: animated)
+            if navigationTabCoordinator.selectedTab != .chats {
+                navigationTabCoordinator.selectedTab = .chats
+            }
         }
-      }
-      .store(in: &cancellables)
-
-    spacesTabFlowCoordinator.actionsPublisher
-      .sink { [weak self] action in
-        guard let self else { return }
-        switch action {
-        case .presentCallScreen(let roomProxy, let isVoiceCall):
-          presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
-        case .verifyUser(let userID):
-          presentSessionVerificationScreen(flow: .userInitiator(userID: userID))
-        case .showSettings:
-          stateMachine.tryEvent(.showSettingsScreen)
-        }
-      }
-      .store(in: &cancellables)
-
-    userSession.sessionSecurityStatePublisher
-      .map(\.verificationState)
-      .filter { $0 != .unknown }
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] _ in
-        guard let self else { return }
-
-        attemptStartingOnboarding()
-        setupSessionVerificationRequestsObserver()
-      }
-      .store(in: &cancellables)
-
-    let reachabilityNotificationID = "io.element.elementx.reachability.notification"
-    userSession.clientProxy.homeserverReachabilityPublisher.removeDuplicates()
-      .combineLatest(
-        flowParameters.appMediator.networkMonitor.reachabilityPublisher.removeDuplicates()
-      )
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] homeserverReachability, networkReachability in
-        MXLog.info("Homeserver reachability: \(homeserverReachability)")
-
-        guard let self else { return }
-        switch (networkReachability, homeserverReachability) {
-        case (.reachable, .reachable):
-          flowParameters.userIndicatorController.retractIndicatorWithId(reachabilityNotificationID)
-        case (.reachable, .unreachable):
-          flowParameters.userIndicatorController.submitIndicator(
-            .init(
-              id: reachabilityNotificationID,
-              title: L10n.commonServerUnreachable,
-              persistent: true))
-        case (.unreachable, _):
-          flowParameters.userIndicatorController.submitIndicator(
-            .init(
-              id: reachabilityNotificationID,
-              title: L10n.commonOffline,
-              persistent: true))
-        }
-      }
-      .store(in: &cancellables)
-
-    onboardingFlowCoordinator.actions
-      .sink { [weak self] action in
-        guard let self else { return }
-
-        switch action {
-        case .requestPresentation(let animated):
-          navigationTabCoordinator.setFullScreenCoverCoordinator(
-            onboardingStackCoordinator, animated: animated)
-        case .dismiss:
-          navigationTabCoordinator.setFullScreenCoverCoordinator(nil)
-        case .logoutConfirmed:
-          actionsSubject.send(.logout)
-        }
-      }
-      .store(in: &cancellables)
-
-    flowParameters.elementCallService.actions
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] action in
-        switch action {
-        case .endCall:
-          self?.dismissCallScreenIfNeeded()
-        default:
-          break
-        }
-      }
-      .store(in: &cancellables)
-  }
-
-  // MARK: - Onboarding
-
-  private func attemptStartingOnboarding() {
-    MXLog.info("Attempting to start onboarding")
-
-    if onboardingFlowCoordinator.shouldStart {
-      clearRoute(animated: false)
-      onboardingFlowCoordinator.start()
     }
-  }
 
-  // MARK: - Settings
+    func clearRoute(animated: Bool) {
+        clearPresentedSheets(animated: animated)
+        chatsTabFlowCoordinator.clearRoute(animated: animated)
+    }
 
-  private func startSettingsFlow(detached: Bool) {
-    //        let navigationStackCoordinator = NavigationStackCoordinator()
-    //        let coordinator = SettingsFlowCoordinator(appLockService: appLockService,
-    //                                                  navigationStackCoordinator: navigationStackCoordinator,
-    //                                                  flowParameters: flowParameters)
-
-    settingScreenFlowCoordinator.actions.sink { [weak self] action in
-      guard let self else { return }
-
-      switch action {
-      case .dismiss:
-        navigationTabCoordinator.setSheetCoordinator(nil)
-      case .clearCache:
-        actionsSubject.send(.clearCache)
-      case .runLogoutFlow:
-        Task {
-          self.navigationTabCoordinator.setSheetCoordinator(nil)
-
-          // The sheet needs to be dismissed before the alert can be shown
-          try await Task.sleep(for: .milliseconds(100))
-          await self.runLogoutFlow()
+    /// Clearing routes is more complicated than it first seems. When passing routes
+    /// to the chats flow we can't clear all routes as e.g. childRoom/childEvent etc
+    /// expect to push into the existing stack. But we do need to hide any sheets that
+    /// might cover up the presented route. BUT! We probably shouldn't dismiss onboarding
+    /// or verification flows until they're complete… This needs more thought before we
+    /// codify it all into the state machine.
+    private func clearPresentedSheets(animated: Bool) {
+        switch stateMachine.state {
+        case .initial, .tabBar:
+            break
+        case .settingsScreen:
+            navigationTabCoordinator.setSheetCoordinator(nil, animated: animated)
         }
-      case .forceLogout:
-        actionsSubject.send(.forceLogout)
-      }
     }
-    .store(in: &cancellables)
 
-    settingScreenFlowCoordinator.handleAppRoute(.settings, animated: false)
-
-    if detached {
-      flowParameters.windowManager.registerCoordinator(
-        settingsSplitStackCoordinator,
-        flowCoordinator: settingScreenFlowCoordinator,
-        forWindowType: .settings)
-    } else {
-      settingsFlowCoordinator = settingScreenFlowCoordinator
-
-      navigationTabCoordinator.setSheetCoordinator(settingsSplitStackCoordinator) { [weak self] in
-        self?.stateMachine.tryEvent(.dismissedSettingsScreen)
-      }
+    func isDisplayingRoomScreen(withRoomID roomID: String) -> Bool {
+        guard navigationTabCoordinator.selectedTab == .chats else { return false }
+        return chatsTabFlowCoordinator.isDisplayingRoomScreen(withRoomID: roomID)
     }
-  }
 
-  // MARK: - Session Verification
+    // MARK: - Private
 
-  private func setupSessionVerificationRequestsObserver() {
-    userSession.clientProxy.sessionVerificationController?.actions
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] action in
-        guard let self, case .receivedVerificationRequest(let details) = action else {
-          return
+    private func observeLanguageChanges() {
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateTabTitles()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func updateTabTitles() {
+        chatsTabDetails.title = L10n.screenHomeTabChats
+        spacesTabDetails.title = L10n.screenHomeTabSpaces
+        settingsTabDetails.title = L10n.commonSettings
+    }
+
+    private func configureStateMachine() {
+        stateMachine.addRoutes(event: .start, transitions: [.initial => .tabBar]) { [weak self] _ in
+            guard let self else { return }
+
+            chatsTabFlowCoordinator.start()
+            spacesTabFlowCoordinator.start()
+            startSettingsFlow(detached: true)
+            attemptStartingOnboarding()
         }
 
-        MXLog.info("Received session verification request")
+        stateMachine.addRoutes(event: .showSettingsScreen, transitions: [.tabBar => .settingsScreen]) {
+            [weak self] _ in
+            self?.startSettingsFlow(detached: false)
+        }
+        stateMachine.addRoutes(event: .dismissedSettingsScreen, transitions: [.settingsScreen => .tabBar]) { [weak self] _ in
+            self?.settingsFlowCoordinator = nil
+        }
 
-        if details.senderProfile.userID == userSession.clientProxy.userID {
-          presentSessionVerificationScreen(flow: .deviceResponder(requestDetails: details))
+        stateMachine.addErrorHandler { context in
+            fatalError("Unexpected transition: \(context)")
+        }
+    }
+
+    private func setupObservers() {
+        chatsTabFlowCoordinator.actionsPublisher
+            .sink { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case .switchToChatsTab:
+                    navigationTabCoordinator.selectedTab = .chats
+                case .showSettings:
+                    handleAppRoute(.settings, animated: true)
+                case .showChatBackupSettings:
+                    handleAppRoute(.chatBackupSettings, animated: true)
+                case .sessionVerification(let flow):
+                    presentSessionVerificationScreen(flow: flow)
+                case .showCallScreen(let roomProxy, let isVoiceCall):
+                    presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
+                case .hideCallScreenOverlay:
+                    hideCallScreenOverlay()
+                case .logout:
+                    Task { await self.runLogoutFlow() }
+                }
+            }
+            .store(in: &cancellables)
+
+        spacesTabFlowCoordinator.actionsPublisher
+            .sink { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case .presentCallScreen(let roomProxy, let isVoiceCall):
+                    presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
+                case .verifyUser(let userID):
+                    presentSessionVerificationScreen(flow: .userInitiator(userID: userID))
+                case .showSettings:
+                    stateMachine.tryEvent(.showSettingsScreen)
+                }
+            }
+            .store(in: &cancellables)
+
+        userSession.sessionSecurityStatePublisher
+            .map(\.verificationState)
+            .filter { $0 != .unknown }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+
+                attemptStartingOnboarding()
+                setupSessionVerificationRequestsObserver()
+            }
+            .store(in: &cancellables)
+
+        let reachabilityNotificationID = "io.element.elementx.reachability.notification"
+        userSession.clientProxy.homeserverReachabilityPublisher.removeDuplicates()
+            .combineLatest(flowParameters.appMediator.networkMonitor.reachabilityPublisher.removeDuplicates())
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] homeserverReachability, networkReachability in
+                MXLog.info("Homeserver reachability: \(homeserverReachability)")
+
+                guard let self else { return }
+                switch (networkReachability, homeserverReachability) {
+                case (.reachable, .reachable):
+                    flowParameters.userIndicatorController.retractIndicatorWithId(reachabilityNotificationID)
+                case (.reachable, .unreachable):
+                    flowParameters.userIndicatorController.submitIndicator(.init(id: reachabilityNotificationID,
+                                                                                 title: L10n.commonServerUnreachable,
+                                                                                 persistent: true))
+                case (.unreachable, _):
+                    flowParameters.userIndicatorController.submitIndicator(.init(id: reachabilityNotificationID,
+                                                                                 title: L10n.commonOffline,
+                                                                                 persistent: true))
+                }
+            }
+            .store(in: &cancellables)
+
+        onboardingFlowCoordinator.actions
+            .sink { [weak self] action in
+                guard let self else { return }
+
+                switch action {
+                case .requestPresentation(let animated):
+                    navigationTabCoordinator.setFullScreenCoverCoordinator(onboardingStackCoordinator, animated: animated)
+                case .dismiss:
+                    navigationTabCoordinator.setFullScreenCoverCoordinator(nil)
+                case .logoutConfirmed:
+                    actionsSubject.send(.logout)
+                }
+            }
+            .store(in: &cancellables)
+
+        flowParameters.elementCallService.actions
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] action in
+                switch action {
+                case .endCall:
+                    self?.dismissCallScreenIfNeeded()
+                default:
+                    break
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Onboarding
+
+    private func attemptStartingOnboarding() {
+        MXLog.info("Attempting to start onboarding")
+
+        if onboardingFlowCoordinator.shouldStart {
+            clearRoute(animated: false)
+            onboardingFlowCoordinator.start()
+        }
+    }
+
+    // MARK: - Settings
+
+    private func startSettingsFlow(detached: Bool) {
+        //        let navigationStackCoordinator = NavigationStackCoordinator()
+        //        let coordinator = SettingsFlowCoordinator(appLockService: appLockService,
+        //                                                  navigationStackCoordinator: navigationStackCoordinator,
+        //                                                  flowParameters: flowParameters)
+
+        settingScreenFlowCoordinator.actions.sink { [weak self] action in
+            guard let self else { return }
+
+            switch action {
+            case .dismiss:
+                navigationTabCoordinator.setSheetCoordinator(nil)
+            case .clearCache:
+                actionsSubject.send(.clearCache)
+            case .runLogoutFlow:
+                Task {
+                    self.navigationTabCoordinator.setSheetCoordinator(nil)
+
+                    // The sheet needs to be dismissed before the alert can be shown
+                    try await Task.sleep(for: .milliseconds(100))
+                    await self.runLogoutFlow()
+                }
+            case .forceLogout:
+                actionsSubject.send(.forceLogout)
+            }
+        }
+        .store(in: &cancellables)
+
+        settingScreenFlowCoordinator.handleAppRoute(.settings, animated: false)
+
+        if detached {
+            flowParameters.windowManager.registerCoordinator(settingsSplitStackCoordinator,
+                                                             flowCoordinator: settingScreenFlowCoordinator,
+                                                             forWindowType: .settings)
         } else {
-          presentSessionVerificationScreen(flow: .userResponder(requestDetails: details))
+            settingsFlowCoordinator = settingScreenFlowCoordinator
+
+            navigationTabCoordinator.setSheetCoordinator(settingsSplitStackCoordinator) { [weak self] in
+                self?.stateMachine.tryEvent(.dismissedSettingsScreen)
+            }
         }
-      }
-      .store(in: &cancellables)
-  }
-
-  private func presentSessionVerificationScreen(flow: SessionVerificationScreenFlow) {
-    guard let sessionVerificationController = userSession.clientProxy.sessionVerificationController
-    else {
-      fatalError("The sessionVerificationController should aways be valid at this point")
     }
 
-    let navigationStackCoordinator = NavigationStackCoordinator()
+    // MARK: - Session Verification
 
-    let parameters = SessionVerificationScreenCoordinatorParameters(
-      sessionVerificationControllerProxy: sessionVerificationController,
-      flow: flow,
-      appSettings: flowParameters.appSettings,
-      mediaProvider: userSession.mediaProvider)
+    private func setupSessionVerificationRequestsObserver() {
+        userSession.clientProxy.sessionVerificationController?.actions
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] action in
+                guard let self, case .receivedVerificationRequest(let details) = action else {
+                    return
+                }
 
-    let coordinator = SessionVerificationScreenCoordinator(parameters: parameters)
+                MXLog.info("Received session verification request")
 
-    coordinator.actions
-      .sink { [weak self] action in
-        switch action {
-        case .done:
-          self?.navigationTabCoordinator.setSheetCoordinator(nil)
+                if details.senderProfile.userID == userSession.clientProxy.userID {
+                    presentSessionVerificationScreen(flow: .deviceResponder(requestDetails: details))
+                } else {
+                    presentSessionVerificationScreen(flow: .userResponder(requestDetails: details))
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func presentSessionVerificationScreen(flow: SessionVerificationScreenFlow) {
+        guard let sessionVerificationController = userSession.clientProxy.sessionVerificationController
+        else {
+            fatalError("The sessionVerificationController should aways be valid at this point")
         }
-      }
-      .store(in: &cancellables)
 
-    navigationStackCoordinator.setRootCoordinator(coordinator)
+        let navigationStackCoordinator = NavigationStackCoordinator()
 
-    navigationTabCoordinator.setSheetCoordinator(navigationStackCoordinator)
-  }
+        let parameters = SessionVerificationScreenCoordinatorParameters(sessionVerificationControllerProxy: sessionVerificationController,
+                                                                        flow: flow,
+                                                                        appSettings: flowParameters.appSettings,
+                                                                        mediaProvider: userSession.mediaProvider)
 
-  // MARK: - Calls
+        let coordinator = SessionVerificationScreenCoordinator(parameters: parameters)
 
-  private func presentCallScreen(roomID: String, isVoiceCall: Bool) async {
-    guard case .joined(let roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID)
-    else {
-      return
+        coordinator.actions
+            .sink { [weak self] action in
+                switch action {
+                case .done:
+                    self?.navigationTabCoordinator.setSheetCoordinator(nil)
+                }
+            }
+            .store(in: &cancellables)
+
+        navigationStackCoordinator.setRootCoordinator(coordinator)
+
+        navigationTabCoordinator.setSheetCoordinator(navigationStackCoordinator)
     }
 
-    presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
-  }
+    // MARK: - Calls
 
-  private func presentCallScreen(roomProxy: JoinedRoomProxyProtocol, voiceOnly: Bool) {
-    let colorScheme: ColorScheme =
-      flowParameters.windowManager.mainWindow.traitCollection.userInterfaceStyle == .light
-      ? .light : .dark
-    presentCallScreen(
-      configuration: .init(
-        roomProxy: roomProxy,
-        clientProxy: userSession.clientProxy,
-        clientID: InfoPlistReader.main.bundleIdentifier,
-        elementCallBaseURL: flowParameters.appSettings.elementCallBaseURL,
-        elementCallBaseURLOverride: flowParameters.appSettings.elementCallBaseURLOverride,
-        voiceOnly: voiceOnly,
-        colorScheme: colorScheme))
-  }
-
-  private var callScreenPictureInPictureController: AVPictureInPictureController?
-  private func presentCallScreen(configuration: ElementCallConfiguration) {
-    guard flowParameters.ongoingCallRoomIDPublisher.value != configuration.callRoomID else {
-      MXLog.info("Returning to existing call.")
-      callScreenPictureInPictureController?.stopPictureInPicture()
-      return
-    }
-
-    let callScreenCoordinator = CallScreenCoordinator(
-      parameters: .init(
-        elementCallService: flowParameters.elementCallService,
-        configuration: configuration,
-        allowPictureInPicture: true,
-        appSettings: flowParameters.appSettings,
-        appHooks: flowParameters.appHooks,
-        analytics: flowParameters.analytics))
-
-    callScreenCoordinator.actions
-      .sink { [weak self] action in
-        guard let self else { return }
-        switch action {
-        case .pictureInPictureIsAvailable(let controller):
-          callScreenPictureInPictureController = controller
-        case .pictureInPictureStarted:
-          MXLog.info("Hiding call for PiP presentation.")
-          navigationTabCoordinator.setOverlayPresentationMode(.minimized)
-        case .pictureInPictureStopped:
-          MXLog.info("Restoring call after PiP presentation.")
-          navigationTabCoordinator.setOverlayPresentationMode(.fullScreen)
-        case .dismiss:
-          callScreenPictureInPictureController = nil
-          navigationTabCoordinator.setOverlayCoordinator(nil)
+    private func presentCallScreen(roomID: String, isVoiceCall: Bool) async {
+        guard case .joined(let roomProxy) = await userSession.clientProxy.roomForIdentifier(roomID)
+        else {
+            return
         }
-      }
-      .store(in: &cancellables)
 
-    navigationTabCoordinator.setOverlayCoordinator(callScreenCoordinator, animated: true)
-
-    flowParameters.analytics.track(screen: .RoomCall)
-  }
-
-  private func hideCallScreenOverlay() {
-    guard let callScreenPictureInPictureController else {
-      MXLog.warning("Picture in picture isn't available, dismissing the call screen.")
-      dismissCallScreenIfNeeded()
-      return
+        presentCallScreen(roomProxy: roomProxy, voiceOnly: isVoiceCall)
     }
 
-    MXLog.info("Starting picture in picture to hide the call screen overlay.")
-    callScreenPictureInPictureController.startPictureInPicture()
-    navigationTabCoordinator.setOverlayPresentationMode(.minimized)
-  }
-
-  private func dismissCallScreenIfNeeded() {
-    guard navigationTabCoordinator.overlayCoordinator is CallScreenCoordinator else {
-      return
+    private func presentCallScreen(roomProxy: JoinedRoomProxyProtocol, voiceOnly: Bool) {
+        let colorScheme: ColorScheme =
+            flowParameters.windowManager.mainWindow.traitCollection.userInterfaceStyle == .light
+                ? .light : .dark
+        presentCallScreen(configuration: .init(roomProxy: roomProxy,
+                                               clientProxy: userSession.clientProxy,
+                                               clientID: InfoPlistReader.main.bundleIdentifier,
+                                               elementCallBaseURL: flowParameters.appSettings.elementCallBaseURL,
+                                               elementCallBaseURLOverride: flowParameters.appSettings.elementCallBaseURLOverride,
+                                               voiceOnly: voiceOnly,
+                                               colorScheme: colorScheme))
     }
 
-    navigationTabCoordinator.setOverlayCoordinator(nil)
-  }
-
-  // MARK: - Logout
-
-  private func runLogoutFlow() async {
-    let secureBackupController = userSession.clientProxy.secureBackupController
-
-    guard case .success(let isLastDevice) = await userSession.clientProxy.isOnlyDeviceLeft() else {
-      navigationRootCoordinator.alertInfo = .init(id: .init())
-      return
-    }
-
-    guard isLastDevice else {
-      navigationRootCoordinator.alertInfo = .init(
-        id: .init(),
-        title: L10n.screenSignoutConfirmationDialogTitle,
-        message: L10n.screenSignoutConfirmationDialogContent,
-        primaryButton: .init(title: L10n.screenSignoutConfirmationDialogSubmit, role: .destructive)
-        { [weak self] in
-          self?.actionsSubject.send(.logout)
-        })
-      return
-    }
-
-    guard secureBackupController.recoveryState.value == .enabled else {
-      navigationRootCoordinator.alertInfo = .init(
-        id: .init(),
-        title: L10n.screenSignoutRecoveryDisabledTitle,
-        message: L10n.screenSignoutRecoveryDisabledSubtitle,
-        primaryButton: .init(title: L10n.screenSignoutConfirmationDialogSubmit, role: .destructive)
-        { [weak self] in
-          self?.actionsSubject.send(.logout)
-        },
-        secondaryButton: .init(title: L10n.commonSettings, role: .cancel) { [weak self] in
-          self?.chatsTabFlowCoordinator.handleAppRoute(.chatBackupSettings, animated: true)
-        })
-      return
-    }
-
-    guard secureBackupController.keyBackupState.value == .enabled else {
-      navigationRootCoordinator.alertInfo = .init(
-        id: .init(),
-        title: L10n.screenSignoutKeyBackupDisabledTitle,
-        message: L10n.screenSignoutKeyBackupDisabledSubtitle,
-        primaryButton: .init(title: L10n.screenSignoutConfirmationDialogSubmit, role: .destructive)
-        { [weak self] in
-          self?.actionsSubject.send(.logout)
-        },
-        secondaryButton: .init(title: L10n.commonSettings, role: .cancel) { [weak self] in
-          self?.chatsTabFlowCoordinator.handleAppRoute(.chatBackupSettings, animated: true)
-        })
-      return
-    }
-
-    presentSecureBackupLogoutConfirmationScreen()
-  }
-
-  private func presentSecureBackupLogoutConfirmationScreen() {
-    let coordinator = SecureBackupLogoutConfirmationScreenCoordinator(
-      parameters: .init(
-        secureBackupController: userSession.clientProxy.secureBackupController,
-        homeserverReachabilityPublisher: userSession.clientProxy.homeserverReachabilityPublisher))
-
-    coordinator.actions
-      .sink { [weak self] action in
-        guard let self else { return }
-
-        switch action {
-        case .cancel:
-          navigationTabCoordinator.setSheetCoordinator(nil)
-        case .settings:
-          chatsTabFlowCoordinator.handleAppRoute(.chatBackupSettings, animated: true)
-          navigationTabCoordinator.setSheetCoordinator(nil)
-        case .logout:
-          actionsSubject.send(.logout)
+    private var callScreenPictureInPictureController: AVPictureInPictureController?
+    private func presentCallScreen(configuration: ElementCallConfiguration) {
+        guard flowParameters.ongoingCallRoomIDPublisher.value != configuration.callRoomID else {
+            MXLog.info("Returning to existing call.")
+            callScreenPictureInPictureController?.stopPictureInPicture()
+            return
         }
-      }
-      .store(in: &cancellables)
 
-    navigationTabCoordinator.setSheetCoordinator(coordinator, animated: true)
-  }
+        let callScreenCoordinator = CallScreenCoordinator(parameters: .init(elementCallService: flowParameters.elementCallService,
+                                                                            configuration: configuration,
+                                                                            allowPictureInPicture: true,
+                                                                            appSettings: flowParameters.appSettings,
+                                                                            appHooks: flowParameters.appHooks,
+                                                                            analytics: flowParameters.analytics))
+
+        callScreenCoordinator.actions
+            .sink { [weak self] action in
+                guard let self else { return }
+                switch action {
+                case .pictureInPictureIsAvailable(let controller):
+                    callScreenPictureInPictureController = controller
+                case .pictureInPictureStarted:
+                    MXLog.info("Hiding call for PiP presentation.")
+                    navigationTabCoordinator.setOverlayPresentationMode(.minimized)
+                case .pictureInPictureStopped:
+                    MXLog.info("Restoring call after PiP presentation.")
+                    navigationTabCoordinator.setOverlayPresentationMode(.fullScreen)
+                case .dismiss:
+                    callScreenPictureInPictureController = nil
+                    navigationTabCoordinator.setOverlayCoordinator(nil)
+                }
+            }
+            .store(in: &cancellables)
+
+        navigationTabCoordinator.setOverlayCoordinator(callScreenCoordinator, animated: true)
+
+        flowParameters.analytics.track(screen: .RoomCall)
+    }
+
+    private func hideCallScreenOverlay() {
+        guard let callScreenPictureInPictureController else {
+            MXLog.warning("Picture in picture isn't available, dismissing the call screen.")
+            dismissCallScreenIfNeeded()
+            return
+        }
+
+        MXLog.info("Starting picture in picture to hide the call screen overlay.")
+        callScreenPictureInPictureController.startPictureInPicture()
+        navigationTabCoordinator.setOverlayPresentationMode(.minimized)
+    }
+
+    private func dismissCallScreenIfNeeded() {
+        guard navigationTabCoordinator.overlayCoordinator is CallScreenCoordinator else {
+            return
+        }
+
+        navigationTabCoordinator.setOverlayCoordinator(nil)
+    }
+
+    // MARK: - Logout
+
+    private func runLogoutFlow() async {
+        let secureBackupController = userSession.clientProxy.secureBackupController
+
+        guard case .success(let isLastDevice) = await userSession.clientProxy.isOnlyDeviceLeft() else {
+            navigationRootCoordinator.alertInfo = .init(id: .init())
+            return
+        }
+
+        guard isLastDevice else {
+            navigationRootCoordinator.alertInfo = .init(id: .init(),
+                                                        title: L10n.screenSignoutConfirmationDialogTitle,
+                                                        message: L10n.screenSignoutConfirmationDialogContent,
+                                                        primaryButton: .init(title: L10n.screenSignoutConfirmationDialogSubmit, role: .destructive) { [weak self] in
+                                                            self?.actionsSubject.send(.logout)
+                                                        })
+            return
+        }
+
+        guard secureBackupController.recoveryState.value == .enabled else {
+            navigationRootCoordinator.alertInfo = .init(id: .init(),
+                                                        title: L10n.screenSignoutRecoveryDisabledTitle,
+                                                        message: L10n.screenSignoutRecoveryDisabledSubtitle,
+                                                        primaryButton: .init(title: L10n.screenSignoutConfirmationDialogSubmit, role: .destructive) { [weak self] in
+                                                            self?.actionsSubject.send(.logout)
+                                                        },
+                                                        secondaryButton: .init(title: L10n.commonSettings, role: .cancel) { [weak self] in
+                                                            self?.chatsTabFlowCoordinator.handleAppRoute(.chatBackupSettings, animated: true)
+                                                        })
+            return
+        }
+
+        guard secureBackupController.keyBackupState.value == .enabled else {
+            navigationRootCoordinator.alertInfo = .init(id: .init(),
+                                                        title: L10n.screenSignoutKeyBackupDisabledTitle,
+                                                        message: L10n.screenSignoutKeyBackupDisabledSubtitle,
+                                                        primaryButton: .init(title: L10n.screenSignoutConfirmationDialogSubmit, role: .destructive) { [weak self] in
+                                                            self?.actionsSubject.send(.logout)
+                                                        },
+                                                        secondaryButton: .init(title: L10n.commonSettings, role: .cancel) { [weak self] in
+                                                            self?.chatsTabFlowCoordinator.handleAppRoute(.chatBackupSettings, animated: true)
+                                                        })
+            return
+        }
+
+        presentSecureBackupLogoutConfirmationScreen()
+    }
+
+    private func presentSecureBackupLogoutConfirmationScreen() {
+        let coordinator = SecureBackupLogoutConfirmationScreenCoordinator(parameters: .init(secureBackupController: userSession.clientProxy.secureBackupController,
+                                                                                            homeserverReachabilityPublisher: userSession.clientProxy.homeserverReachabilityPublisher))
+
+        coordinator.actions
+            .sink { [weak self] action in
+                guard let self else { return }
+
+                switch action {
+                case .cancel:
+                    navigationTabCoordinator.setSheetCoordinator(nil)
+                case .settings:
+                    chatsTabFlowCoordinator.handleAppRoute(.chatBackupSettings, animated: true)
+                    navigationTabCoordinator.setSheetCoordinator(nil)
+                case .logout:
+                    actionsSubject.send(.logout)
+                }
+            }
+            .store(in: &cancellables)
+
+        navigationTabCoordinator.setSheetCoordinator(coordinator, animated: true)
+    }
 }

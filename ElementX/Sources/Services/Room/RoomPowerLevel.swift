@@ -9,38 +9,38 @@
 import MatrixRustSDK
 
 enum RoomPowerLevel: Hashable, Comparable {
-  case value(Int)
-  case infinite
+    case value(Int)
+    case infinite
 
-  init(rustPowerLevel: PowerLevel) {
-    self = rustPowerLevel.toRoomPowerLevel
-  }
-
-  init(value: Int) {
-    self = .value(value)
-  }
-
-  init(value: Int64) {
-    self = .value(Int(value))
-  }
-
-  var rustPowerLevel: PowerLevel {
-    switch self {
-    case .infinite: .infinite
-    case .value(let value): .value(value: Int64(value))
+    init(rustPowerLevel: PowerLevel) {
+        self = rustPowerLevel.toRoomPowerLevel
     }
-  }
 
-  var role: RoomRole {
-    RoomRole(powerLevel: self)
-  }
+    init(value: Int) {
+        self = .value(value)
+    }
+
+    init(value: Int64) {
+        self = .value(Int(value))
+    }
+
+    var rustPowerLevel: PowerLevel {
+        switch self {
+        case .infinite: .infinite
+        case .value(let value): .value(value: Int64(value))
+        }
+    }
+
+    var role: RoomRole {
+        RoomRole(powerLevel: self)
+    }
 }
 
 extension PowerLevel {
-  var toRoomPowerLevel: RoomPowerLevel {
-    switch self {
-    case .infinite: .infinite
-    case .value(let value): .value(Int(value))
+    var toRoomPowerLevel: RoomPowerLevel {
+        switch self {
+        case .infinite: .infinite
+        case .value(let value): .value(Int(value))
+        }
     }
-  }
 }

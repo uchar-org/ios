@@ -9,36 +9,33 @@
 import Combine
 import SwiftUI
 
-typealias EncryptionResetPasswordScreenViewModelType = StateStoreViewModelV2<
-  EncryptionResetPasswordScreenViewState, EncryptionResetPasswordScreenViewAction
->
+typealias EncryptionResetPasswordScreenViewModelType = StateStoreViewModelV2<EncryptionResetPasswordScreenViewState, EncryptionResetPasswordScreenViewAction>
 
 class EncryptionResetPasswordScreenViewModel: EncryptionResetPasswordScreenViewModelType,
-  EncryptionResetPasswordScreenViewModelProtocol
-{
-  private let passwordPublisher: PassthroughSubject<String, Never>
+    EncryptionResetPasswordScreenViewModelProtocol {
+    private let passwordPublisher: PassthroughSubject<String, Never>
 
-  private let actionsSubject:
-    PassthroughSubject<EncryptionResetPasswordScreenViewModelAction, Never> = .init()
-  var actionsPublisher: AnyPublisher<EncryptionResetPasswordScreenViewModelAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(passwordPublisher: PassthroughSubject<String, Never>) {
-    self.passwordPublisher = passwordPublisher
-
-    super.init(initialViewState: .init(bindings: .init(password: "")))
-  }
-
-  // MARK: - Public
-
-  override func process(viewAction: EncryptionResetPasswordScreenViewAction) {
-    MXLog.info("View model: received view action: \(viewAction)")
-
-    switch viewAction {
-    case .submit:
-      passwordPublisher.send(state.bindings.password)
-      actionsSubject.send(.passwordEntered)
+    private let actionsSubject:
+        PassthroughSubject<EncryptionResetPasswordScreenViewModelAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<EncryptionResetPasswordScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-  }
+
+    init(passwordPublisher: PassthroughSubject<String, Never>) {
+        self.passwordPublisher = passwordPublisher
+
+        super.init(initialViewState: .init(bindings: .init(password: "")))
+    }
+
+    // MARK: - Public
+
+    override func process(viewAction: EncryptionResetPasswordScreenViewAction) {
+        MXLog.info("View model: received view action: \(viewAction)")
+
+        switch viewAction {
+        case .submit:
+            passwordPublisher.send(state.bindings.password)
+            actionsSubject.send(.passwordEntered)
+        }
+    }
 }

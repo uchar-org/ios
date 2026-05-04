@@ -9,23 +9,22 @@ import Combine
 import CoreLocation
 
 extension LiveLocationManagerMock {
-  struct Configuration {
-    var authorizationStatus: CLAuthorizationStatus = .notDetermined
-    var requestAlwaysAuthorizationIfPossibleReturnValue = true
-    var hasDisplayedLiveLocationDisclaimer = false
-  }
+    struct Configuration {
+        var authorizationStatus: CLAuthorizationStatus = .notDetermined
+        var requestAlwaysAuthorizationIfPossibleReturnValue = true
+        var hasDisplayedLiveLocationDisclaimer = false
+    }
 
-  convenience init(_ configuration: Configuration) {
-    self.init()
+    convenience init(_ configuration: Configuration) {
+        self.init()
 
-    let authorizationStatusSubject = CurrentValueSubject<CLAuthorizationStatus, Never>(
-      configuration.authorizationStatus)
-    underlyingAuthorizationStatus = .init(authorizationStatusSubject)
+        let authorizationStatusSubject = CurrentValueSubject<CLAuthorizationStatus, Never>(configuration.authorizationStatus)
+        underlyingAuthorizationStatus = .init(authorizationStatusSubject)
 
-    requestAlwaysAuthorizationIfPossibleReturnValue =
-      configuration.requestAlwaysAuthorizationIfPossibleReturnValue
-    startLiveLocationRoomIDDurationReturnValue = .success(())
+        requestAlwaysAuthorizationIfPossibleReturnValue =
+            configuration.requestAlwaysAuthorizationIfPossibleReturnValue
+        startLiveLocationRoomIDDurationReturnValue = .success(())
 
-    underlyingHasDisplayedLiveLocationDisclaimer = configuration.hasDisplayedLiveLocationDisclaimer
-  }
+        underlyingHasDisplayedLiveLocationDisclaimer = configuration.hasDisplayedLiveLocationDisclaimer
+    }
 }

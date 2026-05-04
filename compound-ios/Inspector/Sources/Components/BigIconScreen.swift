@@ -9,18 +9,18 @@ import Compound
 import SwiftUI
 
 struct BigIconScreen: View {
-  var body: some View {
-    ScreenContent(navigationTitle: "Big Icon") {
-      BigIcon_Previews.states
+    var body: some View {
+        ScreenContent(navigationTitle: "Big Icon") {
+            BigIcon_Previews.states
+        }
     }
-  }
 }
 
 struct BigIconScreen_Previews: PreviewProvider {
-  static var previews: some View {
-    NavigationStack {
-      BigIconScreen()
+    static var previews: some View {
+        NavigationStack {
+            BigIconScreen()
+        }
+        .previewLayout(.fixed(width: 375, height: 700))
     }
-    .previewLayout(.fixed(width: 375, height: 700))
-  }
 }

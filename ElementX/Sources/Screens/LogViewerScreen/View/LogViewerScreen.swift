@@ -11,67 +11,64 @@ import QuickLook
 import SwiftUI
 
 struct LogViewerScreen: View {
-  let context: LogViewerScreenViewModel.Context
+    let context: LogViewerScreenViewModel.Context
 
-  var body: some View {
-    PreviewView(urls: context.viewState.urls)
-  }
+    var body: some View {
+        PreviewView(urls: context.viewState.urls)
+    }
 }
 
 private struct PreviewView: UIViewControllerRepresentable {
-  let urls: [URL]
+    let urls: [URL]
 
-  func makeUIViewController(context: Context) -> UIViewController {
-    let previewController = QLPreviewController()
-    previewController.dataSource = context.coordinator
-    previewController.delegate = context.coordinator
+    func makeUIViewController(context: Context) -> UIViewController {
+        let previewController = QLPreviewController()
+        previewController.dataSource = context.coordinator
+        previewController.delegate = context.coordinator
 
-    return UINavigationController(rootViewController: previewController)
-  }
-
-  func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
-
-  func makeCoordinator() -> Coordinator {
-    Coordinator(view: self)
-  }
-
-  class Coordinator: NSObject, QLPreviewControllerDataSource, QLPreviewControllerDelegate {
-    let view: PreviewView
-
-    init(view: PreviewView) {
-      self.view = view
+        return UINavigationController(rootViewController: previewController)
     }
 
-    // MARK: - QLPreviewControllerDataSource
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) { }
 
-    func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
-      view.urls.count
+    func makeCoordinator() -> Coordinator {
+        Coordinator(view: self)
     }
 
-    func previewController(_ controller: QLPreviewController, previewItemAt index: Int)
-      -> QLPreviewItem
-    {
-      let url = view.urls[index]
+    class Coordinator: NSObject, QLPreviewControllerDataSource, QLPreviewControllerDelegate {
+        let view: PreviewView
 
-      return PreviewItem(previewItemURL: url, previewItemTitle: url.lastPathComponent)
+        init(view: PreviewView) {
+            self.view = view
+        }
+
+        // MARK: - QLPreviewControllerDataSource
+
+        func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+            view.urls.count
+        }
+
+        func previewController(_ controller: QLPreviewController, previewItemAt index: Int)
+            -> QLPreviewItem {
+            let url = view.urls[index]
+
+            return PreviewItem(previewItemURL: url, previewItemTitle: url.lastPathComponent)
+        }
+
+        // MARK: - QLPreviewControllerDelegate
+
+        func previewController(_ controller: QLPreviewController, editingModeFor previewItem: QLPreviewItem) -> QLPreviewItemEditingMode {
+            .disabled
+        }
     }
-
-    // MARK: - QLPreviewControllerDelegate
-
-    func previewController(
-      _ controller: QLPreviewController, editingModeFor previewItem: QLPreviewItem
-    ) -> QLPreviewItemEditingMode {
-      .disabled
-    }
-  }
 }
 
 private class PreviewItem: NSObject, QLPreviewItem {
-  var previewItemURL: URL?
-  var previewItemTitle: String?
+    var previewItemURL: URL?
+    var previewItemTitle: String?
 
-  init(previewItemURL: URL?, previewItemTitle: String?) {
-    self.previewItemURL = previewItemURL
-    self.previewItemTitle = previewItemTitle
-  }
+    init(previewItemURL: URL?, previewItemTitle: String?) {
+        self.previewItemURL = previewItemURL
+        self.previewItemTitle = previewItemTitle
+    }
 }

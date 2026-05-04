@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol AppLockSetupPINScreenViewModelProtocol {
-  var actions: AnyPublisher<AppLockSetupPINScreenViewModelAction, Never> { get }
-  var context: AppLockSetupPINScreenViewModelType.Context { get }
+    var actions: AnyPublisher<AppLockSetupPINScreenViewModelAction, Never> { get }
+    var context: AppLockSetupPINScreenViewModelType.Context { get }
 }

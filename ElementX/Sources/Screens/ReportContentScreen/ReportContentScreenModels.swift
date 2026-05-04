@@ -9,22 +9,22 @@
 import Foundation
 
 enum ReportContentScreenViewModelAction: Equatable {
-  case cancel
-  case submitStarted
-  case submitFinished
-  case submitFailed(message: String)
+    case cancel
+    case submitStarted
+    case submitFinished
+    case submitFailed(message: String)
 }
 
 struct ReportContentScreenViewState: BindableState {
-  var bindings: ReportContentScreenViewStateBindings
+    var bindings: ReportContentScreenViewStateBindings
 }
 
 struct ReportContentScreenViewStateBindings {
-  var reasonText: String
-  var ignoreUser: Bool
+    var reasonText: String
+    var ignoreUser: Bool
 }
 
 enum ReportContentScreenViewAction {
-  case cancel
-  case submit
+    case cancel
+    case submit
 }

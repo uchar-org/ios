@@ -6,65 +6,64 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+@testable import ElementX
 import Foundation
 import Testing
 
-@testable import ElementX
-
 @MainActor
 struct NavigationRootCoordinatorTests {
-  private var navigationRootCoordinator: NavigationRootCoordinator
+    private var navigationRootCoordinator: NavigationRootCoordinator
 
-  init() {
-    navigationRootCoordinator = NavigationRootCoordinator()
-  }
-
-  @Test
-  func rootChanges() {
-    #expect(navigationRootCoordinator.rootCoordinator == nil)
-
-    let firstRootCoordinator = SomeTestCoordinator()
-    navigationRootCoordinator.setRootCoordinator(firstRootCoordinator)
-
-    assertCoordinatorsEqual(firstRootCoordinator, navigationRootCoordinator.rootCoordinator)
-
-    let secondRootCoordinator = SomeTestCoordinator()
-    navigationRootCoordinator.setRootCoordinator(secondRootCoordinator)
-
-    assertCoordinatorsEqual(secondRootCoordinator, navigationRootCoordinator.rootCoordinator)
-  }
-
-  // MARK: - Dismissal Callbacks
-
-  @Test
-  func replacementDismissalCallbacks() async {
-    #expect(navigationRootCoordinator.rootCoordinator == nil)
-
-    let rootCoordinator = SomeTestCoordinator()
-
-    await confirmation("Wait for callback") { confirm in
-      navigationRootCoordinator.setRootCoordinator(rootCoordinator) {
-        confirm()
-      }
-
-      navigationRootCoordinator.setRootCoordinator(nil)
-    }
-  }
-
-  // MARK: - Private
-
-  private func assertCoordinatorsEqual(_ lhs: CoordinatorProtocol?, _ rhs: CoordinatorProtocol?) {
-    guard let lhs = lhs as? SomeTestCoordinator,
-      let rhs = rhs as? SomeTestCoordinator
-    else {
-      Issue.record("Coordinators are not the same")
-      return
+    init() {
+        navigationRootCoordinator = NavigationRootCoordinator()
     }
 
-    #expect(lhs.id == rhs.id)
-  }
+    @Test
+    func rootChanges() {
+        #expect(navigationRootCoordinator.rootCoordinator == nil)
+
+        let firstRootCoordinator = SomeTestCoordinator()
+        navigationRootCoordinator.setRootCoordinator(firstRootCoordinator)
+
+        assertCoordinatorsEqual(firstRootCoordinator, navigationRootCoordinator.rootCoordinator)
+
+        let secondRootCoordinator = SomeTestCoordinator()
+        navigationRootCoordinator.setRootCoordinator(secondRootCoordinator)
+
+        assertCoordinatorsEqual(secondRootCoordinator, navigationRootCoordinator.rootCoordinator)
+    }
+
+    // MARK: - Dismissal Callbacks
+
+    @Test
+    func replacementDismissalCallbacks() async {
+        #expect(navigationRootCoordinator.rootCoordinator == nil)
+
+        let rootCoordinator = SomeTestCoordinator()
+
+        await confirmation("Wait for callback") { confirm in
+            navigationRootCoordinator.setRootCoordinator(rootCoordinator) {
+                confirm()
+            }
+
+            navigationRootCoordinator.setRootCoordinator(nil)
+        }
+    }
+
+    // MARK: - Private
+
+    private func assertCoordinatorsEqual(_ lhs: CoordinatorProtocol?, _ rhs: CoordinatorProtocol?) {
+        guard let lhs = lhs as? SomeTestCoordinator,
+              let rhs = rhs as? SomeTestCoordinator
+        else {
+            Issue.record("Coordinators are not the same")
+            return
+        }
+
+        #expect(lhs.id == rhs.id)
+    }
 }
 
 private class SomeTestCoordinator: CoordinatorProtocol {
-  let id = UUID()
+    let id = UUID()
 }

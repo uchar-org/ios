@@ -10,108 +10,107 @@ import Combine
 import SwiftUI
 
 struct HomeScreenCoordinatorParameters {
-  let userSession: UserSessionProtocol
-  let bugReportService: BugReportServiceProtocol
-  let selectedRoomPublisher: CurrentValuePublisher<String?, Never>
-  let appSettings: AppSettings
-  let analyticsService: AnalyticsService
-  let notificationManager: NotificationManagerProtocol
-  let userIndicatorController: UserIndicatorControllerProtocol
+    let userSession: UserSessionProtocol
+    let bugReportService: BugReportServiceProtocol
+    let selectedRoomPublisher: CurrentValuePublisher<String?, Never>
+    let appSettings: AppSettings
+    let analyticsService: AnalyticsService
+    let notificationManager: NotificationManagerProtocol
+    let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum HomeScreenCoordinatorAction {
-  case presentRoom(roomIdentifier: String)
-  case detachRoom(roomIdentifier: String)
-  case presentRoomDetails(roomIdentifier: String)
-  case presentReportRoom(roomIdentifier: String)
-  case presentDeclineAndBlock(userID: String, roomID: String)
-  case presentSpace(SpaceRoomListProxyProtocol)
-  case roomLeft(roomIdentifier: String)
-  case transferOwnership(roomIdentifier: String)
-  case presentSettingsScreen
-  case presentFeedbackScreen
-  case presentSecureBackupSettings
-  case presentRecoveryKeyScreen
-  case presentEncryptionResetScreen
-  case presentStartChatScreen
-  case logout
+    case presentRoom(roomIdentifier: String)
+    case detachRoom(roomIdentifier: String)
+    case presentRoomDetails(roomIdentifier: String)
+    case presentReportRoom(roomIdentifier: String)
+    case presentDeclineAndBlock(userID: String, roomID: String)
+    case presentSpace(SpaceRoomListProxyProtocol)
+    case roomLeft(roomIdentifier: String)
+    case transferOwnership(roomIdentifier: String)
+    case presentSettingsScreen
+    case presentFeedbackScreen
+    case presentSecureBackupSettings
+    case presentRecoveryKeyScreen
+    case presentEncryptionResetScreen
+    case presentStartChatScreen
+    case logout
 }
 
 final class HomeScreenCoordinator: CoordinatorProtocol {
-  private var viewModel: HomeScreenViewModelProtocol
-  // periphery:ignore - only used in release builds
-  private let bugReportService: BugReportServiceProtocol
+    private var viewModel: HomeScreenViewModelProtocol
+    // periphery:ignore - only used in release builds
+    private let bugReportService: BugReportServiceProtocol
 
-  private let actionsSubject: PassthroughSubject<HomeScreenCoordinatorAction, Never> = .init()
-  private var cancellables = Set<AnyCancellable>()
+    private let actionsSubject: PassthroughSubject<HomeScreenCoordinatorAction, Never> = .init()
+    private var cancellables = Set<AnyCancellable>()
 
-  var actions: AnyPublisher<HomeScreenCoordinatorAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
+    var actions: AnyPublisher<HomeScreenCoordinatorAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
+    }
 
-  init(parameters: HomeScreenCoordinatorParameters) {
-    viewModel = HomeScreenViewModel(
-      userSession: parameters.userSession,
-      selectedRoomPublisher: parameters.selectedRoomPublisher,
-      appSettings: parameters.appSettings,
-      analyticsService: parameters.analyticsService,
-      notificationManager: parameters.notificationManager,
-      userIndicatorController: parameters.userIndicatorController)
-    bugReportService = parameters.bugReportService
+    init(parameters: HomeScreenCoordinatorParameters) {
+        viewModel = HomeScreenViewModel(userSession: parameters.userSession,
+                                        selectedRoomPublisher: parameters.selectedRoomPublisher,
+                                        appSettings: parameters.appSettings,
+                                        analyticsService: parameters.analyticsService,
+                                        notificationManager: parameters.notificationManager,
+                                        userIndicatorController: parameters.userIndicatorController)
+        bugReportService = parameters.bugReportService
 
-    viewModel.actions
-      .sink { [weak self] action in
-        guard let self else { return }
+        viewModel.actions
+            .sink { [weak self] action in
+                guard let self else { return }
 
-        switch action {
-        case .presentRoom(let roomIdentifier):
-          actionsSubject.send(.presentRoom(roomIdentifier: roomIdentifier))
-        case .detachRoom(let roomIdentifier):
-          actionsSubject.send(.detachRoom(roomIdentifier: roomIdentifier))
-        case .presentRoomDetails(let roomIdentifier):
-          actionsSubject.send(.presentRoomDetails(roomIdentifier: roomIdentifier))
-        case .presentReportRoom(let roomIdentifier):
-          actionsSubject.send(.presentReportRoom(roomIdentifier: roomIdentifier))
-        case .presentDeclineAndBlock(let userID, let roomID):
-          actionsSubject.send(.presentDeclineAndBlock(userID: userID, roomID: roomID))
-        case .presentSpace(let spaceRoomListProxy):
-          actionsSubject.send(.presentSpace(spaceRoomListProxy))
-        case .roomLeft(let roomIdentifier):
-          actionsSubject.send(.roomLeft(roomIdentifier: roomIdentifier))
-        case .presentFeedbackScreen:
-          actionsSubject.send(.presentFeedbackScreen)
-        case .presentSettingsScreen:
-          actionsSubject.send(.presentSettingsScreen)
-        case .presentSecureBackupSettings:
-          actionsSubject.send(.presentSecureBackupSettings)
-        case .presentRecoveryKeyScreen:
-          actionsSubject.send(.presentRecoveryKeyScreen)
-        case .presentEncryptionResetScreen:
-          actionsSubject.send(.presentEncryptionResetScreen)
-        case .presentStartChatScreen:
-          actionsSubject.send(.presentStartChatScreen)
-        case .logout:
-          actionsSubject.send(.logout)
-        case .transferOwnership(let roomIdentifier):
-          actionsSubject.send(.transferOwnership(roomIdentifier: roomIdentifier))
+                switch action {
+                case .presentRoom(let roomIdentifier):
+                    actionsSubject.send(.presentRoom(roomIdentifier: roomIdentifier))
+                case .detachRoom(let roomIdentifier):
+                    actionsSubject.send(.detachRoom(roomIdentifier: roomIdentifier))
+                case .presentRoomDetails(let roomIdentifier):
+                    actionsSubject.send(.presentRoomDetails(roomIdentifier: roomIdentifier))
+                case .presentReportRoom(let roomIdentifier):
+                    actionsSubject.send(.presentReportRoom(roomIdentifier: roomIdentifier))
+                case .presentDeclineAndBlock(let userID, let roomID):
+                    actionsSubject.send(.presentDeclineAndBlock(userID: userID, roomID: roomID))
+                case .presentSpace(let spaceRoomListProxy):
+                    actionsSubject.send(.presentSpace(spaceRoomListProxy))
+                case .roomLeft(let roomIdentifier):
+                    actionsSubject.send(.roomLeft(roomIdentifier: roomIdentifier))
+                case .presentFeedbackScreen:
+                    actionsSubject.send(.presentFeedbackScreen)
+                case .presentSettingsScreen:
+                    actionsSubject.send(.presentSettingsScreen)
+                case .presentSecureBackupSettings:
+                    actionsSubject.send(.presentSecureBackupSettings)
+                case .presentRecoveryKeyScreen:
+                    actionsSubject.send(.presentRecoveryKeyScreen)
+                case .presentEncryptionResetScreen:
+                    actionsSubject.send(.presentEncryptionResetScreen)
+                case .presentStartChatScreen:
+                    actionsSubject.send(.presentStartChatScreen)
+                case .logout:
+                    actionsSubject.send(.logout)
+                case .transferOwnership(let roomIdentifier):
+                    actionsSubject.send(.transferOwnership(roomIdentifier: roomIdentifier))
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    // MARK: - Public
+
+    func start() {
+        #if !DEBUG
+        // Note: bugReportService.isEnabled doesn't determine if a user has opted in to Analytics/Sentry.
+        // Therefore we use lastCrashEventID as this will only be set if we have crash ID from Sentry.
+        if bugReportService.crashedLastRun, bugReportService.lastCrashEventID != nil {
+            viewModel.presentCrashedLastRunAlert()
         }
-      }
-      .store(in: &cancellables)
-  }
+        #endif
+    }
 
-  // MARK: - Public
-
-  func start() {
-    #if !DEBUG
-      // Note: bugReportService.isEnabled doesn't determine if a user has opted in to Analytics/Sentry.
-      // Therefore we use lastCrashEventID as this will only be set if we have crash ID from Sentry.
-      if bugReportService.crashedLastRun, bugReportService.lastCrashEventID != nil {
-        viewModel.presentCrashedLastRunAlert()
-      }
-    #endif
-  }
-
-  func toPresentable() -> AnyView {
-    AnyView(HomeScreen(context: viewModel.context))
-  }
+    func toPresentable() -> AnyView {
+        AnyView(HomeScreen(context: viewModel.context))
+    }
 }

@@ -10,16 +10,16 @@ import SwiftUI
 
 /// Information about how a call should be configured.
 struct ElementCallConfiguration {
-  let roomProxy: JoinedRoomProxyProtocol
-  let clientProxy: ClientProxyProtocol
-  let clientID: String
-  let elementCallBaseURL: URL
-  let elementCallBaseURLOverride: URL?
-  let voiceOnly: Bool
-  let colorScheme: ColorScheme
+    let roomProxy: JoinedRoomProxyProtocol
+    let clientProxy: ClientProxyProtocol
+    let clientID: String
+    let elementCallBaseURL: URL
+    let elementCallBaseURLOverride: URL?
+    let voiceOnly: Bool
+    let colorScheme: ColorScheme
 
-  /// A string representing the call being configured.
-  var callRoomID: String {
-    roomProxy.id
-  }
+    /// A string representing the call being configured.
+    var callRoomID: String {
+        roomProxy.id
+    }
 }

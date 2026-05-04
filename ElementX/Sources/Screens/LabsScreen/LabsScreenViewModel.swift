@@ -11,22 +11,22 @@ import SwiftUI
 typealias LabsScreenViewModelType = StateStoreViewModelV2<LabsScreenViewState, LabsScreenViewAction>
 
 class LabsScreenViewModel: LabsScreenViewModelType, LabsScreenViewModelProtocol {
-  private let actionsSubject: PassthroughSubject<LabsScreenViewModelAction, Never> = .init()
-  var actionsPublisher: AnyPublisher<LabsScreenViewModelAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(labsOptions: LabsOptionsProtocol) {
-    let bindings = LabsScreenViewStateBindings(labsOptions: labsOptions)
-    let state = LabsScreenViewState(bindings: bindings)
-
-    super.init(initialViewState: state)
-  }
-
-  override func process(viewAction: LabsScreenViewAction) {
-    switch viewAction {
-    case .clearCache:
-      actionsSubject.send(.clearCache)
+    private let actionsSubject: PassthroughSubject<LabsScreenViewModelAction, Never> = .init()
+    var actionsPublisher: AnyPublisher<LabsScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-  }
+
+    init(labsOptions: LabsOptionsProtocol) {
+        let bindings = LabsScreenViewStateBindings(labsOptions: labsOptions)
+        let state = LabsScreenViewState(bindings: bindings)
+
+        super.init(initialViewState: state)
+    }
+
+    override func process(viewAction: LabsScreenViewAction) {
+        switch viewAction {
+        case .clearCache:
+            actionsSubject.send(.clearCache)
+        }
+    }
 }

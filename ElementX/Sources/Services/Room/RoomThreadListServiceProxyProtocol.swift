@@ -10,29 +10,29 @@ import Foundation
 
 // sourcery: AutoMockable
 protocol RoomThreadListServiceProxyProtocol {
-  var itemsPublisher: CurrentValuePublisher<[RoomThreadListItem], Never> { get }
+    var itemsPublisher: CurrentValuePublisher<[RoomThreadListItem], Never> { get }
 
-  var paginationStatePublisher: CurrentValuePublisher<RoomThreadListPaginationState, Never> { get }
+    var paginationStatePublisher: CurrentValuePublisher<RoomThreadListPaginationState, Never> { get }
 
-  func paginate() async -> Result<Void, RoomProxyError>
+    func paginate() async -> Result<Void, RoomProxyError>
 }
 
 struct RoomThreadListItem: Identifiable {
-  struct MessageDetails {
-    let sender: TimelineItemSender
-    let timestamp: Date
-    let message: AttributedString?
-  }
+    struct MessageDetails {
+        let sender: TimelineItemSender
+        let timestamp: Date
+        let message: AttributedString?
+    }
 
-  let id: String
+    let id: String
 
-  let rootMessageDetails: MessageDetails
-  let latestMessageDetails: MessageDetails?
+    let rootMessageDetails: MessageDetails
+    let latestMessageDetails: MessageDetails?
 
-  let numberOfReplies: UInt
+    let numberOfReplies: UInt
 }
 
 enum RoomThreadListPaginationState: Equatable {
-  case idle(endReached: Bool)
-  case loading
+    case idle(endReached: Bool)
+    case loading
 }

@@ -9,185 +9,174 @@
 import Combine
 import SwiftUI
 
-typealias RoomNotificationSettingsScreenViewModelType = StateStoreViewModelV2<
-  RoomNotificationSettingsScreenViewState, RoomNotificationSettingsScreenViewAction
->
+typealias RoomNotificationSettingsScreenViewModelType = StateStoreViewModelV2<RoomNotificationSettingsScreenViewState, RoomNotificationSettingsScreenViewAction>
 
 class RoomNotificationSettingsScreenViewModel: RoomNotificationSettingsScreenViewModelType,
-  RoomNotificationSettingsScreenViewModelProtocol
-{
-  private let actionsSubject:
-    PassthroughSubject<RoomNotificationSettingsScreenViewModelAction, Never> = .init()
-  private let notificationSettingsProxy: NotificationSettingsProxyProtocol
-  private let roomProxy: JoinedRoomProxyProtocol
+    RoomNotificationSettingsScreenViewModelProtocol {
+    private let actionsSubject:
+        PassthroughSubject<RoomNotificationSettingsScreenViewModelAction, Never> = .init()
+    private let notificationSettingsProxy: NotificationSettingsProxyProtocol
+    private let roomProxy: JoinedRoomProxyProtocol
 
-  // periphery:ignore - cancellable tasks cancel when reassigned
-  @CancellableTask private var fetchNotificationSettingsTask: Task<Void, Error>?
+    // periphery:ignore - cancellable tasks cancel when reassigned
+    @CancellableTask private var fetchNotificationSettingsTask: Task<Void, Error>?
 
-  var actions: AnyPublisher<RoomNotificationSettingsScreenViewModelAction, Never> {
-    actionsSubject.eraseToAnyPublisher()
-  }
-
-  init(
-    notificationSettingsProxy: NotificationSettingsProxyProtocol,
-    roomProxy: JoinedRoomProxyProtocol, displayAsUserDefinedRoomSettings: Bool
-  ) {
-    let bindings = RoomNotificationSettingsScreenViewStateBindings()
-    self.notificationSettingsProxy = notificationSettingsProxy
-    self.roomProxy = roomProxy
-    let navigationTitle =
-      displayAsUserDefinedRoomSettings
-      ? roomProxy.infoPublisher.value.displayName : L10n.screenRoomDetailsNotificationTitle
-    let customSettingsSectionHeader =
-      displayAsUserDefinedRoomSettings
-      ? L10n.screenRoomNotificationSettingsRoomCustomSettingsTitle
-      : L10n.screenRoomNotificationSettingsCustomSettingsTitle
-    super.init(
-      initialViewState: RoomNotificationSettingsScreenViewState(
-        bindings: bindings,
-        displayAsUserDefinedRoomSettings: displayAsUserDefinedRoomSettings,
-        navigationTitle: navigationTitle ?? L10n.screenRoomDetailsNotificationTitle,
-        customSettingsSectionHeader: customSettingsSectionHeader))
-
-    setupNotificationSettingsSubscription()
-    fetchNotificationSettings()
-  }
-
-  // MARK: - Public
-
-  override func process(viewAction: RoomNotificationSettingsScreenViewAction) {
-    switch viewAction {
-    case .changedAllowCustomSettings:
-      toogleCustomSetting()
-    case .setCustomMode(let mode):
-      setCustomMode(mode)
-    case .customSettingFootnoteLinkTapped:
-      actionsSubject.send(.openGlobalSettings)
-    case .deleteCustomSettingTapped:
-      Task { await deleteCustomSetting() }
+    var actions: AnyPublisher<RoomNotificationSettingsScreenViewModelAction, Never> {
+        actionsSubject.eraseToAnyPublisher()
     }
-  }
 
-  // MARK: - Private
+    init(notificationSettingsProxy: NotificationSettingsProxyProtocol,
+         roomProxy: JoinedRoomProxyProtocol, displayAsUserDefinedRoomSettings: Bool) {
+        let bindings = RoomNotificationSettingsScreenViewStateBindings()
+        self.notificationSettingsProxy = notificationSettingsProxy
+        self.roomProxy = roomProxy
+        let navigationTitle =
+            displayAsUserDefinedRoomSettings
+                ? roomProxy.infoPublisher.value.displayName : L10n.screenRoomDetailsNotificationTitle
+        let customSettingsSectionHeader =
+            displayAsUserDefinedRoomSettings
+                ? L10n.screenRoomNotificationSettingsRoomCustomSettingsTitle
+                : L10n.screenRoomNotificationSettingsCustomSettingsTitle
+        super.init(initialViewState: RoomNotificationSettingsScreenViewState(bindings: bindings,
+                                                                             displayAsUserDefinedRoomSettings: displayAsUserDefinedRoomSettings,
+                                                                             navigationTitle: navigationTitle ?? L10n.screenRoomDetailsNotificationTitle,
+                                                                             customSettingsSectionHeader: customSettingsSectionHeader))
 
-  private func setupNotificationSettingsSubscription() {
-    notificationSettingsProxy.callbacks
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] callback in
-        guard let self else { return }
+        setupNotificationSettingsSubscription()
+        fetchNotificationSettings()
+    }
 
-        switch callback {
-        case .settingsDidChange:
-          self.fetchNotificationSettings()
+    // MARK: - Public
+
+    override func process(viewAction: RoomNotificationSettingsScreenViewAction) {
+        switch viewAction {
+        case .changedAllowCustomSettings:
+            toogleCustomSetting()
+        case .setCustomMode(let mode):
+            setCustomMode(mode)
+        case .customSettingFootnoteLinkTapped:
+            actionsSubject.send(.openGlobalSettings)
+        case .deleteCustomSettingTapped:
+            Task { await deleteCustomSetting() }
         }
-      }
-      .store(in: &cancellables)
-  }
-
-  private func fetchNotificationSettings() {
-    fetchNotificationSettingsTask = Task {
-      await fetchRoomNotificationSettings()
-    }
-  }
-
-  private func fetchRoomNotificationSettings() async {
-    let isEncrypted = roomProxy.infoPublisher.value.isEncrypted
-
-    state.shouldDisplayMentionsOnlyDisclaimer =
-      isEncrypted ? await !notificationSettingsProxy.canPushEncryptedEventsToDevice() : false
-
-    do {
-      // `isOneToOne` here is not the same as `isDirect` on the room. From the point of view of the push rule, a one-to-one room is a room with exactly two active members.
-      let settings = try await notificationSettingsProxy.getNotificationSettings(
-        roomId: roomProxy.id,
-        isEncrypted: isEncrypted,
-        isOneToOne: roomProxy.infoPublisher.value.activeMembersCount == 2)
-      guard !Task.isCancelled else { return }
-      state.notificationSettingsState = .loaded(settings: settings)
-      if !state.isRestoringDefaultSetting {
-        state.bindings.allowCustomSetting = !settings.isDefault
-      }
-    } catch {
-      state.notificationSettingsState = .error
-      displayError(.loadingSettingsFailed)
-    }
-  }
-
-  private func toogleCustomSetting() {
-    guard case .loaded(let settings) = state.notificationSettingsState else { return }
-    guard state.bindings.allowCustomSetting == settings.isDefault else { return }
-
-    if state.bindings.allowCustomSetting {
-      setCustomMode(settings.mode)
-    } else {
-      restoreDefaultSetting()
-    }
-  }
-
-  private func restoreDefaultSetting() {
-    state.isRestoringDefaultSetting = true
-    Task {
-      do {
-        try await notificationSettingsProxy.restoreDefaultNotificationMode(roomId: roomProxy.id)
-      } catch {
-        displayError(.restoreDefaultFailed)
-      }
-      await MainActor.run {
-        state.isRestoringDefaultSetting = false
-      }
-    }
-  }
-
-  private func setCustomMode(_ mode: RoomNotificationModeProxy) {
-    // Check if the new mode is already the current one
-    if case .loaded(let currentSettings) = state.notificationSettingsState {
-      if !currentSettings.isDefault, currentSettings.mode == mode {
-        return
-      }
     }
 
-    state.pendingCustomMode = mode
-    Task {
-      do {
-        try await notificationSettingsProxy.setNotificationMode(roomId: roomProxy.id, mode: mode)
-      } catch {
-        displayError(.setModeFailed)
-      }
-      await MainActor.run {
-        state.pendingCustomMode = nil
-      }
-    }
-  }
+    // MARK: - Private
 
-  private func displayError(_ type: RoomNotificationSettingsScreenErrorType) {
-    switch type {
-    case .loadingSettingsFailed:
-      state.bindings.alertInfo = AlertInfo(
-        id: type,
-        title: L10n.commonError,
-        message: L10n.screenRoomNotificationSettingsErrorLoadingSettings)
-    case .setModeFailed:
-      state.bindings.alertInfo = AlertInfo(
-        id: type,
-        title: L10n.commonError,
-        message: L10n.screenRoomNotificationSettingsErrorSettingMode)
+    private func setupNotificationSettingsSubscription() {
+        notificationSettingsProxy.callbacks
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] callback in
+                guard let self else { return }
 
-    case .restoreDefaultFailed:
-      state.bindings.alertInfo = AlertInfo(
-        id: type,
-        title: L10n.commonError,
-        message: L10n.screenRoomNotificationSettingsErrorRestoringDefault)
+                switch callback {
+                case .settingsDidChange:
+                    self.fetchNotificationSettings()
+                }
+            }
+            .store(in: &cancellables)
     }
-  }
 
-  private func deleteCustomSetting() async {
-    state.deletingCustomSetting = true
-    do {
-      try await notificationSettingsProxy.restoreDefaultNotificationMode(roomId: roomProxy.id)
-      actionsSubject.send(.dismiss)
-    } catch {
-      displayError(.restoreDefaultFailed)
+    private func fetchNotificationSettings() {
+        fetchNotificationSettingsTask = Task {
+            await fetchRoomNotificationSettings()
+        }
     }
-    state.deletingCustomSetting = false
-  }
+
+    private func fetchRoomNotificationSettings() async {
+        let isEncrypted = roomProxy.infoPublisher.value.isEncrypted
+
+        state.shouldDisplayMentionsOnlyDisclaimer =
+            isEncrypted ? await !notificationSettingsProxy.canPushEncryptedEventsToDevice() : false
+
+        do {
+            // `isOneToOne` here is not the same as `isDirect` on the room. From the point of view of the push rule, a one-to-one room is a room with exactly two active members.
+            let settings = try await notificationSettingsProxy.getNotificationSettings(roomId: roomProxy.id,
+                                                                                       isEncrypted: isEncrypted,
+                                                                                       isOneToOne: roomProxy.infoPublisher.value.activeMembersCount == 2)
+            guard !Task.isCancelled else { return }
+            state.notificationSettingsState = .loaded(settings: settings)
+            if !state.isRestoringDefaultSetting {
+                state.bindings.allowCustomSetting = !settings.isDefault
+            }
+        } catch {
+            state.notificationSettingsState = .error
+            displayError(.loadingSettingsFailed)
+        }
+    }
+
+    private func toogleCustomSetting() {
+        guard case .loaded(let settings) = state.notificationSettingsState else { return }
+        guard state.bindings.allowCustomSetting == settings.isDefault else { return }
+
+        if state.bindings.allowCustomSetting {
+            setCustomMode(settings.mode)
+        } else {
+            restoreDefaultSetting()
+        }
+    }
+
+    private func restoreDefaultSetting() {
+        state.isRestoringDefaultSetting = true
+        Task {
+            do {
+                try await notificationSettingsProxy.restoreDefaultNotificationMode(roomId: roomProxy.id)
+            } catch {
+                displayError(.restoreDefaultFailed)
+            }
+            await MainActor.run {
+                state.isRestoringDefaultSetting = false
+            }
+        }
+    }
+
+    private func setCustomMode(_ mode: RoomNotificationModeProxy) {
+        // Check if the new mode is already the current one
+        if case .loaded(let currentSettings) = state.notificationSettingsState {
+            if !currentSettings.isDefault, currentSettings.mode == mode {
+                return
+            }
+        }
+
+        state.pendingCustomMode = mode
+        Task {
+            do {
+                try await notificationSettingsProxy.setNotificationMode(roomId: roomProxy.id, mode: mode)
+            } catch {
+                displayError(.setModeFailed)
+            }
+            await MainActor.run {
+                state.pendingCustomMode = nil
+            }
+        }
+    }
+
+    private func displayError(_ type: RoomNotificationSettingsScreenErrorType) {
+        switch type {
+        case .loadingSettingsFailed:
+            state.bindings.alertInfo = AlertInfo(id: type,
+                                                 title: L10n.commonError,
+                                                 message: L10n.screenRoomNotificationSettingsErrorLoadingSettings)
+        case .setModeFailed:
+            state.bindings.alertInfo = AlertInfo(id: type,
+                                                 title: L10n.commonError,
+                                                 message: L10n.screenRoomNotificationSettingsErrorSettingMode)
+
+        case .restoreDefaultFailed:
+            state.bindings.alertInfo = AlertInfo(id: type,
+                                                 title: L10n.commonError,
+                                                 message: L10n.screenRoomNotificationSettingsErrorRestoringDefault)
+        }
+    }
+
+    private func deleteCustomSetting() async {
+        state.deletingCustomSetting = true
+        do {
+            try await notificationSettingsProxy.restoreDefaultNotificationMode(roomId: roomProxy.id)
+            actionsSubject.send(.dismiss)
+        } catch {
+            displayError(.restoreDefaultFailed)
+        }
+        state.deletingCustomSetting = false
+    }
 }

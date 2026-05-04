@@ -9,9 +9,9 @@
 import Foundation
 
 extension Duration {
-  /// Use this to to convert `Duration` in seconds as a `Double`.
-  /// `components.seconds` is not reliable because its type is `Int64`.
-  var seconds: Double {
-    Double(components.seconds) + Double(components.attoseconds) * 1e-18
-  }
+    /// Use this to to convert `Duration` in seconds as a `Double`.
+    /// `components.seconds` is not reliable because its type is `Int64`.
+    var seconds: Double {
+        Double(components.seconds) + Double(components.attoseconds) * 1e-18
+    }
 }

@@ -9,13 +9,13 @@
 import SwiftUI
 
 struct LanguageScreen: View {
-  @Environment(LanguageManager.self) var languageManager
+    @Environment(LanguageManager.self) var languageManager
 
-  var body: some View {
-    List(AvailableLanguage.allCases, id: \.self) { lang in
-      LanguageRow(title: lang.languageName, code: lang.rawValue)
+    var body: some View {
+        List(AvailableLanguage.allCases, id: \.self) { lang in
+            LanguageRow(title: lang.languageName, code: lang.rawValue)
+        }
     }
-  }
 }
 
 // #Preview {
@@ -24,26 +24,26 @@ struct LanguageScreen: View {
 // }
 
 struct LanguageRow: View {
-  let title: String
-  let code: String
-  @Environment(LanguageManager.self) var languageManager
+    let title: String
+    let code: String
+    @Environment(LanguageManager.self) var languageManager
 
-  var body: some View {
-    Button(action: {
-      languageManager.selectedLanguage = code
-    }) {
-      HStack {
-        Text(title)
-          .foregroundColor(.primary)
+    var body: some View {
+        Button(action: {
+            languageManager.selectedLanguage = code
+        }) {
+            HStack {
+                Text(title)
+                    .foregroundColor(.primary)
 
-        Spacer()
+                Spacer()
 
-        if languageManager.selectedLanguage == code {
-          Image(systemName: "checkmark")
-            .foregroundColor(.blue)
-            .font(.system(size: 14, weight: .bold))
+                if languageManager.selectedLanguage == code {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.blue)
+                        .font(.system(size: 14, weight: .bold))
+                }
+            }
         }
-      }
     }
-  }
 }

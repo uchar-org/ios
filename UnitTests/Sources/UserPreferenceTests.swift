@@ -6,192 +6,190 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
+@testable import ElementX
 import Foundation
 import Testing
 
-@testable import ElementX
-
 struct UserPreferenceTests {
-  init() {
-    UserDefaults.testDefaults.removeVolatileDomain(forName: .userDefaultsSuiteName)
-    UserDefaults.testDefaults.removePersistentDomain(forName: .userDefaultsSuiteName)
-  }
-
-  @Test
-  func storePlistValue() {
-    let setPreference = {
-      let value = TestPreferences()
-      value.plist = "Hello"
+    init() {
+        UserDefaults.testDefaults.removeVolatileDomain(forName: .userDefaultsSuiteName)
+        UserDefaults.testDefaults.removePersistentDomain(forName: .userDefaultsSuiteName)
     }
 
-    setPreference()
+    @Test
+    func storePlistValue() {
+        let setPreference = {
+            let value = TestPreferences()
+            value.plist = "Hello"
+        }
 
-    let value = TestPreferences()
+        setPreference()
 
-    #expect(value.plist == "Hello")
-    #expect(UserDefaults.testDefaults.string(forKey: .key2) != nil)
-    #expect(UserDefaults.testDefaults.data(forKey: .key2) == nil)
-  }
+        let value = TestPreferences()
 
-  @Test
-  func storeCodableValue() {
-    let storedType = CodableTestType(a: "some", b: [1, 2, 3])
-
-    let setPreference = {
-      let value = TestPreferences()
-      value.codable = storedType
+        #expect(value.plist == "Hello")
+        #expect(UserDefaults.testDefaults.string(forKey: .key2) != nil)
+        #expect(UserDefaults.testDefaults.data(forKey: .key2) == nil)
     }
 
-    setPreference()
+    @Test
+    func storeCodableValue() {
+        let storedType = CodableTestType(a: "some", b: [1, 2, 3])
 
-    let value = TestPreferences()
+        let setPreference = {
+            let value = TestPreferences()
+            value.codable = storedType
+        }
 
-    #expect(value.codable == storedType)
-    #expect(UserDefaults.testDefaults.data(forKey: .key3) != nil)
-  }
+        setPreference()
 
-  @Test
-  func storePlistValueOnVolatileStorage() {
-    let setPreference = {
-      let value = TestPreferences()
-      value.volatileVar = "Hello"
+        let value = TestPreferences()
+
+        #expect(value.codable == storedType)
+        #expect(UserDefaults.testDefaults.data(forKey: .key3) != nil)
     }
 
-    setPreference()
+    @Test
+    func storePlistValueOnVolatileStorage() {
+        let setPreference = {
+            let value = TestPreferences()
+            value.volatileVar = "Hello"
+        }
 
-    let value = TestPreferences()
+        setPreference()
 
-    #expect(value.volatileVar == nil)
-  }
+        let value = TestPreferences()
 
-  @Test
-  func storeCodableValueOnVolatileStorage() {
-    let storedType = CodableTestType(a: "some", b: [1, 2, 3])
-
-    let setPreference = {
-      let value = TestPreferences()
-      value.volatileCodable = storedType
+        #expect(value.volatileVar == nil)
     }
 
-    setPreference()
+    @Test
+    func storeCodableValueOnVolatileStorage() {
+        let storedType = CodableTestType(a: "some", b: [1, 2, 3])
 
-    let value = TestPreferences()
+        let setPreference = {
+            let value = TestPreferences()
+            value.volatileCodable = storedType
+        }
 
-    #expect(value.volatileCodable == nil)
-    #expect(UserDefaults.testDefaults.data(forKey: .key4) == nil)
-  }
+        setPreference()
 
-  @Test
-  func storePlistArray() {
-    let setPreference = {
-      let value = TestPreferences()
-      value.plistArray = [1, 2, 3]
+        let value = TestPreferences()
+
+        #expect(value.volatileCodable == nil)
+        #expect(UserDefaults.testDefaults.data(forKey: .key4) == nil)
     }
 
-    setPreference()
+    @Test
+    func storePlistArray() {
+        let setPreference = {
+            let value = TestPreferences()
+            value.plistArray = [1, 2, 3]
+        }
 
-    let value = TestPreferences()
+        setPreference()
 
-    #expect(value.plistArray == [1, 2, 3])
-    #expect(UserDefaults.testDefaults.array(forKey: .key5) as? [Int] == [1, 2, 3])
-    #expect(UserDefaults.testDefaults.data(forKey: .key5) == nil)
-  }
+        let value = TestPreferences()
 
-  @Test
-  func assignNilToPlistType() {
-    let setPreference = {
-      let value = TestPreferences()
-      value.plist = "Hello"
+        #expect(value.plistArray == [1, 2, 3])
+        #expect(UserDefaults.testDefaults.array(forKey: .key5) as? [Int] == [1, 2, 3])
+        #expect(UserDefaults.testDefaults.data(forKey: .key5) == nil)
     }
 
-    setPreference()
+    @Test
+    func assignNilToPlistType() {
+        let setPreference = {
+            let value = TestPreferences()
+            value.plist = "Hello"
+        }
 
-    let value = TestPreferences()
-    value.plist = nil
+        setPreference()
 
-    #expect(value.plist == nil)
-    #expect(UserDefaults.testDefaults.string(forKey: .key2) == nil)
-  }
+        let value = TestPreferences()
+        value.plist = nil
 
-  @Test
-  func assignNilToCodableType() {
-    let storedType = CodableTestType(a: "some", b: [1, 2, 3])
-
-    let setPreference = {
-      let value = TestPreferences()
-      value.codable = storedType
+        #expect(value.plist == nil)
+        #expect(UserDefaults.testDefaults.string(forKey: .key2) == nil)
     }
 
-    setPreference()
+    @Test
+    func assignNilToCodableType() {
+        let storedType = CodableTestType(a: "some", b: [1, 2, 3])
 
-    let value = TestPreferences()
-    value.codable = nil
+        let setPreference = {
+            let value = TestPreferences()
+            value.codable = storedType
+        }
 
-    #expect(value.codable == nil)
-    #expect(UserDefaults.testDefaults.data(forKey: .key3) == nil)
-  }
+        setPreference()
 
-  @Test
-  func localOverRemoteValue() {
-    @UserPreference(key: "testKey", defaultValue: "", storageType: .userDefaults(.testDefaults))
-    var preference
-    #expect(preference == "")
+        let value = TestPreferences()
+        value.codable = nil
 
-    _preference.remoteValue = "remote"
-    #expect(preference == "remote")
+        #expect(value.codable == nil)
+        #expect(UserDefaults.testDefaults.data(forKey: .key3) == nil)
+    }
 
-    preference = "local"
-    #expect(preference == "local")
-  }
+    @Test
+    func localOverRemoteValue() {
+        @UserPreference(key: "testKey", defaultValue: "", storageType: .userDefaults(.testDefaults))
+        var preference
+        #expect(preference == "")
 
-  @Test
-  func remoteOverLocalValue() {
-    @UserPreference(
-      key: "testKey", defaultValue: "", storageType: .userDefaults(.testDefaults),
-      mode: .remoteOverLocal) var preference
-    #expect(preference == "")
+        _preference.remoteValue = "remote"
+        #expect(preference == "remote")
 
-    _preference.remoteValue = "remote"
-    #expect(preference == "remote")
+        preference = "local"
+        #expect(preference == "local")
+    }
 
-    preference = "local"
-    #expect(preference == "remote")
-    #expect(_preference.isLockedToRemote)
-  }
+    @Test
+    func remoteOverLocalValue() {
+        @UserPreference(key: "testKey", defaultValue: "", storageType: .userDefaults(.testDefaults),
+                        mode: .remoteOverLocal) var preference
+        #expect(preference == "")
+
+        _preference.remoteValue = "remote"
+        #expect(preference == "remote")
+
+        preference = "local"
+        #expect(preference == "remote")
+        #expect(_preference.isLockedToRemote)
+    }
 }
 
 private struct TestPreferences {
-  @UserPreference(key: .key1, storageType: .volatile)
-  var volatileVar: String?
+    @UserPreference(key: .key1, storageType: .volatile)
+    var volatileVar: String?
 
-  @UserPreference(key: .key2, storageType: .userDefaults(.testDefaults))
-  var plist: String?
+    @UserPreference(key: .key2, storageType: .userDefaults(.testDefaults))
+    var plist: String?
 
-  @UserPreference(key: .key3, storageType: .userDefaults(.testDefaults))
-  var codable: CodableTestType?
+    @UserPreference(key: .key3, storageType: .userDefaults(.testDefaults))
+    var codable: CodableTestType?
 
-  @UserPreference(key: .key4, storageType: .volatile)
-  var volatileCodable: CodableTestType?
+    @UserPreference(key: .key4, storageType: .volatile)
+    var volatileCodable: CodableTestType?
 
-  @UserPreference(key: .key5, storageType: .userDefaults(.testDefaults))
-  var plistArray: [Int]?
+    @UserPreference(key: .key5, storageType: .userDefaults(.testDefaults))
+    var plistArray: [Int]?
 }
 
 private struct CodableTestType: Equatable, Codable {
-  let a: String
-  let b: [Int]
+    let a: String
+    let b: [Int]
 }
 
-extension String {
-  fileprivate static let key1 = "foo.volatile"
-  fileprivate static let key2 = "foo.plist"
-  fileprivate static let key3 = "foo.codable"
-  fileprivate static let key4 = "foo.volatile.codable"
-  fileprivate static let key5 = "foo.plist.array"
-  fileprivate static let userDefaultsSuiteName = "io.element.elementx.unitests"
+private extension String {
+    static let key1 = "foo.volatile"
+    static let key2 = "foo.plist"
+    static let key3 = "foo.codable"
+    static let key4 = "foo.volatile.codable"
+    static let key5 = "foo.plist.array"
+    static let userDefaultsSuiteName = "io.element.elementx.unitests"
 }
 
-extension UserDefaults {
-  // swiftlint:disable:next force_unwrapping
-  fileprivate static let testDefaults = UserDefaults(suiteName: .userDefaultsSuiteName)!
+private extension UserDefaults {
+    // swiftlint:disable:next force_unwrapping
+    static let testDefaults = UserDefaults(suiteName: .userDefaultsSuiteName)!
 }

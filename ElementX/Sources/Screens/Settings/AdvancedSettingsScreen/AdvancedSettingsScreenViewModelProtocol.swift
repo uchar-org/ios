@@ -10,5 +10,5 @@ import Combine
 
 @MainActor
 protocol AdvancedSettingsScreenViewModelProtocol {
-  var context: AdvancedSettingsScreenViewModelType.Context { get }
+    var context: AdvancedSettingsScreenViewModelType.Context { get }
 }

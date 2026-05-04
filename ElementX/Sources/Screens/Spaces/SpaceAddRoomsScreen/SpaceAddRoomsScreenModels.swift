@@ -9,92 +9,90 @@ import Foundation
 import MatrixRustSDK
 
 enum SpaceAddRoomsScreenViewModelAction {
-  case dismiss
+    case dismiss
 }
 
 struct SpaceAddRoomsScreenViewState: BindableState {
-  var roomsSection: Section
-  var selectedRooms: [SpaceAddRoomsScreenRoom] = []
+    var roomsSection: Section
+    var selectedRooms: [SpaceAddRoomsScreenRoom] = []
 
-  var bindings = SpaceAddRoomsScreenViewStateBindings()
+    var bindings = SpaceAddRoomsScreenViewStateBindings()
 
-  struct Section {
-    enum SectionType: Equatable { case searchResults, suggestions }
-    let type: SectionType
+    struct Section {
+        enum SectionType: Equatable { case searchResults, suggestions }
+        let type: SectionType
 
-    let rooms: [SpaceAddRoomsScreenRoom]
+        let rooms: [SpaceAddRoomsScreenRoom]
 
-    var title: String? {
-      switch type {
-      case .searchResults:
-        return nil
-      case .suggestions:
-        return rooms.isEmpty ? nil : L10n.commonSuggestions
-      }
+        var title: String? {
+            switch type {
+            case .searchResults:
+                return nil
+            case .suggestions:
+                return rooms.isEmpty ? nil : L10n.commonSuggestions
+            }
+        }
     }
-  }
 }
 
 struct SpaceAddRoomsScreenViewStateBindings {
-  var searchQuery = ""
-  var selectedRoomsPosition: String?
+    var searchQuery = ""
+    var selectedRoomsPosition: String?
 }
 
 enum SpaceAddRoomsScreenViewAction {
-  case cancel
-  case reachedTop
-  case reachedBottom
-  case searchQueryChanged
-  case toggleRoom(SpaceAddRoomsScreenRoom)
-  case save
+    case cancel
+    case reachedTop
+    case reachedBottom
+    case searchQueryChanged
+    case toggleRoom(SpaceAddRoomsScreenRoom)
+    case save
 }
 
 struct SpaceAddRoomsScreenRoom: Identifiable, Equatable {
-  let id: String
-  let title: String
-  let description: String
-  let avatar: RoomAvatar
+    let id: String
+    let title: String
+    let description: String
+    let avatar: RoomAvatar
 }
 
 extension SpaceAddRoomsScreenRoom {
-  init(summary: RoomSummary) {
-    self.init(
-      id: summary.id,
-      title: summary.name,
-      description: summary.roomListDescription,
-      avatar: summary.avatar)
-  }
+    init(summary: RoomSummary) {
+        self.init(id: summary.id,
+                  title: summary.name,
+                  description: summary.roomListDescription,
+                  avatar: summary.avatar)
+    }
 
-  init(roomProxy: JoinedRoomProxyProtocol) {
-    self.init(
-      id: roomProxy.id,
-      title: roomProxy.infoPublisher.value.displayName ?? roomProxy.id,
-      description: roomProxy.infoPublisher.value.roomListDescription,
-      avatar: roomProxy.infoPublisher.value.avatar)
-  }
+    init(roomProxy: JoinedRoomProxyProtocol) {
+        self.init(id: roomProxy.id,
+                  title: roomProxy.infoPublisher.value.displayName ?? roomProxy.id,
+                  description: roomProxy.infoPublisher.value.roomListDescription,
+                  avatar: roomProxy.infoPublisher.value.avatar)
+    }
 }
 
-extension RoomInfoProxyProtocol {
-  fileprivate var roomListDescription: String {
-    if isDirect {
-      return canonicalAlias ?? ""
+private extension RoomInfoProxyProtocol {
+    var roomListDescription: String {
+        if isDirect {
+            return canonicalAlias ?? ""
+        }
+
+        if let alias = canonicalAlias {
+            return alias
+        }
+
+        guard heroes.count > 0 else {
+            return ""
+        }
+
+        var heroComponents = heroes.compactMap(\.displayName)
+
+        let othersCount = Int(activeMembersCount) - heroes.count
+        if othersCount > 0 {
+            heroComponents.append(L10n.commonManyMembers(othersCount))
+        }
+
+        return heroComponents.formatted(.list(type: .and))
     }
-
-    if let alias = canonicalAlias {
-      return alias
-    }
-
-    guard heroes.count > 0 else {
-      return ""
-    }
-
-    var heroComponents = heroes.compactMap(\.displayName)
-
-    let othersCount = Int(activeMembersCount) - heroes.count
-    if othersCount > 0 {
-      heroComponents.append(L10n.commonManyMembers(othersCount))
-    }
-
-    return heroComponents.formatted(.list(type: .and))
-  }
 }

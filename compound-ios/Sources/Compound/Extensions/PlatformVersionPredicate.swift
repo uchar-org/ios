@@ -9,38 +9,38 @@
 import SwiftUI
 @_spi(Advanced) import SwiftUIIntrospect
 
-extension PlatformViewVersionPredicate<NavigationStackType, UINavigationController> {
-  public static var supportedVersions: Self {
-    .iOS(.v17...)
-  }
+public extension PlatformViewVersionPredicate<NavigationStackType, UINavigationController> {
+    static var supportedVersions: Self {
+        .iOS(.v17...)
+    }
 }
 
-extension PlatformViewVersionPredicate<WindowType, UIWindow> {
-  public static var supportedVersions: Self {
-    .iOS(.v17...)
-  }
+public extension PlatformViewVersionPredicate<WindowType, UIWindow> {
+    static var supportedVersions: Self {
+        .iOS(.v17...)
+    }
 }
 
-extension PlatformViewVersionPredicate<TextFieldType, UITextField> {
-  public static var supportedVersions: Self {
-    .iOS(.v17...)
-  }
+public extension PlatformViewVersionPredicate<TextFieldType, UITextField> {
+    static var supportedVersions: Self {
+        .iOS(.v17...)
+    }
 }
 
-extension PlatformViewVersionPredicate<ScrollViewType, UIScrollView> {
-  public static var supportedVersions: Self {
-    .iOS(.v17...)
-  }
+public extension PlatformViewVersionPredicate<ScrollViewType, UIScrollView> {
+    static var supportedVersions: Self {
+        .iOS(.v17...)
+    }
 }
 
-extension PlatformViewVersionPredicate<ViewControllerType, UIViewController> {
-  public static var supportedVersions: Self {
-    .iOS(.v17...)
-  }
+public extension PlatformViewVersionPredicate<ViewControllerType, UIViewController> {
+    static var supportedVersions: Self {
+        .iOS(.v17...)
+    }
 }
 
-extension PlatformViewVersionPredicate<TabViewType, UITabBarController> {
-  public static var supportedVersions: Self {
-    .iOS(.v17...)
-  }
+public extension PlatformViewVersionPredicate<TabViewType, UITabBarController> {
+    static var supportedVersions: Self {
+        .iOS(.v17...)
+    }
 }
