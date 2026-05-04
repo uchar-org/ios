@@ -10,13 +10,15 @@ import Foundation
 
 @MainActor
 protocol AppCoordinatorProtocol: CoordinatorProtocol {
-    var windowManager: SecureWindowManagerProtocol { get }
-    
-    @discardableResult func handleDeepLink(_ url: URL, isExternalURL: Bool, windowType: SecondaryWindowType?) -> Bool
-    
-    func handleAppRoute(_ appRoute: AppRoute, windowType: SecondaryWindowType?)
-    
-    func handlePotentialPhishingAttempt(url: URL, openURLAction: @escaping (URL) -> Void) -> Bool
-    
-    func handleUserActivity(_ userActivity: NSUserActivity)
+  var windowManager: SecureWindowManagerProtocol { get }
+
+  @discardableResult func handleDeepLink(
+    _ url: URL, isExternalURL: Bool, windowType: SecondaryWindowType?
+  ) -> Bool
+
+  func handleAppRoute(_ appRoute: AppRoute, windowType: SecondaryWindowType?)
+
+  func handlePotentialPhishingAttempt(url: URL, openURLAction: @escaping (URL) -> Void) -> Bool
+
+  func handleUserActivity(_ userActivity: NSUserActivity)
 }

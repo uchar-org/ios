@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol SpacesScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<SpacesScreenViewModelAction, Never> { get }
-    var context: SpacesScreenViewModelType.Context { get }
+  var actionsPublisher: AnyPublisher<SpacesScreenViewModelAction, Never> { get }
+  var context: SpacesScreenViewModelType.Context { get }
 }

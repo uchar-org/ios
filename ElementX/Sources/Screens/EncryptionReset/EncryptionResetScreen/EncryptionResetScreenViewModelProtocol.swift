@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol EncryptionResetScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<EncryptionResetScreenViewModelAction, Never> { get }
-    var context: EncryptionResetScreenViewModelType.Context { get }
-    
-    func stop()
+  var actionsPublisher: AnyPublisher<EncryptionResetScreenViewModelAction, Never> { get }
+  var context: EncryptionResetScreenViewModelType.Context { get }
+
+  func stop()
 }

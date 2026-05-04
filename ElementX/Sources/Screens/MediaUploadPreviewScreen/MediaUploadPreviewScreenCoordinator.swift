@@ -10,58 +10,60 @@ import Combine
 import SwiftUI
 
 struct MediaUploadPreviewScreenCoordinatorParameters {
-    let mediaURLs: [URL]
-    let title: String?
-    let isRoomEncrypted: Bool
-    let shouldShowCaptionWarning: Bool
-    let mediaUploadingPreprocessor: MediaUploadingPreprocessor
-    let timelineController: TimelineControllerProtocol
-    let clientProxy: ClientProxyProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let mediaURLs: [URL]
+  let title: String?
+  let isRoomEncrypted: Bool
+  let shouldShowCaptionWarning: Bool
+  let mediaUploadingPreprocessor: MediaUploadingPreprocessor
+  let timelineController: TimelineControllerProtocol
+  let clientProxy: ClientProxyProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum MediaUploadPreviewScreenCoordinatorAction {
-    case dismiss
+  case dismiss
 }
 
 final class MediaUploadPreviewScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: MediaUploadPreviewScreenViewModelProtocol
-    private let actionsSubject: PassthroughSubject<MediaUploadPreviewScreenCoordinatorAction, Never> = .init()
-    private var cancellables = Set<AnyCancellable>()
-    
-    var actions: AnyPublisher<MediaUploadPreviewScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
-    }
-    
-    init(parameters: MediaUploadPreviewScreenCoordinatorParameters) {
-        viewModel = MediaUploadPreviewScreenViewModel(mediaURLs: parameters.mediaURLs,
-                                                      title: parameters.title,
-                                                      isRoomEncrypted: parameters.isRoomEncrypted,
-                                                      shouldShowCaptionWarning: parameters.shouldShowCaptionWarning,
-                                                      mediaUploadingPreprocessor: parameters.mediaUploadingPreprocessor,
-                                                      timelineController: parameters.timelineController,
-                                                      clientProxy: parameters.clientProxy,
-                                                      userIndicatorController: parameters.userIndicatorController)
-    }
-    
-    func start() {
-        viewModel.actions
-            .sink { [weak self] action in
-                guard let self else { return }
-                
-                switch action {
-                case .dismiss:
-                    actionsSubject.send(.dismiss)
-                }
-            }
-            .store(in: &cancellables)
-    }
-    
-    func stop() {
-        viewModel.stopProcessing()
-    }
-    
-    func toPresentable() -> AnyView {
-        AnyView(MediaUploadPreviewScreen(context: viewModel.context))
-    }
+  private var viewModel: MediaUploadPreviewScreenViewModelProtocol
+  private let actionsSubject: PassthroughSubject<MediaUploadPreviewScreenCoordinatorAction, Never> =
+    .init()
+  private var cancellables = Set<AnyCancellable>()
+
+  var actions: AnyPublisher<MediaUploadPreviewScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: MediaUploadPreviewScreenCoordinatorParameters) {
+    viewModel = MediaUploadPreviewScreenViewModel(
+      mediaURLs: parameters.mediaURLs,
+      title: parameters.title,
+      isRoomEncrypted: parameters.isRoomEncrypted,
+      shouldShowCaptionWarning: parameters.shouldShowCaptionWarning,
+      mediaUploadingPreprocessor: parameters.mediaUploadingPreprocessor,
+      timelineController: parameters.timelineController,
+      clientProxy: parameters.clientProxy,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func start() {
+    viewModel.actions
+      .sink { [weak self] action in
+        guard let self else { return }
+
+        switch action {
+        case .dismiss:
+          actionsSubject.send(.dismiss)
+        }
+      }
+      .store(in: &cancellables)
+  }
+
+  func stop() {
+    viewModel.stopProcessing()
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(MediaUploadPreviewScreen(context: viewModel.context))
+  }
 }

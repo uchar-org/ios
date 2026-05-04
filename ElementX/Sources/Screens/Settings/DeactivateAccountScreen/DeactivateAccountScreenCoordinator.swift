@@ -10,46 +10,48 @@ import Combine
 import SwiftUI
 
 struct DeactivateAccountScreenCoordinatorParameters {
-    let clientProxy: ClientProxyProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let clientProxy: ClientProxyProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum DeactivateAccountScreenCoordinatorAction {
-    case accountDeactivated
+  case accountDeactivated
 }
 
 final class DeactivateAccountScreenCoordinator: CoordinatorProtocol {
-    private let parameters: DeactivateAccountScreenCoordinatorParameters
-    private let viewModel: DeactivateAccountScreenViewModelProtocol
-    
-    private var cancellables = Set<AnyCancellable>()
- 
-    private let actionsSubject: PassthroughSubject<DeactivateAccountScreenCoordinatorAction, Never> = .init()
-    var actionsPublisher: AnyPublisher<DeactivateAccountScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private let parameters: DeactivateAccountScreenCoordinatorParameters
+  private let viewModel: DeactivateAccountScreenViewModelProtocol
+
+  private var cancellables = Set<AnyCancellable>()
+
+  private let actionsSubject: PassthroughSubject<DeactivateAccountScreenCoordinatorAction, Never> =
+    .init()
+  var actionsPublisher: AnyPublisher<DeactivateAccountScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: DeactivateAccountScreenCoordinatorParameters) {
+    self.parameters = parameters
+
+    viewModel = DeactivateAccountScreenViewModel(
+      clientProxy: parameters.clientProxy,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func start() {
+    viewModel.actionsPublisher.sink { [weak self] action in
+      MXLog.info("Coordinator: received view model action: \(action)")
+
+      guard let self else { return }
+      switch action {
+      case .accountDeactivated:
+        actionsSubject.send(.accountDeactivated)
+      }
     }
-    
-    init(parameters: DeactivateAccountScreenCoordinatorParameters) {
-        self.parameters = parameters
-        
-        viewModel = DeactivateAccountScreenViewModel(clientProxy: parameters.clientProxy,
-                                                     userIndicatorController: parameters.userIndicatorController)
-    }
-    
-    func start() {
-        viewModel.actionsPublisher.sink { [weak self] action in
-            MXLog.info("Coordinator: received view model action: \(action)")
-            
-            guard let self else { return }
-            switch action {
-            case .accountDeactivated:
-                actionsSubject.send(.accountDeactivated)
-            }
-        }
-        .store(in: &cancellables)
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(DeactivateAccountScreen(context: viewModel.context))
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(DeactivateAccountScreen(context: viewModel.context))
+  }
 }

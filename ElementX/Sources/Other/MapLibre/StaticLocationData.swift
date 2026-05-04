@@ -8,8 +8,8 @@
 import Foundation
 
 struct StaticLocationData: Hashable {
-    let sender: TimelineItemSender
-    let geoURI: GeoURI
-    let kind: StaticLocationKind
-    let timestamp: Date
+  let sender: TimelineItemSender
+  let geoURI: GeoURI
+  let kind: StaticLocationKind
+  let timestamp: Date
 }

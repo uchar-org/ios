@@ -9,8 +9,8 @@
 import UIKit
 
 struct EmoteRoomTimelineItemContent: Hashable {
-    let body: String
-    var formattedBody: AttributedString?
-    /// The original textual representation of the formatted body directly from the event (usually HTML code)
-    var formattedBodyHTMLString: String?
+  let body: String
+  var formattedBody: AttributedString?
+  /// The original textual representation of the formatted body directly from the event (usually HTML code)
+  var formattedBodyHTMLString: String?
 }

@@ -9,11 +9,11 @@
 import Foundation
 
 protocol BugReportHookProtocol {
-    func update(_ bugReport: BugReport) -> BugReport
+  func update(_ bugReport: BugReport) -> BugReport
 }
 
 struct DefaultBugReportHook: BugReportHookProtocol {
-    func update(_ bugReport: BugReport) -> BugReport {
-        bugReport
-    }
+  func update(_ bugReport: BugReport) -> BugReport {
+    bugReport
+  }
 }

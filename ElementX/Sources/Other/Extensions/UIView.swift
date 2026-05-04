@@ -9,14 +9,14 @@
 import SwiftUI
 
 extension UIView {
-    func addMatchedSubview(_ subview: UIView) {
-        addSubview(subview)
-        subview.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            subview.topAnchor.constraint(equalTo: topAnchor),
-            subview.leadingAnchor.constraint(equalTo: leadingAnchor),
-            subview.trailingAnchor.constraint(equalTo: trailingAnchor),
-            subview.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
-    }
+  func addMatchedSubview(_ subview: UIView) {
+    addSubview(subview)
+    subview.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+      subview.topAnchor.constraint(equalTo: topAnchor),
+      subview.leadingAnchor.constraint(equalTo: leadingAnchor),
+      subview.trailingAnchor.constraint(equalTo: trailingAnchor),
+      subview.bottomAnchor.constraint(equalTo: bottomAnchor),
+    ])
+  }
 }

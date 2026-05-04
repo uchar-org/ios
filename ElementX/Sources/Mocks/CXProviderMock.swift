@@ -6,12 +6,12 @@
 //
 
 extension CXProviderMock {
-    struct Configuration { }
-    
-    convenience init(_ configuration: Configuration) {
-        self.init()
-        reportNewIncomingCallWithUpdateCompletionClosure = { _, _, completion in
-            completion(nil)
-        }
+  struct Configuration {}
+
+  convenience init(_ configuration: Configuration) {
+    self.init()
+    reportNewIncomingCallWithUpdateCompletionClosure = { _, _, completion in
+      completion(nil)
     }
+  }
 }

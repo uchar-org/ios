@@ -10,24 +10,27 @@ import Compound
 import SwiftUI
 
 struct SeparatorMediaEventsTimelineView: View {
-    let group: MediaEventsTimelineGroup
-    
-    var body: some View {
-        Text(group.title)
-            .font(.compound.bodySMSemibold)
-            .foregroundColor(.compound.textPrimary)
-            .frame(alignment: .center)
-            .padding(.vertical, 16)
-    }
+  let group: MediaEventsTimelineGroup
+
+  var body: some View {
+    Text(group.title)
+      .font(.compound.bodySMSemibold)
+      .foregroundColor(.compound.textPrimary)
+      .frame(alignment: .center)
+      .padding(.vertical, 16)
+  }
 }
 
 struct SeparatorMediaEventsTimelineView_Previews: PreviewProvider, TestablePreview {
-    static var previews: some View {
-        let item = SeparatorRoomTimelineItem(id: .virtual(uniqueID: .init("Separator")),
-                                             timestamp: .mock)
-        
-        SeparatorMediaEventsTimelineView(group: .init(id: item.id.uniqueID.value,
-                                                      title: "Group",
-                                                      items: []))
-    }
+  static var previews: some View {
+    let item = SeparatorRoomTimelineItem(
+      id: .virtual(uniqueID: .init("Separator")),
+      timestamp: .mock)
+
+    SeparatorMediaEventsTimelineView(
+      group: .init(
+        id: item.id.uniqueID.value,
+        title: "Group",
+        items: []))
+  }
 }

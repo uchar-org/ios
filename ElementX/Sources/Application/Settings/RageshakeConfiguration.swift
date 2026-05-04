@@ -10,8 +10,8 @@ import Foundation
 
 /// A type that represents how rageshakes are collected by the app.
 enum RageshakeConfiguration: Equatable, Codable {
-    /// Rageshakes should be sent to the provided URL
-    case url(URL)
-    /// Rageshakes are disabled.
-    case disabled
+  /// Rageshakes should be sent to the provided URL
+  case url(URL)
+  /// Rageshakes are disabled.
+  case disabled
 }

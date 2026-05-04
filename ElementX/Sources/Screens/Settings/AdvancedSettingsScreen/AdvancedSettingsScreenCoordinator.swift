@@ -10,23 +10,24 @@ import Combine
 import SwiftUI
 
 struct AdvancedSettingsScreenCoordinatorParameters {
-    let appSettings: AppSettings
-    let analytics: AnalyticsService
-    let clientProxy: ClientProxyProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let appSettings: AppSettings
+  let analytics: AnalyticsService
+  let clientProxy: ClientProxyProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 final class AdvancedSettingsScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: AdvancedSettingsScreenViewModelProtocol
-    
-    init(parameters: AdvancedSettingsScreenCoordinatorParameters) {
-        viewModel = AdvancedSettingsScreenViewModel(advancedSettings: parameters.appSettings,
-                                                    analytics: parameters.analytics,
-                                                    clientProxy: parameters.clientProxy,
-                                                    userIndicatorController: parameters.userIndicatorController)
-    }
-            
-    func toPresentable() -> AnyView {
-        AnyView(AdvancedSettingsScreen(context: viewModel.context))
-    }
+  private var viewModel: AdvancedSettingsScreenViewModelProtocol
+
+  init(parameters: AdvancedSettingsScreenCoordinatorParameters) {
+    viewModel = AdvancedSettingsScreenViewModel(
+      advancedSettings: parameters.appSettings,
+      analytics: parameters.analytics,
+      clientProxy: parameters.clientProxy,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(AdvancedSettingsScreen(context: viewModel.context))
+  }
 }

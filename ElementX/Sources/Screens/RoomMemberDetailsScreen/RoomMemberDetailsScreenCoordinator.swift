@@ -10,63 +10,65 @@ import Combine
 import SwiftUI
 
 struct RoomMemberDetailsScreenCoordinatorParameters {
-    let userID: String
-    let roomProxy: JoinedRoomProxyProtocol
-    let userSession: UserSessionProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
-    let analytics: AnalyticsService
-    let appSettings: AppSettings
+  let userID: String
+  let roomProxy: JoinedRoomProxyProtocol
+  let userSession: UserSessionProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
+  let analytics: AnalyticsService
+  let appSettings: AppSettings
 }
 
 enum RoomMemberDetailsScreenCoordinatorAction {
-    case openUserProfile
-    case openDirectChat(roomID: String)
-    case startCall(roomProxy: JoinedRoomProxyProtocol, isVoiceCall: Bool)
-    case verifyUser(userID: String)
+  case openUserProfile
+  case openDirectChat(roomID: String)
+  case startCall(roomProxy: JoinedRoomProxyProtocol, isVoiceCall: Bool)
+  case verifyUser(userID: String)
 }
 
 final class RoomMemberDetailsScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: RoomMemberDetailsScreenViewModelProtocol
+  private var viewModel: RoomMemberDetailsScreenViewModelProtocol
 
-    private let actionsSubject: PassthroughSubject<RoomMemberDetailsScreenCoordinatorAction, Never> = .init()
-    private var cancellables = Set<AnyCancellable>()
-    
-    var actions: AnyPublisher<RoomMemberDetailsScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
-    }
+  private let actionsSubject: PassthroughSubject<RoomMemberDetailsScreenCoordinatorAction, Never> =
+    .init()
+  private var cancellables = Set<AnyCancellable>()
 
-    init(parameters: RoomMemberDetailsScreenCoordinatorParameters) {
-        viewModel = RoomMemberDetailsScreenViewModel(userID: parameters.userID,
-                                                     roomProxy: parameters.roomProxy,
-                                                     userSession: parameters.userSession,
-                                                     userIndicatorController: parameters.userIndicatorController,
-                                                     analytics: parameters.analytics,
-                                                     appSettings: parameters.appSettings)
-    }
-    
-    func start() {
-        viewModel.actions.sink { [weak self] action in
-            guard let self else { return }
-            
-            switch action {
-            case .openUserProfile:
-                actionsSubject.send(.openUserProfile)
-            case .openDirectChat(let roomID):
-                actionsSubject.send(.openDirectChat(roomID: roomID))
-            case .startCall(let roomProxy, let isVoiceCall):
-                actionsSubject.send(.startCall(roomProxy: roomProxy, isVoiceCall: isVoiceCall))
-            case .verifyUser(let userID):
-                actionsSubject.send(.verifyUser(userID: userID))
-            }
-        }
-        .store(in: &cancellables)
-    }
-    
-    func stop() {
-        viewModel.stop()
-    }
+  var actions: AnyPublisher<RoomMemberDetailsScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
 
-    func toPresentable() -> AnyView {
-        AnyView(RoomMemberDetailsScreen(context: viewModel.context))
+  init(parameters: RoomMemberDetailsScreenCoordinatorParameters) {
+    viewModel = RoomMemberDetailsScreenViewModel(
+      userID: parameters.userID,
+      roomProxy: parameters.roomProxy,
+      userSession: parameters.userSession,
+      userIndicatorController: parameters.userIndicatorController,
+      analytics: parameters.analytics,
+      appSettings: parameters.appSettings)
+  }
+
+  func start() {
+    viewModel.actions.sink { [weak self] action in
+      guard let self else { return }
+
+      switch action {
+      case .openUserProfile:
+        actionsSubject.send(.openUserProfile)
+      case .openDirectChat(let roomID):
+        actionsSubject.send(.openDirectChat(roomID: roomID))
+      case .startCall(let roomProxy, let isVoiceCall):
+        actionsSubject.send(.startCall(roomProxy: roomProxy, isVoiceCall: isVoiceCall))
+      case .verifyUser(let userID):
+        actionsSubject.send(.verifyUser(userID: userID))
+      }
     }
+    .store(in: &cancellables)
+  }
+
+  func stop() {
+    viewModel.stop()
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(RoomMemberDetailsScreen(context: viewModel.context))
+  }
 }

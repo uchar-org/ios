@@ -9,22 +9,22 @@
 import Foundation
 
 enum ThreadTimelineScreenViewModelAction {
-    case displayMessageForwarding(MessageForwardingItem)
+  case displayMessageForwarding(MessageForwardingItem)
 }
 
 struct ThreadTimelineScreenViewState: BindableState {
-    var roomTitle: String
-    var roomAvatar: RoomAvatar
-    var canSendMessage = true
-    var dmRecipientVerificationState: UserIdentityVerificationState?
-    var roomHistorySharingState: RoomHistorySharingState?
-    
-    var bindings = ThreadTimelineScreenViewStateBindings()
+  var roomTitle: String
+  var roomAvatar: RoomAvatar
+  var canSendMessage = true
+  var dmRecipientVerificationState: UserIdentityVerificationState?
+  var roomHistorySharingState: RoomHistorySharingState?
+
+  var bindings = ThreadTimelineScreenViewStateBindings()
 }
 
 struct ThreadTimelineScreenViewStateBindings {
-    /// The view model used to present a QuickLook media preview.
-    var mediaPreviewViewModel: TimelineMediaPreviewViewModel?
+  /// The view model used to present a QuickLook media preview.
+  var mediaPreviewViewModel: TimelineMediaPreviewViewModel?
 }
 
-enum ThreadTimelineScreenViewAction { }
+enum ThreadTimelineScreenViewAction {}

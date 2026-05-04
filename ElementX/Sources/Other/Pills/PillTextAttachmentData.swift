@@ -10,36 +10,36 @@ import Foundation
 import UIKit
 
 enum PillType: Codable, Equatable {
-    enum EventRoom: Codable, Equatable {
-        case roomAlias(String)
-        case roomID(String)
-    }
-    
-    case event(room: EventRoom)
+  enum EventRoom: Codable, Equatable {
     case roomAlias(String)
     case roomID(String)
-    /// A pill that mentions a user
-    case user(userID: String)
-    /// A pill that mentions all users in a room
-    case allUsers
+  }
+
+  case event(room: EventRoom)
+  case roomAlias(String)
+  case roomID(String)
+  /// A pill that mentions a user
+  case user(userID: String)
+  /// A pill that mentions all users in a room
+  case allUsers
 }
 
 struct PillTextAttachmentData: Codable, Equatable {
-    struct Font: Codable, Equatable {
-        let descender: CGFloat
-        let lineHeight: CGFloat
-    }
-    
-    /// Pill type
-    let type: PillType
-    
-    /// Font for the display name
-    let fontData: Font
+  struct Font: Codable, Equatable {
+    let descender: CGFloat
+    let lineHeight: CGFloat
+  }
+
+  /// Pill type
+  let type: PillType
+
+  /// Font for the display name
+  let fontData: Font
 }
 
 extension PillTextAttachmentData {
-    init(type: PillType, font: UIFont) {
-        self.type = type
-        fontData = Font(descender: font.descender, lineHeight: font.lineHeight)
-    }
+  init(type: PillType, font: UIFont) {
+    self.type = type
+    fontData = Font(descender: font.descender, lineHeight: font.lineHeight)
+  }
 }

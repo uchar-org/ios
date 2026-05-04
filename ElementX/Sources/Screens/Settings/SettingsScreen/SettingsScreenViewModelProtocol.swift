@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol SettingsScreenViewModelProtocol {
-    var actions: AnyPublisher<SettingsScreenViewModelAction, Never> { get }
-    var context: SettingsScreenViewModelType.Context { get }
+  var actions: AnyPublisher<SettingsScreenViewModelAction, Never> { get }
+  var context: SettingsScreenViewModelType.Context { get }
 }

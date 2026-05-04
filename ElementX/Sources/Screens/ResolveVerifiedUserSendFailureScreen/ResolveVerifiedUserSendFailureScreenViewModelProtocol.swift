@@ -10,6 +10,8 @@ import Combine
 
 @MainActor
 protocol ResolveVerifiedUserSendFailureScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<ResolveVerifiedUserSendFailureScreenViewModelAction, Never> { get }
-    var context: ResolveVerifiedUserSendFailureScreenViewModelType.Context { get }
+  var actionsPublisher: AnyPublisher<ResolveVerifiedUserSendFailureScreenViewModelAction, Never> {
+    get
+  }
+  var context: ResolveVerifiedUserSendFailureScreenViewModelType.Context { get }
 }

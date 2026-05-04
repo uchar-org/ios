@@ -10,6 +10,6 @@ import Foundation
 
 // sourcery: AutoMockable
 protocol RoomMembershipDetailsProxyProtocol {
-    var ownRoomMember: RoomMemberProxyProtocol { get }
-    var senderRoomMember: RoomMemberProxyProtocol? { get }
+  var ownRoomMember: RoomMemberProxyProtocol { get }
+  var senderRoomMember: RoomMemberProxyProtocol? { get }
 }

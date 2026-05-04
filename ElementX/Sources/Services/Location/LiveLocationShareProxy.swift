@@ -9,26 +9,26 @@ import Foundation
 import MatrixRustSDK
 
 struct LiveLocationShare: Hashable, Identifiable {
-    let userID: String
-    let geoURI: GeoURI?
-    let timestamp: Date
-    let timeoutDate: Date
-    
-    var id: String {
-        userID
-    }
-    
-    init(userID: String, geoURI: GeoURI?, timestamp: Date, timeoutDate: Date) {
-        self.userID = userID
-        self.geoURI = geoURI
-        self.timestamp = timestamp
-        self.timeoutDate = timeoutDate
-    }
-    
-    init(liveLocationShare: MatrixRustSDK.LiveLocationShare) {
-        userID = liveLocationShare.userId
-        geoURI = (liveLocationShare.lastLocation?.location.geoUri).flatMap(GeoURI.init(string:))
-        timestamp = Date(timeIntervalSince1970: Double(liveLocationShare.startTs))
-        timeoutDate = timestamp.addingTimeInterval(Double(liveLocationShare.timeout) / 1000)
-    }
+  let userID: String
+  let geoURI: GeoURI?
+  let timestamp: Date
+  let timeoutDate: Date
+
+  var id: String {
+    userID
+  }
+
+  init(userID: String, geoURI: GeoURI?, timestamp: Date, timeoutDate: Date) {
+    self.userID = userID
+    self.geoURI = geoURI
+    self.timestamp = timestamp
+    self.timeoutDate = timeoutDate
+  }
+
+  init(liveLocationShare: MatrixRustSDK.LiveLocationShare) {
+    userID = liveLocationShare.userId
+    geoURI = (liveLocationShare.lastLocation?.location.geoUri).flatMap(GeoURI.init(string:))
+    timestamp = Date(timeIntervalSince1970: Double(liveLocationShare.startTs))
+    timeoutDate = timestamp.addingTimeInterval(Double(liveLocationShare.timeout) / 1000)
+  }
 }

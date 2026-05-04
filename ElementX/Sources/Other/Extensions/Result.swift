@@ -7,12 +7,12 @@
 //
 
 extension Result {
-    var isFailure: Bool {
-        switch self {
-        case .success:
-            return false
-        case .failure:
-            return true
-        }
+  var isFailure: Bool {
+    switch self {
+    case .success:
+      return false
+    case .failure:
+      return true
     }
+  }
 }

@@ -9,18 +9,18 @@
 import SwiftUI
 
 struct PaginationIndicatorRoomTimelineView: View {
-    let timelineItem: PaginationIndicatorRoomTimelineItem
-    
-    var body: some View {
-        ProgressView()
-            .frame(maxWidth: .infinity)
-            .padding(.top, 12) // Bottom spacing comes from the next item (date separator).
-    }
+  let timelineItem: PaginationIndicatorRoomTimelineItem
+
+  var body: some View {
+    ProgressView()
+      .frame(maxWidth: .infinity)
+      .padding(.top, 12)  // Bottom spacing comes from the next item (date separator).
+  }
 }
 
 struct PaginationIndicatorRoomTimelineView_Previews: PreviewProvider, TestablePreview {
-    static var previews: some View {
-        let item = PaginationIndicatorRoomTimelineItem(position: .start)
-        PaginationIndicatorRoomTimelineView(timelineItem: item)
-    }
+  static var previews: some View {
+    let item = PaginationIndicatorRoomTimelineItem(position: .start)
+    PaginationIndicatorRoomTimelineView(timelineItem: item)
+  }
 }

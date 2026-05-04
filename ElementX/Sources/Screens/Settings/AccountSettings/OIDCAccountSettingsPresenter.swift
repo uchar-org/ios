@@ -16,51 +16,56 @@ import AuthenticationServices
 /// isn't sharing the session back to Safari.
 @MainActor
 class OIDCAccountSettingsPresenter: NSObject {
-    private let accountURL: URL
-    private let presentationAnchor: UIWindow
-    private let oidcRedirectURL: URL
-    
-    typealias Continuation = AsyncStream<Result<Void, OIDCError>>.Continuation
-    private let continuation: Continuation?
-    
-    init(accountURL: URL, presentationAnchor: UIWindow, appSettings: AppSettings, continuation: Continuation? = nil) {
-        self.accountURL = accountURL
-        self.presentationAnchor = presentationAnchor
-        oidcRedirectURL = appSettings.oidcRedirectURL
-        self.continuation = continuation
-        super.init()
+  private let accountURL: URL
+  private let presentationAnchor: UIWindow
+  private let oidcRedirectURL: URL
+
+  typealias Continuation = AsyncStream<Result<Void, OIDCError>>.Continuation
+  private let continuation: Continuation?
+
+  init(
+    accountURL: URL, presentationAnchor: UIWindow, appSettings: AppSettings,
+    continuation: Continuation? = nil
+  ) {
+    self.accountURL = accountURL
+    self.presentationAnchor = presentationAnchor
+    oidcRedirectURL = appSettings.oidcRedirectURL
+    self.continuation = continuation
+    super.init()
+  }
+
+  /// Presents a web authentication session for the supplied data.
+  func start() {
+    let session = ASWebAuthenticationSession(
+      url: accountURL, callback: .oidcRedirectURL(oidcRedirectURL)
+    ) { [continuation] _, error in
+      guard let continuation else { return }
+
+      if error?.isOIDCUserCancellation == true {
+        continuation.yield(.failure(.userCancellation))
+      } else {
+        let errorDescription = error.map(String.init(describing:)) ?? "Unknown error"
+        MXLog.error("A web authentication session error occurred: \(errorDescription)")
+        continuation.yield(.failure(.unknown))
+      }
+
+      continuation.finish()
     }
-    
-    /// Presents a web authentication session for the supplied data.
-    func start() {
-        let session = ASWebAuthenticationSession(url: accountURL, callback: .oidcRedirectURL(oidcRedirectURL)) { [continuation] _, error in
-            guard let continuation else { return }
-            
-            if error?.isOIDCUserCancellation == true {
-                continuation.yield(.failure(.userCancellation))
-            } else {
-                let errorDescription = error.map(String.init(describing:)) ?? "Unknown error"
-                MXLog.error("A web authentication session error occurred: \(errorDescription)")
-                continuation.yield(.failure(.unknown))
-            }
-            
-            continuation.finish()
-        }
-        
-        session.prefersEphemeralWebBrowserSession = false
-        session.presentationContextProvider = self
-        session.additionalHeaderFields = [
-            "X-Element-User-Agent": UserAgentBuilder.makeASCIIUserAgent()
-        ]
-        
-        session.start()
-    }
+
+    session.prefersEphemeralWebBrowserSession = false
+    session.presentationContextProvider = self
+    session.additionalHeaderFields = [
+      "X-Element-User-Agent": UserAgentBuilder.makeASCIIUserAgent()
+    ]
+
+    session.start()
+  }
 }
 
 // MARK: ASWebAuthenticationPresentationContextProviding
 
 extension OIDCAccountSettingsPresenter: ASWebAuthenticationPresentationContextProviding {
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        presentationAnchor
-    }
+  func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+    presentationAnchor
+  }
 }

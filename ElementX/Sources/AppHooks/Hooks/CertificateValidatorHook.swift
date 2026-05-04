@@ -9,11 +9,15 @@
 import Foundation
 
 protocol CertificateValidatorHookProtocol {
-    func respondTo(_ challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?)
+  func respondTo(_ challenge: URLAuthenticationChallenge) async -> (
+    URLSession.AuthChallengeDisposition, URLCredential?
+  )
 }
 
 struct DefaultCertificateValidator: CertificateValidatorHookProtocol {
-    func respondTo(_ challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        (.performDefaultHandling, nil)
-    }
+  func respondTo(_ challenge: URLAuthenticationChallenge) async -> (
+    URLSession.AuthChallengeDisposition, URLCredential?
+  ) {
+    (.performDefaultHandling, nil)
+  }
 }

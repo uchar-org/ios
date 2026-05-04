@@ -10,14 +10,14 @@ import Combine
 import Foundation
 
 struct RoomDirectorySearchProxyMockConfiguration {
-    let results: [RoomDirectorySearchResult]
+  let results: [RoomDirectorySearchResult]
 }
 
 extension RoomDirectorySearchProxyMock {
-    convenience init(configuration: RoomDirectorySearchProxyMockConfiguration) {
-        self.init()
-        resultsPublisher = CurrentValueSubject(configuration.results).asCurrentValuePublisher()
-        searchQueryReturnValue = .success(())
-        nextPageReturnValue = .success(())
-    }
+  convenience init(configuration: RoomDirectorySearchProxyMockConfiguration) {
+    self.init()
+    resultsPublisher = CurrentValueSubject(configuration.results).asCurrentValuePublisher()
+    searchQueryReturnValue = .success(())
+    nextPageReturnValue = .success(())
+  }
 }

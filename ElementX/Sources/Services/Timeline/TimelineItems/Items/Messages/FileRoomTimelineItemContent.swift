@@ -10,13 +10,13 @@ import Foundation
 import UniformTypeIdentifiers
 
 struct FileRoomTimelineItemContent: Hashable {
-    let filename: String
-    var caption: String?
-    var formattedCaption: AttributedString?
-    /// The original textual representation of the formatted caption directly from the event (usually HTML code)
-    var formattedCaptionHTMLString: String?
-    let source: MediaSourceProxy?
-    let fileSize: UInt?
-    let thumbnailSource: MediaSourceProxy?
-    let contentType: UTType?
+  let filename: String
+  var caption: String?
+  var formattedCaption: AttributedString?
+  /// The original textual representation of the formatted caption directly from the event (usually HTML code)
+  var formattedCaptionHTMLString: String?
+  let source: MediaSourceProxy?
+  let fileSize: UInt?
+  let thumbnailSource: MediaSourceProxy?
+  let contentType: UTType?
 }

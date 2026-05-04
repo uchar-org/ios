@@ -10,7 +10,7 @@ import Combine
 
 @MainActor
 protocol BlockedUsersScreenViewModelProtocol {
-    var context: BlockedUsersScreenViewModelType.Context { get }
-    
-    func stop()
+  var context: BlockedUsersScreenViewModelType.Context { get }
+
+  func stop()
 }

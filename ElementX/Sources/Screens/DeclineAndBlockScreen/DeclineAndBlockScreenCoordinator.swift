@@ -12,50 +12,52 @@ import Combine
 import SwiftUI
 
 struct DeclineAndBlockScreenCoordinatorParameters {
-    let userID: String
-    let roomID: String
-    let clientProxy: ClientProxyProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let userID: String
+  let roomID: String
+  let clientProxy: ClientProxyProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum DeclineAndBlockScreenCoordinatorAction {
-    case dismiss(hasDeclined: Bool)
+  case dismiss(hasDeclined: Bool)
 }
 
 final class DeclineAndBlockScreenCoordinator: CoordinatorProtocol {
-    private let parameters: DeclineAndBlockScreenCoordinatorParameters
-    private let viewModel: DeclineAndBlockScreenViewModelProtocol
-    
-    private var cancellables = Set<AnyCancellable>()
- 
-    private let actionsSubject: PassthroughSubject<DeclineAndBlockScreenCoordinatorAction, Never> = .init()
-    var actionsPublisher: AnyPublisher<DeclineAndBlockScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private let parameters: DeclineAndBlockScreenCoordinatorParameters
+  private let viewModel: DeclineAndBlockScreenViewModelProtocol
+
+  private var cancellables = Set<AnyCancellable>()
+
+  private let actionsSubject: PassthroughSubject<DeclineAndBlockScreenCoordinatorAction, Never> =
+    .init()
+  var actionsPublisher: AnyPublisher<DeclineAndBlockScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: DeclineAndBlockScreenCoordinatorParameters) {
+    self.parameters = parameters
+
+    viewModel = DeclineAndBlockScreenViewModel(
+      userID: parameters.userID,
+      roomID: parameters.roomID,
+      clientProxy: parameters.clientProxy,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func start() {
+    viewModel.actionsPublisher.sink { [weak self] action in
+      MXLog.info("Coordinator: received view model action: \(action)")
+
+      guard let self else { return }
+      switch action {
+      case .dismiss(let hasDeclined):
+        actionsSubject.send(.dismiss(hasDeclined: hasDeclined))
+      }
     }
-    
-    init(parameters: DeclineAndBlockScreenCoordinatorParameters) {
-        self.parameters = parameters
-        
-        viewModel = DeclineAndBlockScreenViewModel(userID: parameters.userID,
-                                                   roomID: parameters.roomID,
-                                                   clientProxy: parameters.clientProxy,
-                                                   userIndicatorController: parameters.userIndicatorController)
-    }
-    
-    func start() {
-        viewModel.actionsPublisher.sink { [weak self] action in
-            MXLog.info("Coordinator: received view model action: \(action)")
-            
-            guard let self else { return }
-            switch action {
-            case .dismiss(let hasDeclined):
-                actionsSubject.send(.dismiss(hasDeclined: hasDeclined))
-            }
-        }
-        .store(in: &cancellables)
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(DeclineAndBlockScreen(context: viewModel.context))
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(DeclineAndBlockScreen(context: viewModel.context))
+  }
 }

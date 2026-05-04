@@ -10,7 +10,7 @@ import Foundation
 import OrderedCollections
 
 extension OrderedSet {
-    var set: Set<Element> {
-        Set<Element>(elements)
-    }
+  var set: Set<Element> {
+    Set<Element>(elements)
+  }
 }

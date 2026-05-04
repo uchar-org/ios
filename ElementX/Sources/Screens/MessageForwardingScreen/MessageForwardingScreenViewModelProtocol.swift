@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol MessageForwardingScreenViewModelProtocol {
-    var actions: AnyPublisher<MessageForwardingScreenViewModelAction, Never> { get }
-    var context: MessageForwardingScreenViewModelType.Context { get }
-    
-    func stop()
+  var actions: AnyPublisher<MessageForwardingScreenViewModelAction, Never> { get }
+  var context: MessageForwardingScreenViewModelType.Context { get }
+
+  func stop()
 }

@@ -10,17 +10,17 @@ import SwiftUI
 
 @MainActor
 protocol CoordinatorProtocol: AnyObject {
-    func start()
-    func stop()
-    func toPresentable() -> AnyView
+  func start()
+  func stop()
+  func toPresentable() -> AnyView
 }
 
 extension CoordinatorProtocol {
-    func start() { }
+  func start() {}
 
-    func stop() { }
+  func stop() {}
 
-    func toPresentable() -> AnyView {
-        AnyView(Text("View not configured"))
-    }
+  func toPresentable() -> AnyView {
+    AnyView(Text("View not configured"))
+  }
 }

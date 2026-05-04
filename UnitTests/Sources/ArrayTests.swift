@@ -6,31 +6,33 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-@testable import ElementX
 import Foundation
 import Testing
 
+@testable import ElementX
+
 struct ArrayTests {
-    @Test
-    func grouping() {
-        #expect([].groupBy { $0 == 0 } == [])
-        
-        #expect([0].groupBy { $0 == 0 } == [[0]])
-        
-        #expect([1].groupBy { $0 == 0 } == [[1]])
-        
-        #expect([0, 0, 0].groupBy { $0 == 0 } == [[0, 0, 0]])
-        
-        #expect([1, 1, 1].groupBy { $0 == 0 } == [[1], [1], [1]])
-        
-        #expect([1, 0, 0, 1].groupBy { $0 == 0 } == [[1], [0, 0], [1]])
-        
-        #expect([0, 0, 1, 0].groupBy { $0 == 0 } == [[0, 0], [1], [0]])
-        
-        #expect([0, 0, 0, 1, 2, 3, 0].groupBy { $0 == 0 } == [[0, 0, 0], [1], [2], [3], [0]])
-        
-        #expect([0, 0, 0, 1, 2, 3, 0, 0].groupBy { $0 == 0 } == [[0, 0, 0], [1], [2], [3], [0, 0]])
-        
-        #expect([0, 0, 0, 1, 0, 2, 3, 0, 0].groupBy { $0 == 0 } == [[0, 0, 0], [1], [0], [2], [3], [0, 0]])
-    }
+  @Test
+  func grouping() {
+    #expect([].groupBy { $0 == 0 } == [])
+
+    #expect([0].groupBy { $0 == 0 } == [[0]])
+
+    #expect([1].groupBy { $0 == 0 } == [[1]])
+
+    #expect([0, 0, 0].groupBy { $0 == 0 } == [[0, 0, 0]])
+
+    #expect([1, 1, 1].groupBy { $0 == 0 } == [[1], [1], [1]])
+
+    #expect([1, 0, 0, 1].groupBy { $0 == 0 } == [[1], [0, 0], [1]])
+
+    #expect([0, 0, 1, 0].groupBy { $0 == 0 } == [[0, 0], [1], [0]])
+
+    #expect([0, 0, 0, 1, 2, 3, 0].groupBy { $0 == 0 } == [[0, 0, 0], [1], [2], [3], [0]])
+
+    #expect([0, 0, 0, 1, 2, 3, 0, 0].groupBy { $0 == 0 } == [[0, 0, 0], [1], [2], [3], [0, 0]])
+
+    #expect(
+      [0, 0, 0, 1, 0, 2, 3, 0, 0].groupBy { $0 == 0 } == [[0, 0, 0], [1], [0], [2], [3], [0, 0]])
+  }
 }

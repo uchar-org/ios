@@ -8,11 +8,11 @@
 import SwiftUI
 
 protocol DeveloperOptionsScreenHookProtocol {
-    func generalSectionRows() -> AnyView?
+  func generalSectionRows() -> AnyView?
 }
 
 struct DefaultDeveloperOptionsScreenHook: DeveloperOptionsScreenHookProtocol {
-    func generalSectionRows() -> AnyView? {
-        nil
-    }
+  func generalSectionRows() -> AnyView? {
+    nil
+  }
 }

@@ -12,87 +12,88 @@ import Combine
 import SwiftUI
 
 struct SpaceScreenCoordinatorParameters {
-    let spaceRoomListProxy: SpaceRoomListProxyProtocol
-    let spaceServiceProxy: SpaceServiceProxyProtocol
-    let selectedSpaceRoomPublisher: CurrentValuePublisher<String?, Never>
-    let userSession: UserSessionProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let spaceRoomListProxy: SpaceRoomListProxyProtocol
+  let spaceServiceProxy: SpaceServiceProxyProtocol
+  let selectedSpaceRoomPublisher: CurrentValuePublisher<String?, Never>
+  let userSession: UserSessionProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum SpaceScreenCoordinatorAction {
-    case selectSpace(SpaceRoomListProxyProtocol)
-    case selectUnjoinedSpace(SpaceServiceRoom)
-    case selectRoom(roomID: String)
-    case leftSpace
-    case displayMembers(roomProxy: JoinedRoomProxyProtocol)
-    case displaySpaceSettings(roomProxy: JoinedRoomProxyProtocol)
-    case displayRolesAndPermissions(roomProxy: JoinedRoomProxyProtocol)
-    case displayTransferOwnership(roomProxy: JoinedRoomProxyProtocol)
-    case addExistingChildren
-    case displayCreateChildRoomFlow(space: SpaceServiceRoom)
+  case selectSpace(SpaceRoomListProxyProtocol)
+  case selectUnjoinedSpace(SpaceServiceRoom)
+  case selectRoom(roomID: String)
+  case leftSpace
+  case displayMembers(roomProxy: JoinedRoomProxyProtocol)
+  case displaySpaceSettings(roomProxy: JoinedRoomProxyProtocol)
+  case displayRolesAndPermissions(roomProxy: JoinedRoomProxyProtocol)
+  case displayTransferOwnership(roomProxy: JoinedRoomProxyProtocol)
+  case addExistingChildren
+  case displayCreateChildRoomFlow(space: SpaceServiceRoom)
 }
 
 final class SpaceScreenCoordinator: CoordinatorProtocol {
-    private let parameters: SpaceScreenCoordinatorParameters
-    private let viewModel: SpaceScreenViewModelProtocol
-    
-    private var cancellables = Set<AnyCancellable>()
- 
-    private let actionsSubject: PassthroughSubject<SpaceScreenCoordinatorAction, Never> = .init()
-    var actionsPublisher: AnyPublisher<SpaceScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private let parameters: SpaceScreenCoordinatorParameters
+  private let viewModel: SpaceScreenViewModelProtocol
+
+  private var cancellables = Set<AnyCancellable>()
+
+  private let actionsSubject: PassthroughSubject<SpaceScreenCoordinatorAction, Never> = .init()
+  var actionsPublisher: AnyPublisher<SpaceScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: SpaceScreenCoordinatorParameters) {
+    self.parameters = parameters
+
+    viewModel = SpaceScreenViewModel(
+      spaceRoomListProxy: parameters.spaceRoomListProxy,
+      spaceServiceProxy: parameters.spaceServiceProxy,
+      selectedSpaceRoomPublisher: parameters.selectedSpaceRoomPublisher,
+      userSession: parameters.userSession,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func start() {
+    viewModel.actionsPublisher.sink { [weak self] action in
+      MXLog.info("Coordinator: received view model action: \(action)")
+
+      guard let self else { return }
+      switch action {
+      case .selectSpace(let spaceRoomListProxy):
+        actionsSubject.send(.selectSpace(spaceRoomListProxy))
+      case .selectUnjoinedSpace(let spaceServiceRoom):
+        actionsSubject.send(.selectUnjoinedSpace(spaceServiceRoom))
+      case .selectRoom(let roomID):
+        actionsSubject.send(.selectRoom(roomID: roomID))
+      case .leftSpace:
+        actionsSubject.send(.leftSpace)
+      case .displayMembers(let roomProxy):
+        actionsSubject.send(.displayMembers(roomProxy: roomProxy))
+      case .displaySpaceSettings(let roomProxy):
+        actionsSubject.send(.displaySpaceSettings(roomProxy: roomProxy))
+      case .presentRolesAndPermissions(let roomProxy):
+        actionsSubject.send(.displayRolesAndPermissions(roomProxy: roomProxy))
+      case .addExistingChildren:
+        actionsSubject.send(.addExistingChildren)
+      case .displayCreateChildRoomFlow(let space):
+        actionsSubject.send(.displayCreateChildRoomFlow(space: space))
+      case .presentTransferOwnership(let roomProxy):
+        actionsSubject.send(.displayTransferOwnership(roomProxy: roomProxy))
+      }
     }
-    
-    init(parameters: SpaceScreenCoordinatorParameters) {
-        self.parameters = parameters
-        
-        viewModel = SpaceScreenViewModel(spaceRoomListProxy: parameters.spaceRoomListProxy,
-                                         spaceServiceProxy: parameters.spaceServiceProxy,
-                                         selectedSpaceRoomPublisher: parameters.selectedSpaceRoomPublisher,
-                                         userSession: parameters.userSession,
-                                         userIndicatorController: parameters.userIndicatorController)
-    }
-    
-    func start() {
-        viewModel.actionsPublisher.sink { [weak self] action in
-            MXLog.info("Coordinator: received view model action: \(action)")
-            
-            guard let self else { return }
-            switch action {
-            case .selectSpace(let spaceRoomListProxy):
-                actionsSubject.send(.selectSpace(spaceRoomListProxy))
-            case .selectUnjoinedSpace(let spaceServiceRoom):
-                actionsSubject.send(.selectUnjoinedSpace(spaceServiceRoom))
-            case .selectRoom(let roomID):
-                actionsSubject.send(.selectRoom(roomID: roomID))
-            case .leftSpace:
-                actionsSubject.send(.leftSpace)
-            case .displayMembers(let roomProxy):
-                actionsSubject.send(.displayMembers(roomProxy: roomProxy))
-            case .displaySpaceSettings(let roomProxy):
-                actionsSubject.send(.displaySpaceSettings(roomProxy: roomProxy))
-            case .presentRolesAndPermissions(let roomProxy):
-                actionsSubject.send(.displayRolesAndPermissions(roomProxy: roomProxy))
-            case .addExistingChildren:
-                actionsSubject.send(.addExistingChildren)
-            case .displayCreateChildRoomFlow(let space):
-                actionsSubject.send(.displayCreateChildRoomFlow(space: space))
-            case .presentTransferOwnership(let roomProxy):
-                actionsSubject.send(.displayTransferOwnership(roomProxy: roomProxy))
-            }
-        }
-        .store(in: &cancellables)
-    }
-    
-    func stop() {
-        viewModel.stop()
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(SpaceScreen(context: viewModel.context))
-    }
-    
-    func resetRoomList() {
-        viewModel.resetRoomList()
-    }
+    .store(in: &cancellables)
+  }
+
+  func stop() {
+    viewModel.stop()
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(SpaceScreen(context: viewModel.context))
+  }
+
+  func resetRoomList() {
+    viewModel.resetRoomList()
+  }
 }

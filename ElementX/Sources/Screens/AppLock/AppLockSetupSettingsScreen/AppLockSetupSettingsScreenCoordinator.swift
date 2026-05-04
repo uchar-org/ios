@@ -10,43 +10,44 @@ import Combine
 import SwiftUI
 
 struct AppLockSetupSettingsScreenCoordinatorParameters {
-    let appLockService: AppLockServiceProtocol
+  let appLockService: AppLockServiceProtocol
 }
 
 enum AppLockSetupSettingsScreenCoordinatorAction {
-    case changePINCode
-    case appLockDisabled
+  case changePINCode
+  case appLockDisabled
 }
 
 final class AppLockSetupSettingsScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: AppLockSetupSettingsScreenViewModelProtocol
-    private let actionsSubject: PassthroughSubject<AppLockSetupSettingsScreenCoordinatorAction, Never> = .init()
-    private var cancellables = Set<AnyCancellable>()
-    
-    var actions: AnyPublisher<AppLockSetupSettingsScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private var viewModel: AppLockSetupSettingsScreenViewModelProtocol
+  private let actionsSubject:
+    PassthroughSubject<AppLockSetupSettingsScreenCoordinatorAction, Never> = .init()
+  private var cancellables = Set<AnyCancellable>()
+
+  var actions: AnyPublisher<AppLockSetupSettingsScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: AppLockSetupSettingsScreenCoordinatorParameters) {
+    viewModel = AppLockSetupSettingsScreenViewModel(appLockService: parameters.appLockService)
+  }
+
+  func start() {
+    viewModel.actions.sink { [weak self] action in
+      MXLog.info("Coordinator: received view model action: \(action)")
+
+      guard let self else { return }
+      switch action {
+      case .changePINCode:
+        actionsSubject.send(.changePINCode)
+      case .appLockDisabled:
+        actionsSubject.send(.appLockDisabled)
+      }
     }
-    
-    init(parameters: AppLockSetupSettingsScreenCoordinatorParameters) {
-        viewModel = AppLockSetupSettingsScreenViewModel(appLockService: parameters.appLockService)
-    }
-    
-    func start() {
-        viewModel.actions.sink { [weak self] action in
-            MXLog.info("Coordinator: received view model action: \(action)")
-            
-            guard let self else { return }
-            switch action {
-            case .changePINCode:
-                actionsSubject.send(.changePINCode)
-            case .appLockDisabled:
-                actionsSubject.send(.appLockDisabled)
-            }
-        }
-        .store(in: &cancellables)
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(AppLockSetupSettingsScreen(context: viewModel.context))
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(AppLockSetupSettingsScreen(context: viewModel.context))
+  }
 }

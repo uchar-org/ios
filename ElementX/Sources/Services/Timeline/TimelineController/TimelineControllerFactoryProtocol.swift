@@ -10,33 +10,41 @@ import Foundation
 import MatrixRustSDK
 
 enum TimelineFactoryControllerError: Error {
-    case roomProxyError(RoomProxyError)
+  case roomProxyError(RoomProxyError)
 }
 
 @MainActor
 protocol TimelineControllerFactoryProtocol {
-    func buildTimelineController(roomProxy: JoinedRoomProxyProtocol,
-                                 initialFocussedEventID: String?,
-                                 timelineItemFactory: RoomTimelineItemFactoryProtocol,
-                                 mediaProvider: MediaProviderProtocol) -> TimelineControllerProtocol
-    
-    func buildThreadTimelineController(threadRootEventID: String,
-                                       initialFocussedEventID: String?,
-                                       roomProxy: JoinedRoomProxyProtocol,
-                                       timelineItemFactory: RoomTimelineItemFactoryProtocol,
-                                       mediaProvider: MediaProviderProtocol) async -> Result<TimelineControllerProtocol, TimelineFactoryControllerError>
-    
-    func buildPinnedEventsTimelineController(roomProxy: JoinedRoomProxyProtocol,
-                                             timelineItemFactory: RoomTimelineItemFactoryProtocol,
-                                             mediaProvider: MediaProviderProtocol) async -> Result<TimelineControllerProtocol, TimelineFactoryControllerError>
-    
-    func buildMessageFilteredTimelineController(focus: TimelineFocus,
-                                                allowedMessageTypes: [TimelineAllowedMessageType],
-                                                presentation: TimelineKind.MediaPresentation,
-                                                roomProxy: JoinedRoomProxyProtocol,
-                                                timelineItemFactory: RoomTimelineItemFactoryProtocol,
-                                                mediaProvider: MediaProviderProtocol) async -> Result<TimelineControllerProtocol, TimelineFactoryControllerError>
+  func buildTimelineController(
+    roomProxy: JoinedRoomProxyProtocol,
+    initialFocussedEventID: String?,
+    timelineItemFactory: RoomTimelineItemFactoryProtocol,
+    mediaProvider: MediaProviderProtocol
+  ) -> TimelineControllerProtocol
+
+  func buildThreadTimelineController(
+    threadRootEventID: String,
+    initialFocussedEventID: String?,
+    roomProxy: JoinedRoomProxyProtocol,
+    timelineItemFactory: RoomTimelineItemFactoryProtocol,
+    mediaProvider: MediaProviderProtocol
+  ) async -> Result<TimelineControllerProtocol, TimelineFactoryControllerError>
+
+  func buildPinnedEventsTimelineController(
+    roomProxy: JoinedRoomProxyProtocol,
+    timelineItemFactory: RoomTimelineItemFactoryProtocol,
+    mediaProvider: MediaProviderProtocol
+  ) async -> Result<TimelineControllerProtocol, TimelineFactoryControllerError>
+
+  func buildMessageFilteredTimelineController(
+    focus: TimelineFocus,
+    allowedMessageTypes: [TimelineAllowedMessageType],
+    presentation: TimelineKind.MediaPresentation,
+    roomProxy: JoinedRoomProxyProtocol,
+    timelineItemFactory: RoomTimelineItemFactoryProtocol,
+    mediaProvider: MediaProviderProtocol
+  ) async -> Result<TimelineControllerProtocol, TimelineFactoryControllerError>
 }
 
 // sourcery: AutoMockable
-extension TimelineControllerFactoryProtocol { }
+extension TimelineControllerFactoryProtocol {}

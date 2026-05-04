@@ -10,38 +10,41 @@ import Compound
 import SwiftUI
 
 struct AnalyticsSettingsScreen: View {
-    @Bindable var context: AnalyticsSettingsScreenViewModel.Context
-    
-    var body: some View {
-        Form {
-            analyticsSection
-        }
-        .compoundList()
-        .navigationTitle(L10n.commonAnalytics)
-        .navigationBarTitleDisplayMode(.inline)
+  @Bindable var context: AnalyticsSettingsScreenViewModel.Context
+
+  var body: some View {
+    Form {
+      analyticsSection
     }
-    
-    var analyticsSection: some View {
-        Section {
-            ListRow(label: .plain(title: L10n.screenAnalyticsSettingsShareData),
-                    kind: .toggle($context.enableAnalytics))
-                .onChange(of: context.enableAnalytics) {
-                    context.send(viewAction: .toggleAnalytics)
-                }
-        } footer: {
-            Text(context.viewState.strings.sectionFooter)
-                .compoundListSectionFooter()
-        }
+    .compoundList()
+    .navigationTitle(L10n.commonAnalytics)
+    .navigationBarTitleDisplayMode(.inline)
+  }
+
+  var analyticsSection: some View {
+    Section {
+      ListRow(
+        label: .plain(title: L10n.screenAnalyticsSettingsShareData),
+        kind: .toggle($context.enableAnalytics)
+      )
+      .onChange(of: context.enableAnalytics) {
+        context.send(viewAction: .toggleAnalytics)
+      }
+    } footer: {
+      Text(context.viewState.strings.sectionFooter)
+        .compoundListSectionFooter()
     }
+  }
 }
 
 // MARK: - Previews
 
 struct AnalyticsSettingsScreen_Previews: PreviewProvider, TestablePreview {
-    static var previews: some View {
-        let appSettings = AppSettings()
-        let viewModel = AnalyticsSettingsScreenViewModel(appSettings: appSettings,
-                                                         analytics: ServiceLocator.shared.analytics)
-        AnalyticsSettingsScreen(context: viewModel.context)
-    }
+  static var previews: some View {
+    let appSettings = AppSettings()
+    let viewModel = AnalyticsSettingsScreenViewModel(
+      appSettings: appSettings,
+      analytics: ServiceLocator.shared.analytics)
+    AnalyticsSettingsScreen(context: viewModel.context)
+  }
 }

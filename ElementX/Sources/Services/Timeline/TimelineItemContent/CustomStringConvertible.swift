@@ -11,43 +11,43 @@ import MatrixRustSDK
 // MARK: Redact message content from logs
 
 extension EmoteMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }
 
 extension FileMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }
 
 extension ImageMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }
 
 extension NoticeMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }
 
 extension TextMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }
 
 extension VideoMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }
 
 extension AudioMessageContent: @retroactive CustomStringConvertible {
-    public var description: String {
-        String(describing: Self.self)
-    }
+  public var description: String {
+    String(describing: Self.self)
+  }
 }

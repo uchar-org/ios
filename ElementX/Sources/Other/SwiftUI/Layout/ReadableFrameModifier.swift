@@ -11,19 +11,19 @@ import SwiftUI
 /// Positions this view within an invisible frame that fills the width of its parent view,
 /// whilst limiting the width of the content to a readable size (which is customizable).
 private struct ReadableFrameModifier: ViewModifier {
-    var maxWidth: CGFloat
-    
-    func body(content: Content) -> some View {
-        content
-            .frame(maxWidth: maxWidth)
-            .frame(maxWidth: .infinity)
-    }
+  var maxWidth: CGFloat
+
+  func body(content: Content) -> some View {
+    content
+      .frame(maxWidth: maxWidth)
+      .frame(maxWidth: .infinity)
+  }
 }
 
 extension View {
-    /// Positions this view within an invisible frame that fills the width of its parent view,
-    /// whilst limiting the width of the content to a readable size (which is customizable).
-    func readableFrame(maxWidth: CGFloat = 600) -> some View {
-        modifier(ReadableFrameModifier(maxWidth: maxWidth))
-    }
+  /// Positions this view within an invisible frame that fills the width of its parent view,
+  /// whilst limiting the width of the content to a readable size (which is customizable).
+  func readableFrame(maxWidth: CGFloat = 600) -> some View {
+    modifier(ReadableFrameModifier(maxWidth: maxWidth))
+  }
 }

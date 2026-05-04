@@ -10,18 +10,18 @@ import DesignKit
 import SwiftUI
 
 struct TextFieldsScreen: View {
-    var body: some View {
-        ScreenContent(navigationTitle: "Text Fields") {
-            BorderedInputFieldStyle_Previews.states
-        }
+  var body: some View {
+    ScreenContent(navigationTitle: "Text Fields") {
+      BorderedInputFieldStyle_Previews.states
     }
+  }
 }
 
 struct TextFieldsScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            TextFieldsScreen()
-        }
-        .previewLayout(.fixed(width: 375, height: 700))
+  static var previews: some View {
+    NavigationStack {
+      TextFieldsScreen()
     }
+    .previewLayout(.fixed(width: 375, height: 700))
+  }
 }

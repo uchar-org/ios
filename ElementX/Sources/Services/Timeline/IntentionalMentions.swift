@@ -11,22 +11,22 @@ import MatrixRustSDK
 import WysiwygComposer
 
 struct IntentionalMentions: Equatable {
-    let userIDs: Set<String>
-    let atRoom: Bool
+  let userIDs: Set<String>
+  let atRoom: Bool
 }
 
 extension IntentionalMentions {
-    static var empty: Self {
-        IntentionalMentions(userIDs: .init(), atRoom: false)
-    }
-    
-    func toRustMentions() -> Mentions {
-        Mentions(userIds: Array(userIDs), room: atRoom)
-    }
+  static var empty: Self {
+    IntentionalMentions(userIDs: .init(), atRoom: false)
+  }
+
+  func toRustMentions() -> Mentions {
+    Mentions(userIds: Array(userIDs), room: atRoom)
+  }
 }
 
 extension MentionsState {
-    func toIntentionalMentions() -> IntentionalMentions {
-        IntentionalMentions(userIDs: Set(userIds), atRoom: hasAtRoomMention)
-    }
+  func toIntentionalMentions() -> IntentionalMentions {
+    IntentionalMentions(userIDs: Set(userIds), atRoom: hasAtRoomMention)
+  }
 }

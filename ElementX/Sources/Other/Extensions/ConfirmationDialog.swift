@@ -9,35 +9,47 @@
 import SwiftUI
 
 protocol ConfirmationDialogProtocol {
-    var title: String { get }
+  var title: String { get }
 }
 
 extension View {
-    func confirmationDialog<Item: ConfirmationDialogProtocol, Actions: View>(item: Binding<Item?>,
-                                                                             titleVisibility: Visibility = .automatic,
-                                                                             @ViewBuilder actions: (Item) -> Actions) -> some View {
-        let binding = Binding<Bool>(get: {
-            item.wrappedValue != nil
-        }, set: { newValue in
-            if !newValue {
-                item.wrappedValue = nil
-            }
-        })
-        return confirmationDialog(item.wrappedValue?.title ?? "", isPresented: binding, titleVisibility: titleVisibility, presenting: item.wrappedValue, actions: actions)
-    }
+  func confirmationDialog<Item: ConfirmationDialogProtocol, Actions: View>(
+    item: Binding<Item?>,
+    titleVisibility: Visibility = .automatic,
+    @ViewBuilder actions: (Item) -> Actions
+  ) -> some View {
+    let binding = Binding<Bool>(
+      get: {
+        item.wrappedValue != nil
+      },
+      set: { newValue in
+        if !newValue {
+          item.wrappedValue = nil
+        }
+      })
+    return confirmationDialog(
+      item.wrappedValue?.title ?? "", isPresented: binding, titleVisibility: titleVisibility,
+      presenting: item.wrappedValue, actions: actions)
+  }
 
-    // periphery: ignore - not used yet but might be useful
-    func confirmationDialog<Item: ConfirmationDialogProtocol, Actions: View, Message: View>(item: Binding<Item?>,
-                                                                                            titleVisibility: Visibility = .automatic,
-                                                                                            @ViewBuilder actions: (Item) -> Actions,
-                                                                                            @ViewBuilder message: (Item) -> Message) -> some View {
-        let binding = Binding<Bool>(get: {
-            item.wrappedValue != nil
-        }, set: { newValue in
-            if !newValue {
-                item.wrappedValue = nil
-            }
-        })
-        return confirmationDialog(item.wrappedValue?.title ?? "", isPresented: binding, titleVisibility: titleVisibility, presenting: item.wrappedValue, actions: actions, message: message)
-    }
+  // periphery: ignore - not used yet but might be useful
+  func confirmationDialog<Item: ConfirmationDialogProtocol, Actions: View, Message: View>(
+    item: Binding<Item?>,
+    titleVisibility: Visibility = .automatic,
+    @ViewBuilder actions: (Item) -> Actions,
+    @ViewBuilder message: (Item) -> Message
+  ) -> some View {
+    let binding = Binding<Bool>(
+      get: {
+        item.wrappedValue != nil
+      },
+      set: { newValue in
+        if !newValue {
+          item.wrappedValue = nil
+        }
+      })
+    return confirmationDialog(
+      item.wrappedValue?.title ?? "", isPresented: binding, titleVisibility: titleVisibility,
+      presenting: item.wrappedValue, actions: actions, message: message)
+  }
 }

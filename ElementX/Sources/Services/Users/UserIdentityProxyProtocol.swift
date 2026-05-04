@@ -7,12 +7,12 @@
 //
 
 enum UserIdentityVerificationState {
-    case notVerified
-    case verified
-    case verificationViolation
+  case notVerified
+  case verified
+  case verificationViolation
 }
 
 // sourcery: AutoMockable
 protocol UserIdentityProxyProtocol {
-    var verificationState: UserIdentityVerificationState { get }
+  var verificationState: UserIdentityVerificationState { get }
 }

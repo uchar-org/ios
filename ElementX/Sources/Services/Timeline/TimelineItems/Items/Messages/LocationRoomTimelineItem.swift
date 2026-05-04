@@ -9,23 +9,23 @@
 import Foundation
 
 struct LocationRoomTimelineItem: EventBasedMessageTimelineItemProtocol, Equatable {
-    let id: TimelineItemIdentifier
-    let timestamp: Date
-    let isOutgoing: Bool
-    let isEditable: Bool
-    let canBeRepliedTo: Bool
-    
-    let sender: TimelineItemSender
+  let id: TimelineItemIdentifier
+  let timestamp: Date
+  let isOutgoing: Bool
+  let isEditable: Bool
+  let canBeRepliedTo: Bool
 
-    let content: LocationRoomTimelineItemContent
-    
-    var properties = RoomTimelineItemProperties()
+  let sender: TimelineItemSender
 
-    var body: String {
-        content.body
-    }
+  let content: LocationRoomTimelineItemContent
 
-    var contentType: EventBasedMessageTimelineItemContentType {
-        .location(content)
-    }
+  var properties = RoomTimelineItemProperties()
+
+  var body: String {
+    content.body
+  }
+
+  var contentType: EventBasedMessageTimelineItemContentType {
+    .location(content)
+  }
 }

@@ -9,6 +9,6 @@
 import UIKit
 
 struct NoticeRoomTimelineItemContent: Hashable {
-    let body: String
-    var formattedBody: AttributedString?
+  let body: String
+  var formattedBody: AttributedString?
 }

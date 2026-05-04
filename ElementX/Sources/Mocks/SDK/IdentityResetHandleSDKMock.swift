@@ -11,14 +11,14 @@ import MatrixRustSDK
 import MatrixRustSDKMocks
 
 extension IdentityResetHandleSDKMock {
-    struct Configuration { }
-    
-    convenience init(_ configuration: Configuration) {
-        self.init()
-        
-        authTypeReturnValue = .uiaa
-        resetAuthClosure = { _ in
-            try await Task.sleep(for: .seconds(60))
-        }
+  struct Configuration {}
+
+  convenience init(_ configuration: Configuration) {
+    self.init()
+
+    authTypeReturnValue = .uiaa
+    resetAuthClosure = { _ in
+      try await Task.sleep(for: .seconds(60))
     }
+  }
 }

@@ -9,20 +9,20 @@
 import Foundation
 
 enum PinnedEventsTimelineScreenViewModelAction {
-    case viewInRoomTimeline(eventID: String, threadRootEventID: String?)
-    case displayMessageForwarding(MessageForwardingItem)
-    case dismiss
+  case viewInRoomTimeline(eventID: String, threadRootEventID: String?)
+  case displayMessageForwarding(MessageForwardingItem)
+  case dismiss
 }
 
 struct PinnedEventsTimelineScreenViewState: BindableState {
-    var bindings = PinnedEventsTimelineScreenViewStateBindings()
+  var bindings = PinnedEventsTimelineScreenViewStateBindings()
 }
 
 struct PinnedEventsTimelineScreenViewStateBindings {
-    /// The view model used to present a QuickLook media preview.
-    var mediaPreviewViewModel: TimelineMediaPreviewViewModel?
+  /// The view model used to present a QuickLook media preview.
+  var mediaPreviewViewModel: TimelineMediaPreviewViewModel?
 }
 
 enum PinnedEventsTimelineScreenViewAction {
-    case close
+  case close
 }

@@ -7,66 +7,71 @@
 //
 
 import Combine
-@testable import ElementX
 import Testing
+
+@testable import ElementX
 
 @MainActor
 struct MessageForwardingScreenViewModelTests {
-    let forwardingItem = MessageForwardingItem(id: .event(uniqueID: .init("t1"), eventOrTransactionID: .eventID("t1")),
-                                               roomID: "1",
-                                               content: .init(noHandle: .init()))
-    var viewModel: MessageForwardingScreenViewModelProtocol!
-    var context: MessageForwardingScreenViewModelType.Context!
-    
-    init() {
-        let clientProxy = ClientProxyMock(.init())
-        clientProxy.roomForIdentifierClosure = { .joined(JoinedRoomProxyMock(.init(id: $0))) }
-        
-        viewModel = MessageForwardingScreenViewModel(forwardingItem: forwardingItem,
-                                                     userSession: UserSessionMock(.init(clientProxy: clientProxy)),
-                                                     roomSummaryProvider: RoomSummaryProviderMock(.init(state: .loaded(.mockRooms))),
-                                                     userIndicatorController: UserIndicatorControllerMock())
-        context = viewModel.context
+  let forwardingItem = MessageForwardingItem(
+    id: .event(uniqueID: .init("t1"), eventOrTransactionID: .eventID("t1")),
+    roomID: "1",
+    content: .init(noHandle: .init()))
+  var viewModel: MessageForwardingScreenViewModelProtocol!
+  var context: MessageForwardingScreenViewModelType.Context!
+
+  init() {
+    let clientProxy = ClientProxyMock(.init())
+    clientProxy.roomForIdentifierClosure = { .joined(JoinedRoomProxyMock(.init(id: $0))) }
+
+    viewModel = MessageForwardingScreenViewModel(
+      forwardingItem: forwardingItem,
+      userSession: UserSessionMock(.init(clientProxy: clientProxy)),
+      roomSummaryProvider: RoomSummaryProviderMock(.init(state: .loaded(.mockRooms))),
+      userIndicatorController: UserIndicatorControllerMock())
+    context = viewModel.context
+  }
+
+  @Test
+  func initialState() {
+    #expect(
+      context.viewState.rooms.first { $0.id == forwardingItem.roomID } == nil,
+      "The source room ID shouldn't be shown")
+  }
+
+  @Test
+  mutating func roomSelection() {
+    context.send(viewAction: .selectRoom(roomID: "2"))
+    #expect(context.viewState.selectedRoomID == "2")
+  }
+
+  @Test
+  mutating func searching() async throws {
+    let deferred = deferFulfillment(context.$viewState) { state in
+      state.rooms.count == 1
     }
-    
-    @Test
-    func initialState() {
-        #expect(context.viewState.rooms.first { $0.id == forwardingItem.roomID } == nil, "The source room ID shouldn't be shown")
+
+    context.searchQuery = "Second"
+
+    try await deferred.fulfill()
+  }
+
+  @Test
+  mutating func forwarding() async throws {
+    context.send(viewAction: .selectRoom(roomID: "2"))
+    #expect(context.viewState.selectedRoomID == "2")
+
+    let deferred = deferFulfillment(viewModel.actions) { action in
+      switch action {
+      case .sent(let roomID):
+        return roomID == "2"
+      default:
+        return false
+      }
     }
-    
-    @Test
-    mutating func roomSelection() {
-        context.send(viewAction: .selectRoom(roomID: "2"))
-        #expect(context.viewState.selectedRoomID == "2")
-    }
-    
-    @Test
-    mutating func searching() async throws {
-        let deferred = deferFulfillment(context.$viewState) { state in
-            state.rooms.count == 1
-        }
-        
-        context.searchQuery = "Second"
-        
-        try await deferred.fulfill()
-    }
-    
-    @Test
-    mutating func forwarding() async throws {
-        context.send(viewAction: .selectRoom(roomID: "2"))
-        #expect(context.viewState.selectedRoomID == "2")
-        
-        let deferred = deferFulfillment(viewModel.actions) { action in
-            switch action {
-            case .sent(let roomID):
-                return roomID == "2"
-            default:
-                return false
-            }
-        }
-        
-        context.send(viewAction: .send)
-        
-        try await deferred.fulfill()
-    }
+
+    context.send(viewAction: .send)
+
+    try await deferred.fulfill()
+  }
 }

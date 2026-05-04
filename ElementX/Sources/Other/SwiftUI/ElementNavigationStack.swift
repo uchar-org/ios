@@ -8,26 +8,26 @@
 import SwiftUI
 
 struct ElementNavigationStack<Content: View>: View {
-    @ViewBuilder let content: Content
-    
-    var body: some View {
-        #if DEBUG
-        if ProcessInfo.isRunningAccessibilityTests {
-            // Wrap in VStack to safely apply .id() since applying .id() directly to NavigationStack crashes on iOS 26
-            VStack(spacing: 0) {
-                NavigationStack {
-                    content
-                }
-            }
-        } else {
-            NavigationStack {
-                content
-            }
-        }
-        #else
-        NavigationStack {
+  @ViewBuilder let content: Content
+
+  var body: some View {
+    #if DEBUG
+      if ProcessInfo.isRunningAccessibilityTests {
+        // Wrap in VStack to safely apply .id() since applying .id() directly to NavigationStack crashes on iOS 26
+        VStack(spacing: 0) {
+          NavigationStack {
             content
+          }
         }
-        #endif
-    }
+      } else {
+        NavigationStack {
+          content
+        }
+      }
+    #else
+      NavigationStack {
+        content
+      }
+    #endif
+  }
 }

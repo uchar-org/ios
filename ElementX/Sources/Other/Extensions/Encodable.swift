@@ -9,17 +9,18 @@
 import Foundation
 
 extension Encodable {
-    func toJsonDictionary(_ encoder: JSONEncoder = JSONEncoder()) throws -> [String: Any] {
-        let data = try encoder.encode(self)
-        let object = try JSONSerialization.jsonObject(with: data)
-        guard let json = object as? [String: Any] else {
-            let context = DecodingError.Context(codingPath: [], debugDescription: "Deserialized object is not a dictionary")
-            throw DecodingError.typeMismatch(type(of: object), context)
-        }
-        return json
+  func toJsonDictionary(_ encoder: JSONEncoder = JSONEncoder()) throws -> [String: Any] {
+    let data = try encoder.encode(self)
+    let object = try JSONSerialization.jsonObject(with: data)
+    guard let json = object as? [String: Any] else {
+      let context = DecodingError.Context(
+        codingPath: [], debugDescription: "Deserialized object is not a dictionary")
+      throw DecodingError.typeMismatch(type(of: object), context)
     }
+    return json
+  }
 
-    func toJsonString(_ encoder: JSONEncoder = JSONEncoder()) throws -> String? {
-        try toJsonDictionary(encoder).jsonString
-    }
+  func toJsonString(_ encoder: JSONEncoder = JSONEncoder()) throws -> String? {
+    try toJsonDictionary(encoder).jsonString
+  }
 }

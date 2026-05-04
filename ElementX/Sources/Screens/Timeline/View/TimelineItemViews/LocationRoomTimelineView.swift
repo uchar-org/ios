@@ -9,88 +9,103 @@
 import SwiftUI
 
 struct LocationRoomTimelineView: View {
-    @Environment(\.timelineContext) private var context: TimelineViewModel.Context!
-    let timelineItem: LocationRoomTimelineItem
-    
-    var body: some View {
-        TimelineStyler(timelineItem: timelineItem) {
-            mainContent
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(L10n.commonSharedLocation)
-                .onTapGesture {
-                    guard context.viewState.mapTilerConfiguration.isEnabled else { return }
-                    context.send(viewAction: .mediaTapped(itemID: timelineItem.id))
-                }
+  @Environment(\.timelineContext) private var context: TimelineViewModel.Context!
+  let timelineItem: LocationRoomTimelineItem
+
+  var body: some View {
+    TimelineStyler(timelineItem: timelineItem) {
+      mainContent
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.commonSharedLocation)
+        .onTapGesture {
+          guard context.viewState.mapTilerConfiguration.isEnabled else { return }
+          context.send(viewAction: .mediaTapped(itemID: timelineItem.id))
         }
     }
-                                    
-    @ViewBuilder
-    private var mainContent: some View {
-        if let geoURI = timelineItem.content.geoURI {
-            MapLibreStaticMapView(geoURI: geoURI,
-                                  mapURLBuilder: context.viewState.mapTilerConfiguration,
-                                  mapSize: .init(width: mapAspectRatio * mapMaxHeight, height: mapMaxHeight)) {
-                LocationMarkerView(kind: timelineItem.content.kind == .sender ? .staticUser(.init(sender: timelineItem.sender)) : .pin,
-                                   mediaProvider: context.mediaProvider)
-            }
-            .frame(maxHeight: mapMaxHeight)
-            .aspectRatio(mapAspectRatio, contentMode: .fit)
-            .clipped()
-        } else {
-            FormattedBodyText(text: timelineItem.body, additionalWhitespacesCount: timelineItem.additionalWhitespaces())
-        }
+  }
+
+  @ViewBuilder
+  private var mainContent: some View {
+    if let geoURI = timelineItem.content.geoURI {
+      MapLibreStaticMapView(
+        geoURI: geoURI,
+        mapURLBuilder: context.viewState.mapTilerConfiguration,
+        mapSize: .init(width: mapAspectRatio * mapMaxHeight, height: mapMaxHeight)
+      ) {
+        LocationMarkerView(
+          kind: timelineItem.content.kind == .sender
+            ? .staticUser(.init(sender: timelineItem.sender)) : .pin,
+          mediaProvider: context.mediaProvider)
+      }
+      .frame(maxHeight: mapMaxHeight)
+      .aspectRatio(mapAspectRatio, contentMode: .fit)
+      .clipped()
+    } else {
+      FormattedBodyText(
+        text: timelineItem.body, additionalWhitespacesCount: timelineItem.additionalWhitespaces())
     }
+  }
 
-    // MARK: - Private
+  // MARK: - Private
 
-    private let mapAspectRatio: Double = 3 / 2
-    private let mapMaxHeight: Double = 300
+  private let mapAspectRatio: Double = 3 / 2
+  private let mapMaxHeight: Double = 300
 }
 
 struct LocationRoomTimelineView_Previews: PreviewProvider, TestablePreview {
-    static let viewModel = TimelineViewModel.mock
+  static let viewModel = TimelineViewModel.mock
 
-    static var previews: some View {
-        PreviewScrollView {
-            VStack(spacing: 8) {
-                states
-            }
-        }
-        .environmentObject(viewModel.context)
-        .environment(\.timelineContext, viewModel.context)
-        .previewLayout(.sizeThatFits)
-        .previewDisplayName("Bubbles")
+  static var previews: some View {
+    PreviewScrollView {
+      VStack(spacing: 8) {
+        states
+      }
     }
+    .environmentObject(viewModel.context)
+    .environment(\.timelineContext, viewModel.context)
+    .previewLayout(.sizeThatFits)
+    .previewDisplayName("Bubbles")
+  }
 
-    @ViewBuilder
-    static var states: some View {
-        LocationRoomTimelineView(timelineItem: .init(id: .randomEvent,
-                                                     timestamp: .mock,
-                                                     isOutgoing: false,
-                                                     isEditable: false,
-                                                     canBeRepliedTo: true,
-                                                     sender: .init(id: "Bob"),
-                                                     content: .init(body: "Fallback geo uri description")))
+  @ViewBuilder
+  static var states: some View {
+    LocationRoomTimelineView(
+      timelineItem: .init(
+        id: .randomEvent,
+        timestamp: .mock,
+        isOutgoing: false,
+        isEditable: false,
+        canBeRepliedTo: true,
+        sender: .init(id: "Bob"),
+        content: .init(body: "Fallback geo uri description")))
 
-        LocationRoomTimelineView(timelineItem: .init(id: .randomEvent,
-                                                     timestamp: .mock,
-                                                     isOutgoing: false,
-                                                     isEditable: false,
-                                                     canBeRepliedTo: true,
-                                                     sender: .init(id: "@bob:matrix.org", displayName: "Bob", avatarURL: .mockMXCUserAvatar),
-                                                     content: .init(body: "Fallback geo uri description",
-                                                                    geoURI: .init(latitude: 41.902782, longitude: 12.496366))))
-        LocationRoomTimelineView(timelineItem: .init(id: .randomEvent,
-                                                     timestamp: .mock,
-                                                     isOutgoing: false,
-                                                     isEditable: false,
-                                                     canBeRepliedTo: true,
-                                                     sender: .init(id: "Bob"),
-                                                     content: .init(body: "Fallback geo uri description",
-                                                                    geoURI: .init(latitude: 41.902782, longitude: 12.496366),
-                                                                    kind: .pin),
-                                                     properties: .init(replyDetails: .loaded(sender: .init(id: "@alice:matrix.org", displayName: "Alice"),
-                                                                                             eventID: "123",
-                                                                                             eventContent: .message(.location(.init(body: "")))))))
-    }
+    LocationRoomTimelineView(
+      timelineItem: .init(
+        id: .randomEvent,
+        timestamp: .mock,
+        isOutgoing: false,
+        isEditable: false,
+        canBeRepliedTo: true,
+        sender: .init(id: "@bob:matrix.org", displayName: "Bob", avatarURL: .mockMXCUserAvatar),
+        content: .init(
+          body: "Fallback geo uri description",
+          geoURI: .init(latitude: 41.902782, longitude: 12.496366))))
+    LocationRoomTimelineView(
+      timelineItem: .init(
+        id: .randomEvent,
+        timestamp: .mock,
+        isOutgoing: false,
+        isEditable: false,
+        canBeRepliedTo: true,
+        sender: .init(id: "Bob"),
+        content: .init(
+          body: "Fallback geo uri description",
+          geoURI: .init(latitude: 41.902782, longitude: 12.496366),
+          kind: .pin),
+        properties: .init(
+          replyDetails: .loaded(
+            sender: .init(id: "@alice:matrix.org", displayName: "Alice"),
+            eventID: "123",
+            eventContent: .message(.location(.init(body: "")))))))
+  }
 }

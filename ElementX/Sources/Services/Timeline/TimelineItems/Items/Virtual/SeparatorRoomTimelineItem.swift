@@ -9,6 +9,6 @@
 import Foundation
 
 struct SeparatorRoomTimelineItem: DecorationTimelineItemProtocol, Equatable {
-    let id: TimelineItemIdentifier
-    let timestamp: Date
+  let id: TimelineItemIdentifier
+  let timestamp: Date
 }

@@ -10,9 +10,9 @@ import Combine
 
 @MainActor
 protocol LoginScreenViewModelProtocol {
-    var actions: AnyPublisher<LoginScreenViewModelAction, Never> { get }
-    var context: LoginScreenViewModelType.Context { get }
-    
-    /// Update the view to reflect that loaded has finished.
-    func stopLoading()
+  var actions: AnyPublisher<LoginScreenViewModelAction, Never> { get }
+  var context: LoginScreenViewModelType.Context { get }
+
+  /// Update the view to reflect that loaded has finished.
+  func stopLoading()
 }

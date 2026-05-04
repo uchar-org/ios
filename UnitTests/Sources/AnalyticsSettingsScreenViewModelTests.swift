@@ -6,48 +6,52 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-@testable import ElementX
 import Testing
+
+@testable import ElementX
 
 @MainActor
 final class AnalyticsSettingsScreenViewModelTests {
-    private var appSettings: AppSettings!
-    private var viewModel: AnalyticsSettingsScreenViewModelProtocol!
-    private var context: AnalyticsSettingsScreenViewModelType.Context!
-    
-    init() {
-        AppSettings.resetAllSettings()
-        appSettings = AppSettings()
-        let analyticsClient = AnalyticsClientMock()
-        analyticsClient.isRunning = false
-        ServiceLocator.shared.register(analytics: AnalyticsService(client: analyticsClient,
-                                                                   appSettings: appSettings))
-        
-        viewModel = AnalyticsSettingsScreenViewModel(appSettings: appSettings,
-                                                     analytics: ServiceLocator.shared.analytics)
-        context = viewModel.context
-    }
-    
-    deinit {
-        AppSettings.resetAllSettings()
-    }
+  private var appSettings: AppSettings!
+  private var viewModel: AnalyticsSettingsScreenViewModelProtocol!
+  private var context: AnalyticsSettingsScreenViewModelType.Context!
 
-    @Test
-    func initialState() {
-        #expect(!context.enableAnalytics)
-    }
+  init() {
+    AppSettings.resetAllSettings()
+    appSettings = AppSettings()
+    let analyticsClient = AnalyticsClientMock()
+    analyticsClient.isRunning = false
+    ServiceLocator.shared.register(
+      analytics: AnalyticsService(
+        client: analyticsClient,
+        appSettings: appSettings))
 
-    @Test
-    func optIn() {
-        appSettings.analyticsConsentState = .optedOut
-        context.send(viewAction: .toggleAnalytics)
-        #expect(context.enableAnalytics)
-    }
-    
-    @Test
-    func optOut() {
-        appSettings.analyticsConsentState = .optedIn
-        context.send(viewAction: .toggleAnalytics)
-        #expect(!context.enableAnalytics)
-    }
+    viewModel = AnalyticsSettingsScreenViewModel(
+      appSettings: appSettings,
+      analytics: ServiceLocator.shared.analytics)
+    context = viewModel.context
+  }
+
+  deinit {
+    AppSettings.resetAllSettings()
+  }
+
+  @Test
+  func initialState() {
+    #expect(!context.enableAnalytics)
+  }
+
+  @Test
+  func optIn() {
+    appSettings.analyticsConsentState = .optedOut
+    context.send(viewAction: .toggleAnalytics)
+    #expect(context.enableAnalytics)
+  }
+
+  @Test
+  func optOut() {
+    appSettings.analyticsConsentState = .optedIn
+    context.send(viewAction: .toggleAnalytics)
+    #expect(!context.enableAnalytics)
+  }
 }

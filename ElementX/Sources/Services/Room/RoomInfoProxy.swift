@@ -10,204 +10,204 @@ import Foundation
 import MatrixRustSDK
 
 struct RoomInfoProxy: RoomInfoProxyProtocol {
-    let roomInfo: RoomInfo
-    
-    var id: String {
-        roomInfo.id
-    }
+  let roomInfo: RoomInfo
 
-    var creators: [String] {
-        roomInfo.creators ?? []
-    }
+  var id: String {
+    roomInfo.id
+  }
 
-    var displayName: String? {
-        roomInfo.displayName
-    }
+  var creators: [String] {
+    roomInfo.creators ?? []
+  }
 
-    var rawName: String? {
-        roomInfo.rawName
-    }
+  var displayName: String? {
+    roomInfo.displayName
+  }
 
-    var topic: String? {
-        roomInfo.topic
-    }
+  var rawName: String? {
+    roomInfo.rawName
+  }
 
-    /// The room's avatar URL. Use this for editing and favour ``avatar`` for display.
-    var avatarURL: URL? {
-        roomInfo.avatarUrl.flatMap(URL.init)
-    }
+  var topic: String? {
+    roomInfo.topic
+  }
 
-    /// Here we're assuming unknown rooms are unencrypted.
-    /// Fortunately https://github.com/matrix-org/matrix-rust-sdk/pull/4778 makes that very much of an edge case and we
-    /// also automatically start a `latestEncryptionState` fetch if needed.
-    /// In the worst case, even if we are to assume a room is unencrypted, the SDK will still determine the correct
-    /// state before any message is sent.
-    var isEncrypted: Bool {
-        roomInfo.encryptionState == .encrypted
-    }
-    
-    var isDirect: Bool {
-        roomInfo.isDirect
-    }
+  /// The room's avatar URL. Use this for editing and favour ``avatar`` for display.
+  var avatarURL: URL? {
+    roomInfo.avatarUrl.flatMap(URL.init)
+  }
 
-    var isSpace: Bool {
-        roomInfo.isSpace
-    }
-    
-    var successor: SuccessorRoom? {
-        roomInfo.successorRoom
-    }
+  /// Here we're assuming unknown rooms are unencrypted.
+  /// Fortunately https://github.com/matrix-org/matrix-rust-sdk/pull/4778 makes that very much of an edge case and we
+  /// also automatically start a `latestEncryptionState` fetch if needed.
+  /// In the worst case, even if we are to assume a room is unencrypted, the SDK will still determine the correct
+  /// state before any message is sent.
+  var isEncrypted: Bool {
+    roomInfo.encryptionState == .encrypted
+  }
 
-    var isFavourite: Bool {
-        roomInfo.isFavourite
-    }
+  var isDirect: Bool {
+    roomInfo.isDirect
+  }
 
-    var canonicalAlias: String? {
-        roomInfo.canonicalAlias
-    }
+  var isSpace: Bool {
+    roomInfo.isSpace
+  }
 
-    var alternativeAliases: [String] {
-        roomInfo.alternativeAliases
-    }
+  var successor: SuccessorRoom? {
+    roomInfo.successorRoom
+  }
 
-    var membership: Membership {
-        roomInfo.membership
-    }
+  var isFavourite: Bool {
+    roomInfo.isFavourite
+  }
 
-    var inviter: RoomMemberProxyProtocol? {
-        roomInfo.inviter.map(RoomMemberProxy.init)
-    }
+  var canonicalAlias: String? {
+    roomInfo.canonicalAlias
+  }
 
-    var heroes: [RoomHero] {
-        roomInfo.heroes
-    }
+  var alternativeAliases: [String] {
+    roomInfo.alternativeAliases
+  }
 
-    var activeMembersCount: Int {
-        Int(roomInfo.activeMembersCount)
-    }
+  var membership: Membership {
+    roomInfo.membership
+  }
 
-    var invitedMembersCount: Int {
-        Int(roomInfo.invitedMembersCount)
-    }
+  var inviter: RoomMemberProxyProtocol? {
+    roomInfo.inviter.map(RoomMemberProxy.init)
+  }
 
-    var joinedMembersCount: Int {
-        Int(roomInfo.joinedMembersCount)
-    }
+  var heroes: [RoomHero] {
+    roomInfo.heroes
+  }
 
-    var highlightCount: Int {
-        Int(roomInfo.highlightCount)
-    }
+  var activeMembersCount: Int {
+    Int(roomInfo.activeMembersCount)
+  }
 
-    var notificationCount: Int {
-        Int(roomInfo.notificationCount)
-    }
+  var invitedMembersCount: Int {
+    Int(roomInfo.invitedMembersCount)
+  }
 
-    var cachedUserDefinedNotificationMode: RoomNotificationMode? {
-        roomInfo.cachedUserDefinedNotificationMode
-    }
+  var joinedMembersCount: Int {
+    Int(roomInfo.joinedMembersCount)
+  }
 
-    var hasRoomCall: Bool {
-        roomInfo.hasRoomCall
-    }
+  var highlightCount: Int {
+    Int(roomInfo.highlightCount)
+  }
 
-    var activeRoomCallIntent: CallIntent? {
-        switch roomInfo.activeRoomCallConsensusIntent {
-        case .full(let intent):
-            return .init(rustCallIntent: intent)
-        case .partial(intent: let intent, _, _):
-            return .init(rustCallIntent: intent)
-        case .none:
-            return nil
-        }
-    }
-    
-    var activeRoomCallParticipants: [String] {
-        roomInfo.activeRoomCallParticipants
-    }
+  var notificationCount: Int {
+    Int(roomInfo.notificationCount)
+  }
 
-    var isMarkedUnread: Bool {
-        roomInfo.isMarkedUnread
-    }
+  var cachedUserDefinedNotificationMode: RoomNotificationMode? {
+    roomInfo.cachedUserDefinedNotificationMode
+  }
 
-    var unreadMessagesCount: UInt {
-        UInt(roomInfo.numUnreadMessages)
-    }
+  var hasRoomCall: Bool {
+    roomInfo.hasRoomCall
+  }
 
-    var unreadNotificationsCount: UInt {
-        UInt(roomInfo.numUnreadNotifications)
+  var activeRoomCallIntent: CallIntent? {
+    switch roomInfo.activeRoomCallConsensusIntent {
+    case .full(let intent):
+      return .init(rustCallIntent: intent)
+    case .partial(let intent, _, _):
+      return .init(rustCallIntent: intent)
+    case .none:
+      return nil
     }
+  }
 
-    var unreadMentionsCount: UInt {
-        UInt(roomInfo.numUnreadMentions)
-    }
+  var activeRoomCallParticipants: [String] {
+    roomInfo.activeRoomCallParticipants
+  }
 
-    var pinnedEventIDs: Set<String> {
-        Set(roomInfo.pinnedEventIds)
-    }
+  var isMarkedUnread: Bool {
+    roomInfo.isMarkedUnread
+  }
 
-    var joinRule: JoinRule? {
-        roomInfo.joinRule.map(JoinRule.init)
-    }
+  var unreadMessagesCount: UInt {
+    UInt(roomInfo.numUnreadMessages)
+  }
 
-    var historyVisibility: RoomHistoryVisibility {
-        roomInfo.historyVisibility
-    }
-    
-    var powerLevels: RoomPowerLevelsProxyProtocol? {
-        RoomPowerLevelsProxy(roomInfo.powerLevels)
-    }
+  var unreadNotificationsCount: UInt {
+    UInt(roomInfo.numUnreadNotifications)
+  }
+
+  var unreadMentionsCount: UInt {
+    UInt(roomInfo.numUnreadMentions)
+  }
+
+  var pinnedEventIDs: Set<String> {
+    Set(roomInfo.pinnedEventIds)
+  }
+
+  var joinRule: JoinRule? {
+    roomInfo.joinRule.map(JoinRule.init)
+  }
+
+  var historyVisibility: RoomHistoryVisibility {
+    roomInfo.historyVisibility
+  }
+
+  var powerLevels: RoomPowerLevelsProxyProtocol? {
+    RoomPowerLevelsProxy(roomInfo.powerLevels)
+  }
 }
 
 struct RoomPreviewInfoProxy: BaseRoomInfoProxyProtocol {
-    let roomPreviewInfo: RoomPreviewInfo
-    
-    let successor: SuccessorRoom? = nil
-    
-    var id: String {
-        roomPreviewInfo.roomId
-    }
+  let roomPreviewInfo: RoomPreviewInfo
 
-    var displayName: String? {
-        roomPreviewInfo.name
-    }
+  let successor: SuccessorRoom? = nil
 
-    var heroes: [RoomHero] {
-        roomPreviewInfo.heroes ?? []
-    }
+  var id: String {
+    roomPreviewInfo.roomId
+  }
 
-    var topic: String? {
-        roomPreviewInfo.topic
-    }
+  var displayName: String? {
+    roomPreviewInfo.name
+  }
 
-    var canonicalAlias: String? {
-        roomPreviewInfo.canonicalAlias
-    }
+  var heroes: [RoomHero] {
+    roomPreviewInfo.heroes ?? []
+  }
 
-    var avatarURL: URL? {
-        roomPreviewInfo.avatarUrl.flatMap(URL.init)
-    }
+  var topic: String? {
+    roomPreviewInfo.topic
+  }
 
-    var isDirect: Bool {
-        roomPreviewInfo.isDirect ?? false
-    }
+  var canonicalAlias: String? {
+    roomPreviewInfo.canonicalAlias
+  }
 
-    var isSpace: Bool {
-        roomPreviewInfo.roomType == .space
-    }
+  var avatarURL: URL? {
+    roomPreviewInfo.avatarUrl.flatMap(URL.init)
+  }
 
-    var activeMembersCount: Int {
-        Int(roomPreviewInfo.numActiveMembers ?? roomPreviewInfo.numJoinedMembers)
-    }
+  var isDirect: Bool {
+    roomPreviewInfo.isDirect ?? false
+  }
 
-    var joinedMembersCount: Int {
-        Int(roomPreviewInfo.numJoinedMembers)
-    }
-    
-    var joinRule: JoinRule? {
-        roomPreviewInfo.joinRule.map(JoinRule.init)
-    }
+  var isSpace: Bool {
+    roomPreviewInfo.roomType == .space
+  }
 
-    var membership: Membership? {
-        roomPreviewInfo.membership
-    }
+  var activeMembersCount: Int {
+    Int(roomPreviewInfo.numActiveMembers ?? roomPreviewInfo.numJoinedMembers)
+  }
+
+  var joinedMembersCount: Int {
+    Int(roomPreviewInfo.numJoinedMembers)
+  }
+
+  var joinRule: JoinRule? {
+    roomPreviewInfo.joinRule.map(JoinRule.init)
+  }
+
+  var membership: Membership? {
+    roomPreviewInfo.membership
+  }
 }

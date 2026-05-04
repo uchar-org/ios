@@ -10,31 +10,31 @@ import Foundation
 import MatrixRustSDK
 
 enum RoomSelectionScreenViewModelAction {
-    case dismiss
-    case confirm(roomID: String)
+  case dismiss
+  case confirm(roomID: String)
 }
 
 struct RoomSelectionScreenViewState: BindableState {
-    var rooms: [RoomSelectionRoom] = []
-    var selectedRoomID: String?
-    var bindings = RoomSelectionScreenViewStateBindings()
+  var rooms: [RoomSelectionRoom] = []
+  var selectedRoomID: String?
+  var bindings = RoomSelectionScreenViewStateBindings()
 }
 
 struct RoomSelectionScreenViewStateBindings {
-    var searchQuery = ""
+  var searchQuery = ""
 }
 
 enum RoomSelectionScreenViewAction {
-    case cancel
-    case confirm
-    case selectRoom(roomID: String)
-    case reachedTop
-    case reachedBottom
+  case cancel
+  case confirm
+  case selectRoom(roomID: String)
+  case reachedTop
+  case reachedBottom
 }
 
 struct RoomSelectionRoom: Identifiable, Equatable {
-    let id: String
-    let title: String
-    let description: String
-    let avatar: RoomAvatar
+  let id: String
+  let title: String
+  let description: String
+  let avatar: RoomAvatar
 }

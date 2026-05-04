@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol SecurityAndPrivacyScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<SecurityAndPrivacyScreenViewModelAction, Never> { get }
-    var context: SecurityAndPrivacyScreenViewModelType.Context { get }
+  var actionsPublisher: AnyPublisher<SecurityAndPrivacyScreenViewModelAction, Never> { get }
+  var context: SecurityAndPrivacyScreenViewModelType.Context { get }
 }

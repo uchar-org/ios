@@ -23,39 +23,39 @@ import Testing
 /// }
 /// ```
 final class WaitingConfirmation: Sendable {
-    private let continuation: AsyncStream<Void>.Continuation
-    private let expectedCount: Int
-    private let confirmationsCount: Mutex<Int>
-    
-    fileprivate init(continuation: AsyncStream<Void>.Continuation, expectedCount: Int) {
-        self.continuation = continuation
-        self.expectedCount = expectedCount
-        confirmationsCount = .init(0)
+  private let continuation: AsyncStream<Void>.Continuation
+  private let expectedCount: Int
+  private let confirmationsCount: Mutex<Int>
+
+  fileprivate init(continuation: AsyncStream<Void>.Continuation, expectedCount: Int) {
+    self.continuation = continuation
+    self.expectedCount = expectedCount
+    confirmationsCount = .init(0)
+  }
+
+  /// Confirms that the expected event has occurred once.
+  ///
+  /// Each call yields a value into the underlying stream, incrementing the confirmation count.
+  /// When the count reaches `expectedCount`, the stream is finished, unblocking ``waitForConfirmation``.
+  ///
+  /// This method is thread-safe — the count increment and the finish check are performed
+  /// atomically inside a `Mutex` lock.
+  func confirm() {
+    confirmationsCount.withLock { value in
+      continuation.yield()
+      value += 1
+      if value == expectedCount {
+        continuation.finish()
+      }
     }
-    
-    /// Confirms that the expected event has occurred once.
-    ///
-    /// Each call yields a value into the underlying stream, incrementing the confirmation count.
-    /// When the count reaches `expectedCount`, the stream is finished, unblocking ``waitForConfirmation``.
-    ///
-    /// This method is thread-safe — the count increment and the finish check are performed
-    /// atomically inside a `Mutex` lock.
-    func confirm() {
-        confirmationsCount.withLock { value in
-            continuation.yield()
-            value += 1
-            if value == expectedCount {
-                continuation.finish()
-            }
-        }
-    }
-    
-    /// Allows the instance to be called directly as a function, forwarding to ``confirm()``.
-    ///
-    /// This enables the ergonomic shorthand `confirmation()` instead of `confirmation.confirm()`.
-    func callAsFunction() {
-        confirm()
-    }
+  }
+
+  /// Allows the instance to be called directly as a function, forwarding to ``confirm()``.
+  ///
+  /// This enables the ergonomic shorthand `confirmation()` instead of `confirmation.confirm()`.
+  func callAsFunction() {
+    confirm()
+  }
 }
 
 /// Waits for a confirmation to be triggered an expected number of times within a synchronous body.
@@ -98,29 +98,35 @@ final class WaitingConfirmation: Sendable {
 ///           event occurrences. The closure may throw, and any thrown errors are rethrown to the caller.
 ///           Typically used to configure mocks and trigger the action under test.
 /// - Returns: The value returned by `body`.
-func waitForConfirmation<R>(_ comment: Comment? = nil,
-                            expectedCount: Int = 1,
-                            isolation: isolated (any Actor)? = #isolation,
-                            sourceLocation: SourceLocation = #_sourceLocation,
-                            _ body: (WaitingConfirmation) throws -> sending R) async rethrows -> R {
-    guard expectedCount > 0 else {
-        // Or may run indefinitely
-        Issue.record("Expected count must be greater than 0", sourceLocation: sourceLocation)
-        preconditionFailure()
+func waitForConfirmation<R>(
+  _ comment: Comment? = nil,
+  expectedCount: Int = 1,
+  isolation: isolated (any Actor)? = #isolation,
+  sourceLocation: SourceLocation = #_sourceLocation,
+  _ body: (WaitingConfirmation) throws -> sending R
+) async rethrows -> R {
+  guard expectedCount > 0 else {
+    // Or may run indefinitely
+    Issue.record("Expected count must be greater than 0", sourceLocation: sourceLocation)
+    preconditionFailure()
+  }
+
+  let (stream, continuation) = AsyncStream.makeStream(of: Void.self)
+  return try await confirmation(
+    comment,
+    expectedCount: expectedCount,
+    isolation: isolation,
+    sourceLocation: sourceLocation
+  ) { confirmation in
+    let result = try body(
+      .init(
+        continuation: continuation,
+        expectedCount: expectedCount))
+    for await _ in stream {
+      confirmation()
     }
-    
-    let (stream, continuation) = AsyncStream.makeStream(of: Void.self)
-    return try await confirmation(comment,
-                                  expectedCount: expectedCount,
-                                  isolation: isolation,
-                                  sourceLocation: sourceLocation) { confirmation in
-        let result = try body(.init(continuation: continuation,
-                                    expectedCount: expectedCount))
-        for await _ in stream {
-            confirmation()
-        }
-        return result
-    }
+    return result
+  }
 }
 
 /// Waits for a confirmation to be triggered an expected number of times within a synchronous body,
@@ -164,43 +170,49 @@ func waitForConfirmation<R>(_ comment: Comment? = nil,
 ///           event occurrences. The closure may throw, and any thrown errors are rethrown to the caller.
 ///           Typically used to configure mocks and trigger the action under test.
 /// - Returns: The value returned by `body`.
-func waitForConfirmation<R>(_ comment: Comment? = nil,
-                            expectedCount: Int = 1,
-                            timeout: Duration,
-                            isolation: isolated (any Actor)? = #isolation,
-                            sourceLocation: SourceLocation = #_sourceLocation,
-                            _ body: (WaitingConfirmation) throws -> sending R) async rethrows -> R {
-    guard expectedCount >= 0 else {
-        // Or may run indefinitely
-        Issue.record("Expected count must be equal or greater than 0", sourceLocation: sourceLocation)
-        preconditionFailure()
-    }
-    
-    let (stream, continuation) = AsyncStream.makeStream(of: Void.self)
-    return try await confirmation(comment,
-                                  expectedCount: expectedCount,
-                                  isolation: isolation,
-                                  sourceLocation: sourceLocation) { confirmation in
-        let result = try body(.init(continuation: continuation,
-                                    expectedCount: expectedCount))
-        
-        // The reason why I don't add to the task group directly the non timeout implementation
-        // is that I do not want the body to be marked as @escaping and thus to be able to capture
-        // even mutable structs which is common in Swift Testing.
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask {
-                for await _ in stream {
-                    confirmation()
-                }
-            }
-            group.addTask {
-                try? await Task.sleep(for: timeout)
-                continuation.finish()
-            }
-            await group.next()
-            group.cancelAll()
+func waitForConfirmation<R>(
+  _ comment: Comment? = nil,
+  expectedCount: Int = 1,
+  timeout: Duration,
+  isolation: isolated (any Actor)? = #isolation,
+  sourceLocation: SourceLocation = #_sourceLocation,
+  _ body: (WaitingConfirmation) throws -> sending R
+) async rethrows -> R {
+  guard expectedCount >= 0 else {
+    // Or may run indefinitely
+    Issue.record("Expected count must be equal or greater than 0", sourceLocation: sourceLocation)
+    preconditionFailure()
+  }
+
+  let (stream, continuation) = AsyncStream.makeStream(of: Void.self)
+  return try await confirmation(
+    comment,
+    expectedCount: expectedCount,
+    isolation: isolation,
+    sourceLocation: sourceLocation
+  ) { confirmation in
+    let result = try body(
+      .init(
+        continuation: continuation,
+        expectedCount: expectedCount))
+
+    // The reason why I don't add to the task group directly the non timeout implementation
+    // is that I do not want the body to be marked as @escaping and thus to be able to capture
+    // even mutable structs which is common in Swift Testing.
+    await withTaskGroup(of: Void.self) { group in
+      group.addTask {
+        for await _ in stream {
+          confirmation()
         }
-        
-        return result
+      }
+      group.addTask {
+        try? await Task.sleep(for: timeout)
+        continuation.finish()
+      }
+      await group.next()
+      group.cancelAll()
     }
+
+    return result
+  }
 }

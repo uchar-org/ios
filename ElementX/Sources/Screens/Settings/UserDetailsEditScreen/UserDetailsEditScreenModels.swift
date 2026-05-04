@@ -9,64 +9,64 @@
 import Foundation
 
 enum UserDetailsEditScreenViewModelAction {
-    case dismiss
-    case displayCameraPicker
-    case displayMediaPicker
-    case displayFilePicker
+  case dismiss
+  case displayCameraPicker
+  case displayMediaPicker
+  case displayFilePicker
 }
 
 struct UserDetailsEditScreenViewState: BindableState {
-    let userID: String
-    
-    var canEditAvatar = true
-    var canEditDisplayName = true
-    
-    var currentAvatarURL: URL?
-    var selectedAvatarURL: URL?
-    
-    var currentDisplayName: String?
-    
-    var localMedia: MediaInfo?
-    
-    var bindings: UserDetailsEditScreenViewStateBindings
-    
-    var nameDidChange: Bool {
-        bindings.name != currentDisplayName
-    }
-      
-    var avatarDidChange: Bool {
-        localMedia != nil || selectedAvatarURL != currentAvatarURL
-    }
-    
-    var canSave: Bool {
-        !bindings.name.isEmpty && (avatarDidChange || nameDidChange)
-    }
-    
-    var showDeleteImageAction: Bool {
-        localMedia != nil || selectedAvatarURL != nil
-    }
+  let userID: String
+
+  var canEditAvatar = true
+  var canEditDisplayName = true
+
+  var currentAvatarURL: URL?
+  var selectedAvatarURL: URL?
+
+  var currentDisplayName: String?
+
+  var localMedia: MediaInfo?
+
+  var bindings: UserDetailsEditScreenViewStateBindings
+
+  var nameDidChange: Bool {
+    bindings.name != currentDisplayName
+  }
+
+  var avatarDidChange: Bool {
+    localMedia != nil || selectedAvatarURL != currentAvatarURL
+  }
+
+  var canSave: Bool {
+    !bindings.name.isEmpty && (avatarDidChange || nameDidChange)
+  }
+
+  var showDeleteImageAction: Bool {
+    localMedia != nil || selectedAvatarURL != nil
+  }
 }
 
 struct UserDetailsEditScreenViewStateBindings {
-    var name = ""
-    var showMediaSheet = false
-    
-    var alertInfo: AlertInfo<UserDetailsEditScreenAlertType>?
+  var name = ""
+  var showMediaSheet = false
+
+  var alertInfo: AlertInfo<UserDetailsEditScreenAlertType>?
 }
 
 enum UserDetailsEditScreenAlertType {
-    case failedProcessingMedia
-    case unsavedChanges
-    case saveError
-    case unknown
+  case failedProcessingMedia
+  case unsavedChanges
+  case saveError
+  case unknown
 }
 
 enum UserDetailsEditScreenViewAction {
-    case cancel
-    case save
-    case presentMediaSource
-    case displayCameraPicker
-    case displayMediaPicker
-    case displayFilePicker
-    case removeImage
+  case cancel
+  case save
+  case presentMediaSource
+  case displayCameraPicker
+  case displayMediaPicker
+  case displayFilePicker
+  case removeImage
 }

@@ -10,36 +10,36 @@ import Combine
 import SwiftUI
 
 enum LogViewerScreenCoordinatorAction {
-    case done
+  case done
 }
 
 final class LogViewerScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: LogViewerScreenViewModelProtocol
-    private var cancellables = Set<AnyCancellable>()
-    
-    private let actionsSubject: PassthroughSubject<LogViewerScreenCoordinatorAction, Never> = .init()
-    var actions: AnyPublisher<LogViewerScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private var viewModel: LogViewerScreenViewModelProtocol
+  private var cancellables = Set<AnyCancellable>()
+
+  private let actionsSubject: PassthroughSubject<LogViewerScreenCoordinatorAction, Never> = .init()
+  var actions: AnyPublisher<LogViewerScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init() {
+    viewModel = LogViewerScreenViewModel()
+  }
+
+  func start() {
+    viewModel.actions.sink { [weak self] action in
+      MXLog.info("Coordinator: received view model action: \(action)")
+
+      guard let self else { return }
+      switch action {
+      case .done:
+        self.actionsSubject.send(.done)
+      }
     }
-    
-    init() {
-        viewModel = LogViewerScreenViewModel()
-    }
-    
-    func start() {
-        viewModel.actions.sink { [weak self] action in
-            MXLog.info("Coordinator: received view model action: \(action)")
-            
-            guard let self else { return }
-            switch action {
-            case .done:
-                self.actionsSubject.send(.done)
-            }
-        }
-        .store(in: &cancellables)
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(LogViewerScreen(context: viewModel.context))
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(LogViewerScreen(context: viewModel.context))
+  }
 }

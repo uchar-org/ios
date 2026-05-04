@@ -9,25 +9,25 @@
 import Foundation
 
 class ServiceLocator {
-    private(set) static var shared = ServiceLocator()
-    
-    private init() { }
-    
-    private(set) var userIndicatorController: UserIndicatorControllerProtocol!
-    
-    func register(userIndicatorController: UserIndicatorControllerProtocol) {
-        self.userIndicatorController = userIndicatorController
-    }
-    
-    private(set) var settings: AppSettings!
-    
-    func register(appSettings: AppSettings) {
-        settings = appSettings
-    }
-    
-    private(set) var analytics: AnalyticsService!
-    
-    func register(analytics: AnalyticsService) {
-        self.analytics = analytics
-    }
+  private(set) static var shared = ServiceLocator()
+
+  private init() {}
+
+  private(set) var userIndicatorController: UserIndicatorControllerProtocol!
+
+  func register(userIndicatorController: UserIndicatorControllerProtocol) {
+    self.userIndicatorController = userIndicatorController
+  }
+
+  private(set) var settings: AppSettings!
+
+  func register(appSettings: AppSettings) {
+    settings = appSettings
+  }
+
+  private(set) var analytics: AnalyticsService!
+
+  func register(analytics: AnalyticsService) {
+    self.analytics = analytics
+  }
 }

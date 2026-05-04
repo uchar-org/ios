@@ -9,29 +9,34 @@
 import Combine
 import SwiftUI
 
-typealias AnalyticsPromptScreenViewModelType = StateStoreViewModelV2<AnalyticsPromptScreenViewState, AnalyticsPromptScreenViewAction>
+typealias AnalyticsPromptScreenViewModelType = StateStoreViewModelV2<
+  AnalyticsPromptScreenViewState, AnalyticsPromptScreenViewAction
+>
 
-class AnalyticsPromptScreenViewModel: AnalyticsPromptScreenViewModelType, AnalyticsPromptScreenViewModelProtocol {
-    private var actionsSubject: PassthroughSubject<AnalyticsPromptScreenViewModelAction, Never> = .init()
-    
-    var actions: AnyPublisher<AnalyticsPromptScreenViewModelAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
-    }
-    
-    /// Initialize a view model with the specified prompt type and app display name.
-    init(termsURL: URL?) {
-        let promptStrings = AnalyticsPromptScreenStrings(termsURL: termsURL)
-        super.init(initialViewState: AnalyticsPromptScreenViewState(strings: promptStrings))
-    }
+class AnalyticsPromptScreenViewModel: AnalyticsPromptScreenViewModelType,
+  AnalyticsPromptScreenViewModelProtocol
+{
+  private var actionsSubject: PassthroughSubject<AnalyticsPromptScreenViewModelAction, Never> =
+    .init()
 
-    // MARK: - Public
-    
-    override func process(viewAction: AnalyticsPromptScreenViewAction) {
-        switch viewAction {
-        case .enable:
-            actionsSubject.send(.enable)
-        case .disable:
-            actionsSubject.send(.disable)
-        }
+  var actions: AnyPublisher<AnalyticsPromptScreenViewModelAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  /// Initialize a view model with the specified prompt type and app display name.
+  init(termsURL: URL?) {
+    let promptStrings = AnalyticsPromptScreenStrings(termsURL: termsURL)
+    super.init(initialViewState: AnalyticsPromptScreenViewState(strings: promptStrings))
+  }
+
+  // MARK: - Public
+
+  override func process(viewAction: AnalyticsPromptScreenViewAction) {
+    switch viewAction {
+    case .enable:
+      actionsSubject.send(.enable)
+    case .disable:
+      actionsSubject.send(.disable)
     }
+  }
 }

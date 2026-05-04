@@ -10,25 +10,26 @@ import Combine
 import SwiftUI
 
 struct BlockedUsersScreenCoordinatorParameters {
-    let hideProfiles: Bool
-    let userSession: UserSessionProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let hideProfiles: Bool
+  let userSession: UserSessionProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 final class BlockedUsersScreenCoordinator: CoordinatorProtocol {
-    private let viewModel: BlockedUsersScreenViewModelProtocol
-    
-    init(parameters: BlockedUsersScreenCoordinatorParameters) {
-        viewModel = BlockedUsersScreenViewModel(hideProfiles: parameters.hideProfiles,
-                                                userSession: parameters.userSession,
-                                                userIndicatorController: parameters.userIndicatorController)
-    }
-    
-    func stop() {
-        viewModel.stop()
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(BlockedUsersScreen(context: viewModel.context))
-    }
+  private let viewModel: BlockedUsersScreenViewModelProtocol
+
+  init(parameters: BlockedUsersScreenCoordinatorParameters) {
+    viewModel = BlockedUsersScreenViewModel(
+      hideProfiles: parameters.hideProfiles,
+      userSession: parameters.userSession,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func stop() {
+    viewModel.stop()
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(BlockedUsersScreen(context: viewModel.context))
+  }
 }

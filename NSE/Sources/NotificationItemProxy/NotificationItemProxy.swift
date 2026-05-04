@@ -11,138 +11,140 @@ import MatrixRustSDK
 import UserNotifications
 
 struct NotificationItemProxy: NotificationItemProxyProtocol {
-    let notificationItem: NotificationItem
-    let eventID: String
-    let receiverID: String
-    let roomID: String
+  let notificationItem: NotificationItem
+  let eventID: String
+  let receiverID: String
+  let roomID: String
 
-    var event: NotificationEvent? {
-        notificationItem.event
-    }
+  var event: NotificationEvent? {
+    notificationItem.event
+  }
 
-    var senderDisplayName: String? {
-        notificationItem.senderInfo.displayName
-    }
+  var senderDisplayName: String? {
+    notificationItem.senderInfo.displayName
+  }
 
-    var senderID: String {
-        switch notificationItem.event {
-        case .timeline(let event):
-            return event.senderId()
-        case .invite(let senderID):
-            return senderID
-        }
+  var senderID: String {
+    switch notificationItem.event {
+    case .timeline(let event):
+      return event.senderId()
+    case .invite(let senderID):
+      return senderID
     }
+  }
 
-    var roomDisplayName: String {
-        notificationItem.roomInfo.displayName
-    }
-    
-    var isRoomSpace: Bool {
-        notificationItem.roomInfo.isSpace
-    }
+  var roomDisplayName: String {
+    notificationItem.roomInfo.displayName
+  }
 
-    var isRoomDirect: Bool {
-        notificationItem.roomInfo.isDirect
-    }
-    
-    var isRoomPrivate: Bool {
-        switch notificationItem.roomInfo.joinRule {
-        case .invite, .knock, .restricted, .knockRestricted:
-            true
-        default:
-            false
-        }
-    }
+  var isRoomSpace: Bool {
+    notificationItem.roomInfo.isSpace
+  }
 
-    var roomJoinedMembers: Int {
-        Int(notificationItem.roomInfo.joinedMembersCount)
-    }
+  var isRoomDirect: Bool {
+    notificationItem.roomInfo.isDirect
+  }
 
-    var isNoisy: Bool {
-        notificationItem.isNoisy ?? false
+  var isRoomPrivate: Bool {
+    switch notificationItem.roomInfo.joinRule {
+    case .invite, .knock, .restricted, .knockRestricted:
+      true
+    default:
+      false
     }
-    
-    var hasMention: Bool {
-        notificationItem.hasMention ?? false
-    }
+  }
 
-    var senderAvatarMediaSource: MediaSourceProxy? {
-        if let senderAvatarURLString = notificationItem.senderInfo.avatarUrl,
-           let senderAvatarURL = URL(string: senderAvatarURLString) {
-            return try? MediaSourceProxy(url: senderAvatarURL, mimeType: nil)
-        }
-        return nil
-    }
+  var roomJoinedMembers: Int {
+    Int(notificationItem.roomInfo.joinedMembersCount)
+  }
 
-    var roomAvatarMediaSource: MediaSourceProxy? {
-        if let roomAvatarURLString = notificationItem.roomInfo.avatarUrl,
-           let roomAvatarURL = URL(string: roomAvatarURLString) {
-            return try? MediaSourceProxy(url: roomAvatarURL, mimeType: nil)
-        }
-        return nil
+  var isNoisy: Bool {
+    notificationItem.isNoisy ?? false
+  }
+
+  var hasMention: Bool {
+    notificationItem.hasMention ?? false
+  }
+
+  var senderAvatarMediaSource: MediaSourceProxy? {
+    if let senderAvatarURLString = notificationItem.senderInfo.avatarUrl,
+      let senderAvatarURL = URL(string: senderAvatarURLString)
+    {
+      return try? MediaSourceProxy(url: senderAvatarURL, mimeType: nil)
     }
-    
-    var threadRootEventID: String? {
-        notificationItem.threadId
+    return nil
+  }
+
+  var roomAvatarMediaSource: MediaSourceProxy? {
+    if let roomAvatarURLString = notificationItem.roomInfo.avatarUrl,
+      let roomAvatarURL = URL(string: roomAvatarURLString)
+    {
+      return try? MediaSourceProxy(url: roomAvatarURL, mimeType: nil)
     }
+    return nil
+  }
+
+  var threadRootEventID: String? {
+    notificationItem.threadId
+  }
 }
 
 struct EmptyNotificationItemProxy: NotificationItemProxyProtocol {
-    let eventID: String
+  let eventID: String
 
-    var event: NotificationEvent? {
-        nil
-    }
+  var event: NotificationEvent? {
+    nil
+  }
 
-    let roomID: String
+  let roomID: String
 
-    let receiverID: String
+  let receiverID: String
 
-    var senderID: String {
-        ""
-    }
+  var senderID: String {
+    ""
+  }
 
-    var senderDisplayName: String? {
-        nil
-    }
-    
-    var roomDisplayName: String {
-        ""
-    }
+  var senderDisplayName: String? {
+    nil
+  }
 
-    var isNoisy: Bool {
-        false
-    }
+  var roomDisplayName: String {
+    ""
+  }
 
-    var isRoomSpace: Bool {
-        false
-    }
-    
-    var isRoomDirect: Bool {
-        false
-    }
-    
-    var isRoomPrivate: Bool {
-        false
-    }
+  var isNoisy: Bool {
+    false
+  }
 
-    var senderAvatarMediaSource: MediaSourceProxy? {
-        nil
-    }
+  var isRoomSpace: Bool {
+    false
+  }
 
-    var roomAvatarMediaSource: MediaSourceProxy? {
-        nil
-    }
+  var isRoomDirect: Bool {
+    false
+  }
 
-    var roomJoinedMembers: Int {
-        0
-    }
-    
-    var hasMention: Bool {
-        false
-    }
-    
-    var threadRootEventID: String? {
-        nil
-    }
+  var isRoomPrivate: Bool {
+    false
+  }
+
+  var senderAvatarMediaSource: MediaSourceProxy? {
+    nil
+  }
+
+  var roomAvatarMediaSource: MediaSourceProxy? {
+    nil
+  }
+
+  var roomJoinedMembers: Int {
+    0
+  }
+
+  var hasMention: Bool {
+    false
+  }
+
+  var threadRootEventID: String? {
+    nil
+  }
 }

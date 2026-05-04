@@ -10,48 +10,50 @@ import Combine
 import SwiftUI
 
 struct InviteUsersScreenCoordinatorParameters {
-    let userSession: UserSessionProtocol
-    let roomProxy: JoinedRoomProxyProtocol
-    let isSkippable: Bool
-    let userDiscoveryService: UserDiscoveryServiceProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
-    let appSettings: AppSettings
+  let userSession: UserSessionProtocol
+  let roomProxy: JoinedRoomProxyProtocol
+  let isSkippable: Bool
+  let userDiscoveryService: UserDiscoveryServiceProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
+  let appSettings: AppSettings
 }
 
 enum InviteUsersScreenCoordinatorAction {
-    case dismiss
+  case dismiss
 }
 
 final class InviteUsersScreenCoordinator: CoordinatorProtocol {
-    private let viewModel: InviteUsersScreenViewModelProtocol
-    private let actionsSubject: PassthroughSubject<InviteUsersScreenCoordinatorAction, Never> = .init()
-    private var cancellables = Set<AnyCancellable>()
-    
-    var actions: AnyPublisher<InviteUsersScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private let viewModel: InviteUsersScreenViewModelProtocol
+  private let actionsSubject: PassthroughSubject<InviteUsersScreenCoordinatorAction, Never> =
+    .init()
+  private var cancellables = Set<AnyCancellable>()
+
+  var actions: AnyPublisher<InviteUsersScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: InviteUsersScreenCoordinatorParameters) {
+    viewModel = InviteUsersScreenViewModel(
+      userSession: parameters.userSession,
+      roomProxy: parameters.roomProxy,
+      isSkippable: parameters.isSkippable,
+      userDiscoveryService: parameters.userDiscoveryService,
+      userIndicatorController: parameters.userIndicatorController,
+      appSettings: parameters.appSettings)
+  }
+
+  func start() {
+    viewModel.actions.sink { [weak self] action in
+      guard let self else { return }
+      switch action {
+      case .dismiss:
+        actionsSubject.send(.dismiss)
+      }
     }
-    
-    init(parameters: InviteUsersScreenCoordinatorParameters) {
-        viewModel = InviteUsersScreenViewModel(userSession: parameters.userSession,
-                                               roomProxy: parameters.roomProxy,
-                                               isSkippable: parameters.isSkippable,
-                                               userDiscoveryService: parameters.userDiscoveryService,
-                                               userIndicatorController: parameters.userIndicatorController,
-                                               appSettings: parameters.appSettings)
-    }
-    
-    func start() {
-        viewModel.actions.sink { [weak self] action in
-            guard let self else { return }
-            switch action {
-            case .dismiss:
-                actionsSubject.send(.dismiss)
-            }
-        }
-        .store(in: &cancellables)
-    }
-    
-    func toPresentable() -> AnyView {
-        AnyView(InviteUsersScreen(context: viewModel.context))
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(InviteUsersScreen(context: viewModel.context))
+  }
 }

@@ -9,22 +9,22 @@
 import Foundation
 
 enum SpacesScreenViewModelAction {
-    case selectSpace(SpaceRoomListProxyProtocol)
-    case showSettings
-    case showCreateSpace
+  case selectSpace(SpaceRoomListProxyProtocol)
+  case showSettings
+  case showCreateSpace
 }
 
 struct SpacesScreenViewState: BindableState {
-    let userID: String
-    var userDisplayName: String?
-    var userAvatarURL: URL?
-    
-    var topLevelSpaces: [SpaceServiceRoom]
-    var selectedSpaceID: String?
+  let userID: String
+  var userDisplayName: String?
+  var userAvatarURL: URL?
+
+  var topLevelSpaces: [SpaceServiceRoom]
+  var selectedSpaceID: String?
 }
 
 enum SpacesScreenViewAction {
-    case spaceAction(SpaceRoomCell.Action)
-    case showSettings
-    case createSpace
+  case spaceAction(SpaceRoomCell.Action)
+  case showSettings
+  case createSpace
 }

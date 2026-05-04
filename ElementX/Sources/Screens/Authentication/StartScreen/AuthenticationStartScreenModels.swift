@@ -9,64 +9,67 @@
 import SwiftUI
 
 enum AuthenticationStartScreenViewModelAction: Equatable {
-    case loginWithQR
-    case login
-    case register
-    
-    case loginDirectlyWithOIDC(data: OIDCAuthorizationDataProxy, window: UIWindow)
-    case loginDirectlyWithPassword(loginHint: String?)
-    
-    case reportProblem
-    case developerOptions
+  case loginWithQR
+  case login
+  case register
+
+  case loginDirectlyWithOIDC(data: OIDCAuthorizationDataProxy, window: UIWindow)
+  case loginDirectlyWithPassword(loginHint: String?)
+
+  case reportProblem
+  case developerOptions
 }
 
 struct AuthenticationStartScreenViewState: BindableState {
-    /// The presentation anchor used for OIDC authentication.
-    var window: UIWindow?
-    
-    let serverName: String?
-    let showCreateAccountButton: Bool
-    let showQRCodeLoginButton: Bool
-    
-    enum ClassicAppMode { case welcomeBack(ClassicAppAccount), otherOptions(ClassicAppAccount) }
-    var classicAppMode: ClassicAppMode?
-    
-    let hideBrandChrome: Bool
-    
-    var bindings = AuthenticationStartScreenViewStateBindings()
-    
-    var loginButtonTitle: String {
-        if let serverName {
-            L10n.screenOnboardingSignInTo(serverName)
-        } else if showQRCodeLoginButton {
-            L10n.screenOnboardingSignInManually
-        } else {
-            L10n.actionContinue
-        }
+  /// The presentation anchor used for OIDC authentication.
+  var window: UIWindow?
+
+  let serverName: String?
+  let showCreateAccountButton: Bool
+  let showQRCodeLoginButton: Bool
+
+  enum ClassicAppMode {
+    case welcomeBack(ClassicAppAccount)
+    case otherOptions(ClassicAppAccount)
+  }
+  var classicAppMode: ClassicAppMode?
+
+  let hideBrandChrome: Bool
+
+  var bindings = AuthenticationStartScreenViewStateBindings()
+
+  var loginButtonTitle: String {
+    if let serverName {
+      L10n.screenOnboardingSignInTo(serverName)
+    } else if showQRCodeLoginButton {
+      L10n.screenOnboardingSignInManually
+    } else {
+      L10n.actionContinue
     }
+  }
 }
 
 struct AuthenticationStartScreenViewStateBindings {
-    var alertInfo: AlertInfo<AuthenticationStartScreenAlertType>?
-    var showClassicAppBackupInstructions = false
+  var alertInfo: AlertInfo<AuthenticationStartScreenAlertType>?
+  var showClassicAppBackupInstructions = false
 }
 
 enum AuthenticationStartScreenAlertType {
-    case genericError
+  case genericError
 }
 
 enum AuthenticationStartScreenViewAction {
-    /// Updates the window used as the OIDC presentation anchor.
-    case updateWindow(UIWindow)
-    case developerOptions
-    case reportProblem
-    
-    case loginWithQR
-    case login
-    case register
-    
-    case continueWithClassic(ClassicAppAccount)
-    case otherOptions(ClassicAppAccount)
-    case closeOtherOptions(ClassicAppAccount)
-    case openClassicApp
+  /// Updates the window used as the OIDC presentation anchor.
+  case updateWindow(UIWindow)
+  case developerOptions
+  case reportProblem
+
+  case loginWithQR
+  case login
+  case register
+
+  case continueWithClassic(ClassicAppAccount)
+  case otherOptions(ClassicAppAccount)
+  case closeOtherOptions(ClassicAppAccount)
+  case openClassicApp
 }

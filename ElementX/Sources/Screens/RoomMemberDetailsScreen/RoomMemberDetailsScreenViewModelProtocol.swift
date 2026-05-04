@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol RoomMemberDetailsScreenViewModelProtocol {
-    var actions: AnyPublisher<RoomMemberDetailsScreenViewModelAction, Never> { get }
-    var context: RoomMemberDetailsScreenViewModelType.Context { get }
-    
-    func stop()
+  var actions: AnyPublisher<RoomMemberDetailsScreenViewModelAction, Never> { get }
+  var context: RoomMemberDetailsScreenViewModelType.Context { get }
+
+  func stop()
 }

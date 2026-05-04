@@ -8,11 +8,11 @@
 import Foundation
 
 enum PaginationDirection: String {
-    case backwards, forwards
+  case backwards, forwards
 }
 
 enum PaginationState {
-    case idle
-    case endReached
-    case paginating
+  case idle
+  case endReached
+  case paginating
 }

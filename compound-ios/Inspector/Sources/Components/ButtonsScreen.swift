@@ -10,19 +10,19 @@ import Compound
 import SwiftUI
 
 struct ButtonsScreen: View {
-    var body: some View {
-        ScreenContent(navigationTitle: "Buttons") {
-            CompoundButtonStyle_Previews.states
-            SendButton_Previews.states
-        }
+  var body: some View {
+    ScreenContent(navigationTitle: "Buttons") {
+      CompoundButtonStyle_Previews.states
+      SendButton_Previews.states
     }
+  }
 }
 
 struct ButtonsScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            ButtonsScreen()
-        }
-        .previewLayout(.fixed(width: 375, height: 700))
+  static var previews: some View {
+    NavigationStack {
+      ButtonsScreen()
     }
+    .previewLayout(.fixed(width: 375, height: 700))
+  }
 }

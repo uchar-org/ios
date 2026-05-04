@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol AuthenticationStartScreenViewModelProtocol {
-    var actions: AnyPublisher<AuthenticationStartScreenViewModelAction, Never> { get }
-    var context: AuthenticationStartScreenViewModelType.Context { get }
+  var actions: AnyPublisher<AuthenticationStartScreenViewModelAction, Never> { get }
+  var context: AuthenticationStartScreenViewModelType.Context { get }
 }

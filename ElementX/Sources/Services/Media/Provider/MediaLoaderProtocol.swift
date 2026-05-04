@@ -9,17 +9,19 @@
 import Foundation
 
 enum MediaLoaderError: Error {
-    case missingClient
-    case notSupported
-    case invalidURL
-    case unexpectedResponse
+  case missingClient
+  case notSupported
+  case invalidURL
+  case unexpectedResponse
 }
 
 // sourcery: AutoMockable
 protocol MediaLoaderProtocol {
-    func loadMediaContentForSource(_ source: MediaSourceProxy) async throws -> Data
+  func loadMediaContentForSource(_ source: MediaSourceProxy) async throws -> Data
 
-    func loadMediaThumbnailForSource(_ source: MediaSourceProxy, width: UInt, height: UInt) async throws -> Data
-    
-    func loadMediaFileForSource(_ source: MediaSourceProxy, filename: String?) async throws -> MediaFileHandleProxy
+  func loadMediaThumbnailForSource(_ source: MediaSourceProxy, width: UInt, height: UInt)
+    async throws -> Data
+
+  func loadMediaFileForSource(_ source: MediaSourceProxy, filename: String?) async throws
+    -> MediaFileHandleProxy
 }

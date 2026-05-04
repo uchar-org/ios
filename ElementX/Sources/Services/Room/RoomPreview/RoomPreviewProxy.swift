@@ -9,28 +9,29 @@
 import MatrixRustSDK
 
 final class RoomPreviewProxy: RoomPreviewProxyProtocol {
-    private let roomPreview: RoomPreview
-    
-    let info: RoomPreviewInfoProxy
-    
-    init(roomPreview: RoomPreview) {
-        self.roomPreview = roomPreview
-        info = .init(roomPreviewInfo: roomPreview.info())
+  private let roomPreview: RoomPreview
+
+  let info: RoomPreviewInfoProxy
+
+  init(roomPreview: RoomPreview) {
+    self.roomPreview = roomPreview
+    info = .init(roomPreviewInfo: roomPreview.info())
+  }
+
+  var ownMembershipDetails: RoomMembershipDetailsProxyProtocol? {
+    get async {
+      guard let details = await roomPreview.ownMembershipDetails() else {
+        return nil
+      }
+
+      var senderRoomMember: RoomMemberProxy?
+      if let member = details.senderInfo {
+        senderRoomMember = .init(member: member)
+      }
+
+      return RoomMembershipDetailsProxy(
+        ownRoomMember: RoomMemberProxy(member: details.roomMember),
+        senderRoomMember: senderRoomMember)
     }
-    
-    var ownMembershipDetails: RoomMembershipDetailsProxyProtocol? {
-        get async {
-            guard let details = await roomPreview.ownMembershipDetails() else {
-                return nil
-            }
-            
-            var senderRoomMember: RoomMemberProxy?
-            if let member = details.senderInfo {
-                senderRoomMember = .init(member: member)
-            }
-            
-            return RoomMembershipDetailsProxy(ownRoomMember: RoomMemberProxy(member: details.roomMember),
-                                              senderRoomMember: senderRoomMember)
-        }
-    }
+  }
 }

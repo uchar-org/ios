@@ -10,31 +10,34 @@ import Compound
 import SwiftUI
 
 struct LegalInformationScreen: View {
-    let context: LegalInformationScreenViewModel.Context
-    @Environment(\.openURL) private var openURL
-    
-    var body: some View {
-        Form {
-            Section {
-                ListRow(label: .plain(title: L10n.commonCopyright),
-                        kind: .button { openURL(context.viewState.copyrightURL) })
-                ListRow(label: .plain(title: L10n.commonAcceptableUsePolicy),
-                        kind: .button { openURL(context.viewState.acceptableUseURL) })
-                ListRow(label: .plain(title: L10n.commonPrivacyPolicy),
-                        kind: .button { openURL(context.viewState.privacyURL) })
-            }
-        }
-        .compoundList()
-        .navigationTitle(L10n.commonAbout)
-        .navigationBarTitleDisplayMode(.inline)
+  let context: LegalInformationScreenViewModel.Context
+  @Environment(\.openURL) private var openURL
+
+  var body: some View {
+    Form {
+      Section {
+        ListRow(
+          label: .plain(title: L10n.commonCopyright),
+          kind: .button { openURL(context.viewState.copyrightURL) })
+        ListRow(
+          label: .plain(title: L10n.commonAcceptableUsePolicy),
+          kind: .button { openURL(context.viewState.acceptableUseURL) })
+        ListRow(
+          label: .plain(title: L10n.commonPrivacyPolicy),
+          kind: .button { openURL(context.viewState.privacyURL) })
+      }
     }
+    .compoundList()
+    .navigationTitle(L10n.commonAbout)
+    .navigationBarTitleDisplayMode(.inline)
+  }
 }
 
 // MARK: - Previews
 
 struct LegalInformationScreen_Previews: PreviewProvider, TestablePreview {
-    static let viewModel = LegalInformationScreenViewModel(appSettings: AppSettings())
-    static var previews: some View {
-        LegalInformationScreen(context: viewModel.context)
-    }
+  static let viewModel = LegalInformationScreenViewModel(appSettings: AppSettings())
+  static var previews: some View {
+    LegalInformationScreen(context: viewModel.context)
+  }
 }

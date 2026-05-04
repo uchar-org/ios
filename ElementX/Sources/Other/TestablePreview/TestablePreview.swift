@@ -8,4 +8,4 @@
 
 import SwiftUI
 
-protocol TestablePreview { }
+protocol TestablePreview {}

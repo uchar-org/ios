@@ -9,20 +9,20 @@
 import AnalyticsEvents
 
 extension AnalyticsEvent.JoinedRoom.RoomSize {
-    init?(memberCount: UInt) {
-        switch memberCount {
-        case 2:
-            self = .Two
-        case 3...10:
-            self = .ThreeToTen
-        case 11...100:
-            self = .ElevenToOneHundred
-        case 101...1000:
-            self = .OneHundredAndOneToAThousand
-        case 1001...:
-            self = .MoreThanAThousand
-        default:
-            return nil
-        }
+  init?(memberCount: UInt) {
+    switch memberCount {
+    case 2:
+      self = .Two
+    case 3...10:
+      self = .ThreeToTen
+    case 11...100:
+      self = .ElevenToOneHundred
+    case 101...1000:
+      self = .OneHundredAndOneToAThousand
+    case 1001...:
+      self = .MoreThanAThousand
+    default:
+      return nil
     }
+  }
 }

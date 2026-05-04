@@ -8,4 +8,4 @@
 
 import Foundation
 
-protocol TextBasedRoomTimelineItem: EventBasedMessageTimelineItemProtocol { }
+protocol TextBasedRoomTimelineItem: EventBasedMessageTimelineItemProtocol {}

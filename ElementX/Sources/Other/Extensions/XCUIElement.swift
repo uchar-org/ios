@@ -10,39 +10,39 @@ import SwiftUI
 import XCTest
 
 extension XCUIElement {
-    func clearAndTypeText(_ text: String, app: XCUIApplication) {
-        tap(.center)
-        
-        app.showKeyboardIfNeeded()
-        
-        guard let currentValue = value as? String else {
-            XCTFail("Tried to clear and type text into a non string value")
-            return
-        }
-        
-        let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: currentValue.count)
-        typeText(deleteString)
-        
-        // Note: In the past, we had to type chars one by one to avoid CI flakiness
-        typeText(text)
+  func clearAndTypeText(_ text: String, app: XCUIApplication) {
+    tap(.center)
+
+    app.showKeyboardIfNeeded()
+
+    guard let currentValue = value as? String else {
+      XCTFail("Tried to clear and type text into a non string value")
+      return
     }
-    
-    func tap(_ point: UnitPoint) {
-        let coordinate = coordinate(withNormalizedOffset: .init(dx: point.x, dy: point.y))
-        coordinate.tap()
-    }
+
+    let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: currentValue.count)
+    typeText(deleteString)
+
+    // Note: In the past, we had to type chars one by one to avoid CI flakiness
+    typeText(text)
+  }
+
+  func tap(_ point: UnitPoint) {
+    let coordinate = coordinate(withNormalizedOffset: .init(dx: point.x, dy: point.y))
+    coordinate.tap()
+  }
 }
 
 extension XCUIApplication {
-    /// Ensures the software keyboard is shown on an iPad when a text field is focussed.
-    ///
-    /// Note: Whilst this could be added on XCUIElement to more closely tie it to a text field, it requires the
-    /// app instance anyway, and some of our tests assert that a default focus has been set on the text field,
-    /// so having a method that would set the focus and show the keyboard isn't always desirable.
-    func showKeyboardIfNeeded() {
-        if UIDevice.current.userInterfaceIdiom == .pad, keyboards.count == 0 {
-            buttons["Keyboard"].tap()
-            buttons["Show Keyboard"].tap()
-        }
+  /// Ensures the software keyboard is shown on an iPad when a text field is focussed.
+  ///
+  /// Note: Whilst this could be added on XCUIElement to more closely tie it to a text field, it requires the
+  /// app instance anyway, and some of our tests assert that a default focus has been set on the text field,
+  /// so having a method that would set the focus and show the keyboard isn't always desirable.
+  func showKeyboardIfNeeded() {
+    if UIDevice.current.userInterfaceIdiom == .pad, keyboards.count == 0 {
+      buttons["Keyboard"].tap()
+      buttons["Show Keyboard"].tap()
     }
+  }
 }

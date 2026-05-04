@@ -9,20 +9,20 @@
 import LinkPresentation
 
 class LinkMetadataProvider: LinkMetadataProviderProtocol {
-    private(set) var metadataItems = [URL: LinkMetadataProviderItem]()
-    
-    func fetchMetadataFor(url: URL) async -> Result<LinkMetadataProviderItem, Error> {
-        if let item = metadataItems[url] {
-            return .success(item)
-        }
-        
-        do {
-            let metadata = try await LPMetadataProvider().startFetchingMetadata(for: url)
-            let item = LinkMetadataProviderItem(url: url, metadata: metadata)
-            metadataItems[url] = item
-            return .success(item)
-        } catch {
-            return .failure(error)
-        }
+  private(set) var metadataItems = [URL: LinkMetadataProviderItem]()
+
+  func fetchMetadataFor(url: URL) async -> Result<LinkMetadataProviderItem, Error> {
+    if let item = metadataItems[url] {
+      return .success(item)
     }
+
+    do {
+      let metadata = try await LPMetadataProvider().startFetchingMetadata(for: url)
+      let item = LinkMetadataProviderItem(url: url, metadata: metadata)
+      metadataItems[url] = item
+      return .success(item)
+    } catch {
+      return .failure(error)
+    }
+  }
 }

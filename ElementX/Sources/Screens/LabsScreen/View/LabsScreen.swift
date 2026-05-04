@@ -10,68 +10,70 @@ import Compound
 import SwiftUI
 
 struct LabsScreen: View {
-    @Bindable var context: LabsScreenViewModel.Context
-    
-    var body: some View {
-        Form {
-            header
-            threadsSection
-        }
-        .compoundList()
-        .navigationTitle(L10n.screenLabsTitle)
-        .navigationBarTitleDisplayMode(.inline)
+  @Bindable var context: LabsScreenViewModel.Context
+
+  var body: some View {
+    Form {
+      header
+      threadsSection
     }
-    
-    private var header: some View {
-        Section {
-            EmptyView()
-        } header: {
-            VStack(spacing: 16) {
-                BigIcon(icon: \.labs, style: .default)
-                
-                VStack(spacing: 8) {
-                    Text(L10n.screenLabsHeaderTitle)
-                        .foregroundColor(.compound.textPrimary)
-                        .font(.compound.headingMDBold)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(L10n.screenLabsHeaderDescription)
-                        .font(.compound.bodyMD)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.compound.textSecondary)
-                }
-                .compoundListSectionHeader()
-            }
-            .frame(maxWidth: .infinity)
+    .compoundList()
+    .navigationTitle(L10n.screenLabsTitle)
+    .navigationBarTitleDisplayMode(.inline)
+  }
+
+  private var header: some View {
+    Section {
+      EmptyView()
+    } header: {
+      VStack(spacing: 16) {
+        BigIcon(icon: \.labs, style: .default)
+
+        VStack(spacing: 8) {
+          Text(L10n.screenLabsHeaderTitle)
+            .foregroundColor(.compound.textPrimary)
+            .font(.compound.headingMDBold)
+            .multilineTextAlignment(.center)
+
+          Text(L10n.screenLabsHeaderDescription)
+            .font(.compound.bodyMD)
+            .multilineTextAlignment(.center)
+            .foregroundColor(.compound.textSecondary)
         }
+        .compoundListSectionHeader()
+      }
+      .frame(maxWidth: .infinity)
     }
-    
-    private var threadsSection: some View {
-        Section {
-            ListRow(label: .default(title: L10n.screenLabsEnableThreads,
-                                    icon: \.threads),
-                    kind: .toggle($context.threadsEnabled))
-        } footer: {
-            Text(L10n.screenLabsEnableThreadsDescription)
-                .compoundListSectionFooter()
-        }
-        .onChange(of: context.threadsEnabled) { _, _ in
-            context.send(viewAction: .clearCache)
-        }
+  }
+
+  private var threadsSection: some View {
+    Section {
+      ListRow(
+        label: .default(
+          title: L10n.screenLabsEnableThreads,
+          icon: \.threads),
+        kind: .toggle($context.threadsEnabled))
+    } footer: {
+      Text(L10n.screenLabsEnableThreadsDescription)
+        .compoundListSectionFooter()
     }
+    .onChange(of: context.threadsEnabled) { _, _ in
+      context.send(viewAction: .clearCache)
+    }
+  }
 }
 
 // MARK: - Previews
 
 struct LabsScreen_Previews: PreviewProvider, TestablePreview {
-    static let viewModel = {
-        AppSettings.resetAllSettings()
-        return LabsScreenViewModel(labsOptions: AppSettings())
-    }()
-    
-    static var previews: some View {
-        ElementNavigationStack {
-            LabsScreen(context: viewModel.context)
-        }
+  static let viewModel = {
+    AppSettings.resetAllSettings()
+    return LabsScreenViewModel(labsOptions: AppSettings())
+  }()
+
+  static var previews: some View {
+    ElementNavigationStack {
+      LabsScreen(context: viewModel.context)
     }
+  }
 }

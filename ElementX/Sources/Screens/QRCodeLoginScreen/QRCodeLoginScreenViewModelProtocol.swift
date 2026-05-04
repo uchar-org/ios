@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol QRCodeLoginScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<QRCodeLoginScreenViewModelAction, Never> { get }
-    var context: QRCodeLoginScreenViewModelType.Context { get }
+  var actionsPublisher: AnyPublisher<QRCodeLoginScreenViewModelAction, Never> { get }
+  var context: QRCodeLoginScreenViewModelType.Context { get }
 }

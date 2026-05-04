@@ -10,88 +10,93 @@ import Compound
 import SwiftUI
 
 struct DeclineAndBlockScreen: View {
-    @Bindable var context: DeclineAndBlockScreenViewModel.Context
-    
-    var body: some View {
-        Form {
-            blockUserSection
-            reportSection
-            if context.shouldReport {
-                reportReasonSection
-            }
-        }
-        .compoundList()
-        .navigationTitle(L10n.screenDeclineAndBlockTitle)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar { toolbar }
-        .animation(.elementDefault, value: context.shouldReport)
-        .alert(item: $context.alert)
+  @Bindable var context: DeclineAndBlockScreenViewModel.Context
+
+  var body: some View {
+    Form {
+      blockUserSection
+      reportSection
+      if context.shouldReport {
+        reportReasonSection
+      }
     }
-    
-    private var blockUserSection: some View {
-        Section {
-            ListRow(label: .plain(title: L10n.screenDeclineAndBlockBlockUserOptionTitle),
-                    kind: .toggle($context.shouldBlockUser))
-        } footer: {
-            Text(L10n.screenDeclineAndBlockBlockUserOptionDescription)
-                .compoundListSectionFooter()
-        }
+    .compoundList()
+    .navigationTitle(L10n.screenDeclineAndBlockTitle)
+    .navigationBarTitleDisplayMode(.inline)
+    .toolbar { toolbar }
+    .animation(.elementDefault, value: context.shouldReport)
+    .alert(item: $context.alert)
+  }
+
+  private var blockUserSection: some View {
+    Section {
+      ListRow(
+        label: .plain(title: L10n.screenDeclineAndBlockBlockUserOptionTitle),
+        kind: .toggle($context.shouldBlockUser))
+    } footer: {
+      Text(L10n.screenDeclineAndBlockBlockUserOptionDescription)
+        .compoundListSectionFooter()
     }
-    
-    private var reportSection: some View {
-        Section {
-            ListRow(label: .plain(title: L10n.actionReportRoom),
-                    kind: .toggle($context.shouldReport))
-        } footer: {
-            Text(L10n.screenDeclineAndBlockReportUserOptionDescription)
-                .compoundListSectionFooter()
-        }
+  }
+
+  private var reportSection: some View {
+    Section {
+      ListRow(
+        label: .plain(title: L10n.actionReportRoom),
+        kind: .toggle($context.shouldReport))
+    } footer: {
+      Text(L10n.screenDeclineAndBlockReportUserOptionDescription)
+        .compoundListSectionFooter()
     }
-    
-    private var reportReasonSection: some View {
-        Section {
-            ListRow(label: .plain(title: L10n.screenDeclineAndBlockReportUserReasonPlaceholder),
-                    kind: .textField(text: $context.reportReason, axis: .vertical))
-                .lineLimit(4, reservesSpace: true)
-        }
+  }
+
+  private var reportReasonSection: some View {
+    Section {
+      ListRow(
+        label: .plain(title: L10n.screenDeclineAndBlockReportUserReasonPlaceholder),
+        kind: .textField(text: $context.reportReason, axis: .vertical)
+      )
+      .lineLimit(4, reservesSpace: true)
     }
-    
-    @ToolbarContentBuilder
-    private var toolbar: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
-            Button(L10n.actionCancel) {
-                context.send(viewAction: .dismiss)
-            }
-        }
-        
-        ToolbarItem(placement: .confirmationAction) {
-            Button(L10n.actionDecline) {
-                context.send(viewAction: .decline)
-            }
-            .disabled(context.viewState.isDeclineDisabled)
-        }
+  }
+
+  @ToolbarContentBuilder
+  private var toolbar: some ToolbarContent {
+    ToolbarItem(placement: .cancellationAction) {
+      Button(L10n.actionCancel) {
+        context.send(viewAction: .dismiss)
+      }
     }
+
+    ToolbarItem(placement: .confirmationAction) {
+      Button(L10n.actionDecline) {
+        context.send(viewAction: .decline)
+      }
+      .disabled(context.viewState.isDeclineDisabled)
+    }
+  }
 }
 
 // MARK: - Previews
 
 struct DeclineAndBlockScreen_Previews: PreviewProvider, TestablePreview {
-    static let viewModel = DeclineAndBlockScreenViewModel(userID: "@alice:matrix.org",
-                                                          roomID: "!room:matrix.org",
-                                                          clientProxy: ClientProxyMock(.init()),
-                                                          userIndicatorController: UserIndicatorControllerMock())
-    
-    static var previews: some View {
-        ElementNavigationStack {
-            DeclineAndBlockScreen(context: viewModel.context)
-        }
-        .previewDisplayName("Default")
-        ElementNavigationStack {
-            DeclineAndBlockScreen(context: viewModel.context)
-                .onAppear {
-                    viewModel.context.shouldReport = true
-                }
-        }
-        .previewDisplayName("Report room selected")
+  static let viewModel = DeclineAndBlockScreenViewModel(
+    userID: "@alice:matrix.org",
+    roomID: "!room:matrix.org",
+    clientProxy: ClientProxyMock(.init()),
+    userIndicatorController: UserIndicatorControllerMock())
+
+  static var previews: some View {
+    ElementNavigationStack {
+      DeclineAndBlockScreen(context: viewModel.context)
     }
+    .previewDisplayName("Default")
+    ElementNavigationStack {
+      DeclineAndBlockScreen(context: viewModel.context)
+        .onAppear {
+          viewModel.context.shouldReport = true
+        }
+    }
+    .previewDisplayName("Report room selected")
+  }
 }

@@ -9,12 +9,12 @@
 import Foundation
 
 struct CallNotificationRoomTimelineItem: RoomTimelineItemProtocol, Equatable {
-    let id: TimelineItemIdentifier
-    let timestamp: Date
-    let isEditable: Bool
-    let canBeRepliedTo: Bool
-    
-    let sender: TimelineItemSender
-    
-    var properties = RoomTimelineItemProperties()
+  let id: TimelineItemIdentifier
+  let timestamp: Date
+  let isEditable: Bool
+  let canBeRepliedTo: Bool
+
+  let sender: TimelineItemSender
+
+  var properties = RoomTimelineItemProperties()
 }

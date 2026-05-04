@@ -10,19 +10,20 @@ import Combine
 import SwiftUI
 
 struct AnalyticsSettingsScreenCoordinatorParameters {
-    let appSettings: AppSettings
-    let analytics: AnalyticsService
+  let appSettings: AppSettings
+  let analytics: AnalyticsService
 }
 
 final class AnalyticsSettingsScreenCoordinator: CoordinatorProtocol {
-    private let viewModel: AnalyticsSettingsScreenViewModel
-    
-    init(parameters: AnalyticsSettingsScreenCoordinatorParameters) {
-        viewModel = AnalyticsSettingsScreenViewModel(appSettings: parameters.appSettings,
-                                                     analytics: parameters.analytics)
-    }
-    
-    func toPresentable() -> AnyView {
-        AnyView(AnalyticsSettingsScreen(context: viewModel.context))
-    }
+  private let viewModel: AnalyticsSettingsScreenViewModel
+
+  init(parameters: AnalyticsSettingsScreenCoordinatorParameters) {
+    viewModel = AnalyticsSettingsScreenViewModel(
+      appSettings: parameters.appSettings,
+      analytics: parameters.analytics)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(AnalyticsSettingsScreen(context: viewModel.context))
+  }
 }

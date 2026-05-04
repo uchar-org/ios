@@ -9,11 +9,11 @@
 import MatrixRustSDK
 
 protocol ClientBuilderHookProtocol {
-    func configure(_ builder: ClientBuilder) -> ClientBuilder
+  func configure(_ builder: ClientBuilder) -> ClientBuilder
 }
 
 struct DefaultClientBuilderHook: ClientBuilderHookProtocol {
-    func configure(_ builder: ClientBuilder) -> ClientBuilder {
-        builder
-    }
+  func configure(_ builder: ClientBuilder) -> ClientBuilder {
+    builder
+  }
 }

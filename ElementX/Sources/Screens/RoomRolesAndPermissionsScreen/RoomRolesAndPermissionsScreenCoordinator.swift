@@ -10,50 +10,53 @@ import Combine
 import SwiftUI
 
 struct RoomRolesAndPermissionsScreenCoordinatorParameters {
-    let roomProxy: JoinedRoomProxyProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
-    let analytics: AnalyticsService
+  let roomProxy: JoinedRoomProxyProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
+  let analytics: AnalyticsService
 }
 
 enum RoomRolesAndPermissionsScreenCoordinatorAction {
-    case editRoles(RoomRolesAndPermissionsScreenRole)
-    case editPermissions(ownPowerLevel: RoomPowerLevel, permissions: RoomPermissions)
-    case demotedOwnUser
+  case editRoles(RoomRolesAndPermissionsScreenRole)
+  case editPermissions(ownPowerLevel: RoomPowerLevel, permissions: RoomPermissions)
+  case demotedOwnUser
 }
 
 final class RoomRolesAndPermissionsScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: RoomRolesAndPermissionsScreenViewModelProtocol
-    private var cancellables = Set<AnyCancellable>()
-    
-    private let actionsSubject: PassthroughSubject<RoomRolesAndPermissionsScreenCoordinatorAction, Never> = .init()
-    var actionsPublisher: AnyPublisher<RoomRolesAndPermissionsScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private var viewModel: RoomRolesAndPermissionsScreenViewModelProtocol
+  private var cancellables = Set<AnyCancellable>()
+
+  private let actionsSubject:
+    PassthroughSubject<RoomRolesAndPermissionsScreenCoordinatorAction, Never> = .init()
+  var actionsPublisher: AnyPublisher<RoomRolesAndPermissionsScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: RoomRolesAndPermissionsScreenCoordinatorParameters) {
+    viewModel = RoomRolesAndPermissionsScreenViewModel(
+      roomProxy: parameters.roomProxy,
+      userIndicatorController: parameters.userIndicatorController,
+      analytics: parameters.analytics)
+  }
+
+  func start() {
+    viewModel.actionsPublisher.sink { [weak self] action in
+      MXLog.info("Coordinator: received view model action: \(action)")
+
+      guard let self else { return }
+      switch action {
+      case .editRoles(let role):
+        actionsSubject.send(.editRoles(role))
+      case .editPermissions(let ownPowerLevel, let permissions):
+        actionsSubject.send(
+          .editPermissions(ownPowerLevel: ownPowerLevel, permissions: permissions))
+      case .demotedOwnUser:
+        actionsSubject.send(.demotedOwnUser)
+      }
     }
-    
-    init(parameters: RoomRolesAndPermissionsScreenCoordinatorParameters) {
-        viewModel = RoomRolesAndPermissionsScreenViewModel(roomProxy: parameters.roomProxy,
-                                                           userIndicatorController: parameters.userIndicatorController,
-                                                           analytics: parameters.analytics)
-    }
-    
-    func start() {
-        viewModel.actionsPublisher.sink { [weak self] action in
-            MXLog.info("Coordinator: received view model action: \(action)")
-            
-            guard let self else { return }
-            switch action {
-            case .editRoles(let role):
-                actionsSubject.send(.editRoles(role))
-            case .editPermissions(let ownPowerLevel, let permissions):
-                actionsSubject.send(.editPermissions(ownPowerLevel: ownPowerLevel, permissions: permissions))
-            case .demotedOwnUser:
-                actionsSubject.send(.demotedOwnUser)
-            }
-        }
-        .store(in: &cancellables)
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(RoomRolesAndPermissionsScreen(context: viewModel.context))
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(RoomRolesAndPermissionsScreen(context: viewModel.context))
+  }
 }

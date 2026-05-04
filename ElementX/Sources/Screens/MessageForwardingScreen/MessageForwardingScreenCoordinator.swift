@@ -10,50 +10,52 @@ import Combine
 import SwiftUI
 
 struct MessageForwardingScreenCoordinatorParameters {
-    let forwardingItem: MessageForwardingItem
-    let userSession: UserSessionProtocol
-    let roomSummaryProvider: RoomSummaryProviderProtocol
-    let userIndicatorController: UserIndicatorControllerProtocol
+  let forwardingItem: MessageForwardingItem
+  let userSession: UserSessionProtocol
+  let roomSummaryProvider: RoomSummaryProviderProtocol
+  let userIndicatorController: UserIndicatorControllerProtocol
 }
 
 enum MessageForwardingScreenCoordinatorAction {
-    case dismiss
-    case sent(roomID: String)
+  case dismiss
+  case sent(roomID: String)
 }
 
 final class MessageForwardingScreenCoordinator: CoordinatorProtocol {
-    private var viewModel: MessageForwardingScreenViewModelProtocol
-    private let actionsSubject: PassthroughSubject<MessageForwardingScreenCoordinatorAction, Never> = .init()
-    private var cancellables = Set<AnyCancellable>()
-    
-    var actions: AnyPublisher<MessageForwardingScreenCoordinatorAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+  private var viewModel: MessageForwardingScreenViewModelProtocol
+  private let actionsSubject: PassthroughSubject<MessageForwardingScreenCoordinatorAction, Never> =
+    .init()
+  private var cancellables = Set<AnyCancellable>()
+
+  var actions: AnyPublisher<MessageForwardingScreenCoordinatorAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(parameters: MessageForwardingScreenCoordinatorParameters) {
+    viewModel = MessageForwardingScreenViewModel(
+      forwardingItem: parameters.forwardingItem,
+      userSession: parameters.userSession,
+      roomSummaryProvider: parameters.roomSummaryProvider,
+      userIndicatorController: parameters.userIndicatorController)
+  }
+
+  func start() {
+    viewModel.actions.sink { [weak self] action in
+      switch action {
+      case .dismiss:
+        self?.actionsSubject.send(.dismiss)
+      case .sent(let roomID):
+        self?.actionsSubject.send(.sent(roomID: roomID))
+      }
     }
-    
-    init(parameters: MessageForwardingScreenCoordinatorParameters) {
-        viewModel = MessageForwardingScreenViewModel(forwardingItem: parameters.forwardingItem,
-                                                     userSession: parameters.userSession,
-                                                     roomSummaryProvider: parameters.roomSummaryProvider,
-                                                     userIndicatorController: parameters.userIndicatorController)
-    }
-    
-    func start() {
-        viewModel.actions.sink { [weak self] action in
-            switch action {
-            case .dismiss:
-                self?.actionsSubject.send(.dismiss)
-            case .sent(let roomID):
-                self?.actionsSubject.send(.sent(roomID: roomID))
-            }
-        }
-        .store(in: &cancellables)
-    }
-        
-    func toPresentable() -> AnyView {
-        AnyView(MessageForwardingScreen(context: viewModel.context))
-    }
-    
-    func stop() {
-        viewModel.stop()
-    }
+    .store(in: &cancellables)
+  }
+
+  func toPresentable() -> AnyView {
+    AnyView(MessageForwardingScreen(context: viewModel.context))
+  }
+
+  func stop() {
+    viewModel.stop()
+  }
 }

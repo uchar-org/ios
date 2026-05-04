@@ -9,42 +9,42 @@
 import SwiftUI
 
 enum MediaEventsTimelineScreenViewModelAction {
-    case displayMessageForwarding(MessageForwardingItem)
-    case viewInRoomTimeline(TimelineItemIdentifier)
+  case displayMessageForwarding(MessageForwardingItem)
+  case viewInRoomTimeline(TimelineItemIdentifier)
 }
 
 enum MediaEventsTimelineScreenMode {
-    case media
-    case files
+  case media
+  case files
 }
 
 struct MediaEventsTimelineGroup: Identifiable {
-    var id: String
-    var title: String
-    var items: [RoomTimelineItemViewState]
+  var id: String
+  var title: String
+  var items: [RoomTimelineItemViewState]
 }
 
 struct MediaEventsTimelineScreenViewState: BindableState {
-    var isBackPaginating = false
-    var shouldShowEmptyState = false
-    
-    var groups = [MediaEventsTimelineGroup]()
-    
-    var activeTimelineContext: TimelineViewModel.Context
-    
-    var bindings: MediaEventsTimelineScreenViewStateBindings
+  var isBackPaginating = false
+  var shouldShowEmptyState = false
+
+  var groups = [MediaEventsTimelineGroup]()
+
+  var activeTimelineContext: TimelineViewModel.Context
+
+  var bindings: MediaEventsTimelineScreenViewStateBindings
 }
 
 struct MediaEventsTimelineScreenViewStateBindings {
-    var screenMode: MediaEventsTimelineScreenMode
-    var mediaPreviewViewModel: TimelineMediaPreviewViewModel?
-    var mediaPreviewSheetViewModel: TimelineMediaPreviewViewModel?
+  var screenMode: MediaEventsTimelineScreenMode
+  var mediaPreviewViewModel: TimelineMediaPreviewViewModel?
+  var mediaPreviewSheetViewModel: TimelineMediaPreviewViewModel?
 }
 
 enum MediaEventsTimelineScreenViewAction {
-    case changedScreenMode
-    case oldestItemDidAppear
-    case oldestItemDidDisappear
-    case tappedItem(item: RoomTimelineItemViewState)
-    case longPressedItem(item: RoomTimelineItemViewState)
+  case changedScreenMode
+  case oldestItemDidAppear
+  case oldestItemDidDisappear
+  case tappedItem(item: RoomTimelineItemViewState)
+  case longPressedItem(item: RoomTimelineItemViewState)
 }

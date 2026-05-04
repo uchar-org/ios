@@ -9,23 +9,23 @@
 import Foundation
 
 enum SecureBackupKeyBackupScreenViewModelAction {
-    case done
+  case done
 }
 
 enum SecureBackupKeyBackupScreenViewMode {
-    case disableBackup
+  case disableBackup
 }
 
 struct SecureBackupKeyBackupScreenViewState: BindableState {
-    let mode: SecureBackupKeyBackupScreenViewMode
-    var bindings = SecureBackupKeyBackupScreenViewStateBindings()
+  let mode: SecureBackupKeyBackupScreenViewMode
+  var bindings = SecureBackupKeyBackupScreenViewStateBindings()
 }
 
 struct SecureBackupKeyBackupScreenViewStateBindings {
-    var alertInfo: AlertInfo<UUID>?
+  var alertInfo: AlertInfo<UUID>?
 }
 
 enum SecureBackupKeyBackupScreenViewAction {
-    case cancel
-    case toggleBackup
+  case cancel
+  case toggleBackup
 }

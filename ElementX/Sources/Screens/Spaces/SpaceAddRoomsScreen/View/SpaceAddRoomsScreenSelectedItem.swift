@@ -10,43 +10,49 @@ import Compound
 import SwiftUI
 
 struct SpaceAddRoomsScreenSelectedItem: View {
-    let room: SpaceAddRoomsScreenRoom
-    let mediaProvider: MediaProviderProtocol?
-    let dismissAction: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 10) {
-            avatar
-                .accessibilityHidden(true)
-            
-            Text(room.title)
-                .font(.compound.bodySM)
-                .foregroundColor(.compound.textSecondary)
-                .lineLimit(1)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityAction(named: L10n.actionRemove, dismissAction)
+  let room: SpaceAddRoomsScreenRoom
+  let mediaProvider: MediaProviderProtocol?
+  let dismissAction: () -> Void
+
+  var body: some View {
+    VStack(spacing: 10) {
+      avatar
+        .accessibilityHidden(true)
+
+      Text(room.title)
+        .font(.compound.bodySM)
+        .foregroundColor(.compound.textSecondary)
+        .lineLimit(1)
     }
-    
-    // MARK: - Private
-    
-    var avatar: some View {
-        RoomAvatarImage(avatar: room.avatar,
-                        avatarSize: .room(on: .spaceAddRoomsSelected),
-                        mediaProvider: mediaProvider)
-            .overlayRemoveItemButton(action: dismissAction)
-    }
+    .accessibilityElement(children: .combine)
+    .accessibilityAction(named: L10n.actionRemove, dismissAction)
+  }
+
+  // MARK: - Private
+
+  var avatar: some View {
+    RoomAvatarImage(
+      avatar: room.avatar,
+      avatarSize: .room(on: .spaceAddRoomsSelected),
+      mediaProvider: mediaProvider
+    )
+    .overlayRemoveItemButton(action: dismissAction)
+  }
 }
 
 struct SpaceAddRoomsScreenSelectedItem_Previews: PreviewProvider, TestablePreview {
-    static var previews: some View {
-        SpaceAddRoomsScreenSelectedItem(room: .init(id: "",
-                                                    title: "Selected Room",
-                                                    description: "#selected:matrix.org",
-                                                    avatar: .room(id: "",
-                                                                  name: "Selected Room",
-                                                                  avatarURL: .mockMXCAvatar)),
-                                        mediaProvider: MediaProviderMock(configuration: .init())) { }
-            .frame(width: 80)
-    }
+  static var previews: some View {
+    SpaceAddRoomsScreenSelectedItem(
+      room: .init(
+        id: "",
+        title: "Selected Room",
+        description: "#selected:matrix.org",
+        avatar: .room(
+          id: "",
+          name: "Selected Room",
+          avatarURL: .mockMXCAvatar)),
+      mediaProvider: MediaProviderMock(configuration: .init())
+    ) {}
+    .frame(width: 80)
+  }
 }

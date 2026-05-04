@@ -9,6 +9,6 @@ import Combine
 
 @MainActor
 protocol LinkNewDeviceScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<LinkNewDeviceScreenViewModelAction, Never> { get }
-    var context: LinkNewDeviceScreenViewModelType.Context { get }
+  var actionsPublisher: AnyPublisher<LinkNewDeviceScreenViewModelAction, Never> { get }
+  var context: LinkNewDeviceScreenViewModelType.Context { get }
 }

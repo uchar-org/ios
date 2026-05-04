@@ -10,40 +10,45 @@ import MatrixRustSDK
 import SwiftUI
 
 struct TimelineItemSender: Identifiable, Hashable {
-    static let test = TimelineItemSender(id: "@test.matrix.org")
-    
-    let id: String
-    let displayName: String?
-    let isDisplayNameAmbiguous: Bool
-    let avatarURL: URL?
-    
-    init(id: String, displayName: String? = nil, isDisplayNameAmbiguous: Bool = false, avatarURL: URL? = nil) {
-        self.id = id
-        self.displayName = displayName
-        self.isDisplayNameAmbiguous = isDisplayNameAmbiguous
-        self.avatarURL = avatarURL
+  static let test = TimelineItemSender(id: "@test.matrix.org")
+
+  let id: String
+  let displayName: String?
+  let isDisplayNameAmbiguous: Bool
+  let avatarURL: URL?
+
+  init(
+    id: String, displayName: String? = nil, isDisplayNameAmbiguous: Bool = false,
+    avatarURL: URL? = nil
+  ) {
+    self.id = id
+    self.displayName = displayName
+    self.isDisplayNameAmbiguous = isDisplayNameAmbiguous
+    self.avatarURL = avatarURL
+  }
+
+  init(senderID: String, senderProfile: ProfileDetails) {
+    switch senderProfile {
+    case .ready(let displayName, let isDisplayNameAmbiguous, let avatarUrl):
+      self.init(
+        id: senderID,
+        displayName: displayName,
+        isDisplayNameAmbiguous: isDisplayNameAmbiguous,
+        avatarURL: avatarUrl.flatMap(URL.init(string:)))
+    default:
+      self.init(
+        id: senderID,
+        displayName: nil,
+        isDisplayNameAmbiguous: false,
+        avatarURL: nil)
     }
-    
-    init(senderID: String, senderProfile: ProfileDetails) {
-        switch senderProfile {
-        case let .ready(displayName, isDisplayNameAmbiguous, avatarUrl):
-            self.init(id: senderID,
-                      displayName: displayName,
-                      isDisplayNameAmbiguous: isDisplayNameAmbiguous,
-                      avatarURL: avatarUrl.flatMap(URL.init(string:)))
-        default:
-            self.init(id: senderID,
-                      displayName: nil,
-                      isDisplayNameAmbiguous: false,
-                      avatarURL: nil)
-        }
+  }
+
+  var disambiguatedDisplayName: String? {
+    guard let displayName else {
+      return nil
     }
-        
-    var disambiguatedDisplayName: String? {
-        guard let displayName else {
-            return nil
-        }
-        
-        return isDisplayNameAmbiguous ? "\(displayName) (\(id))" : displayName
-    }
+
+    return isDisplayNameAmbiguous ? "\(displayName) (\(id))" : displayName
+  }
 }

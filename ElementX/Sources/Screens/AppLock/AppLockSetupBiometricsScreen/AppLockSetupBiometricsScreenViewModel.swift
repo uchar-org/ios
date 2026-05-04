@@ -9,56 +9,64 @@
 import Combine
 import SwiftUI
 
-typealias AppLockSetupBiometricsScreenViewModelType = StateStoreViewModel<AppLockSetupBiometricsScreenViewState, AppLockSetupBiometricsScreenViewAction>
+typealias AppLockSetupBiometricsScreenViewModelType = StateStoreViewModel<
+  AppLockSetupBiometricsScreenViewState, AppLockSetupBiometricsScreenViewAction
+>
 
-class AppLockSetupBiometricsScreenViewModel: AppLockSetupBiometricsScreenViewModelType, AppLockSetupBiometricsScreenViewModelProtocol {
-    private let appLockService: AppLockServiceProtocol
-    private var actionsSubject: PassthroughSubject<AppLockSetupBiometricsScreenViewModelAction, Never> = .init()
-    
-    var actions: AnyPublisher<AppLockSetupBiometricsScreenViewModelAction, Never> {
-        actionsSubject.eraseToAnyPublisher()
+class AppLockSetupBiometricsScreenViewModel: AppLockSetupBiometricsScreenViewModelType,
+  AppLockSetupBiometricsScreenViewModelProtocol
+{
+  private let appLockService: AppLockServiceProtocol
+  private var actionsSubject:
+    PassthroughSubject<AppLockSetupBiometricsScreenViewModelAction, Never> = .init()
+
+  var actions: AnyPublisher<AppLockSetupBiometricsScreenViewModelAction, Never> {
+    actionsSubject.eraseToAnyPublisher()
+  }
+
+  init(appLockService: AppLockServiceProtocol) {
+    self.appLockService = appLockService
+    super.init(
+      initialViewState: AppLockSetupBiometricsScreenViewState(
+        biometryType: appLockService.biometryType))
+  }
+
+  // MARK: - Public
+
+  override func process(viewAction: AppLockSetupBiometricsScreenViewAction) {
+    MXLog.info("View model: received view action: \(viewAction)")
+
+    switch viewAction {
+    case .allow:
+      Task { await enableBiometricUnlock() }
+    case .skip:
+      disableBiometricUnlock()
+    }
+  }
+
+  // MARK: - Private
+
+  private func enableBiometricUnlock() async {
+    guard case .success = appLockService.enableBiometricUnlock() else {
+      MXLog.error("Enabling biometric unlock failed.")
+      return
+    }
+    MXLog.info("Biometric unlock enabled.")
+
+    // Attempt unlock to trigger Face ID permissions alert.
+    if appLockService.biometryType == .faceID,
+      await appLockService.unlockWithBiometrics() != .unlocked
+    {
+      MXLog.info("Confirmation failed. Disabling biometric unlock.")
+      appLockService.disableBiometricUnlock()
     }
 
-    init(appLockService: AppLockServiceProtocol) {
-        self.appLockService = appLockService
-        super.init(initialViewState: AppLockSetupBiometricsScreenViewState(biometryType: appLockService.biometryType))
-    }
-    
-    // MARK: - Public
-    
-    override func process(viewAction: AppLockSetupBiometricsScreenViewAction) {
-        MXLog.info("View model: received view action: \(viewAction)")
-        
-        switch viewAction {
-        case .allow:
-            Task { await enableBiometricUnlock() }
-        case .skip:
-            disableBiometricUnlock()
-        }
-    }
-    
-    // MARK: - Private
-    
-    private func enableBiometricUnlock() async {
-        guard case .success = appLockService.enableBiometricUnlock() else {
-            MXLog.error("Enabling biometric unlock failed.")
-            return
-        }
-        MXLog.info("Biometric unlock enabled.")
-        
-        // Attempt unlock to trigger Face ID permissions alert.
-        if appLockService.biometryType == .faceID,
-           await appLockService.unlockWithBiometrics() != .unlocked {
-            MXLog.info("Confirmation failed. Disabling biometric unlock.")
-            appLockService.disableBiometricUnlock()
-        }
-        
-        actionsSubject.send(.continue)
-    }
-    
-    private func disableBiometricUnlock() {
-        appLockService.disableBiometricUnlock()
-        MXLog.info("Biometric unlock disabled.")
-        actionsSubject.send(.continue)
-    }
+    actionsSubject.send(.continue)
+  }
+
+  private func disableBiometricUnlock() {
+    appLockService.disableBiometricUnlock()
+    MXLog.info("Biometric unlock disabled.")
+    actionsSubject.send(.continue)
+  }
 }

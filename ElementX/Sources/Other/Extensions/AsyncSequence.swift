@@ -7,7 +7,7 @@
 //
 
 extension AsyncSequence {
-    func first() async rethrows -> Self.Element? {
-        try await first { _ in true }
-    }
+  func first() async rethrows -> Self.Element? {
+    try await first { _ in true }
+  }
 }

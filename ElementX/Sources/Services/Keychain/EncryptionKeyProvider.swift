@@ -10,9 +10,9 @@ import CryptoKit
 import Foundation
 
 struct EncryptionKeyProvider: EncryptionKeyProviderProtocol {
-    func generateKey() -> Data {
-        SymmetricKey(size: .bits256).withUnsafeBytes { bytes in
-            Data(Array(bytes))
-        }
+  func generateKey() -> Data {
+    SymmetricKey(size: .bits256).withUnsafeBytes { bytes in
+      Data(Array(bytes))
     }
+  }
 }

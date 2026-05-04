@@ -9,18 +9,18 @@
 import UIKit
 
 extension AppMediatorMock {
-    static var `default`: AppMediatorMock {
-        let mock = AppMediatorMock()
-        
-        mock.underlyingAppState = .active
-        mock.requestAuthorizationIfNeededUnderlyingReturnValue = true
-        mock.underlyingNetworkMonitor = NetworkMonitorMock.default
-        
-        let windowManagerMock = WindowManagerMock()
-        windowManagerMock.closeAllSecondaryWindowsClosure = { }
-        windowManagerMock.closeSecondaryWindowForTypeClosure = { _ in }
-        mock.underlyingWindowManager = windowManagerMock
-        
-        return mock
-    }
+  static var `default`: AppMediatorMock {
+    let mock = AppMediatorMock()
+
+    mock.underlyingAppState = .active
+    mock.requestAuthorizationIfNeededUnderlyingReturnValue = true
+    mock.underlyingNetworkMonitor = NetworkMonitorMock.default
+
+    let windowManagerMock = WindowManagerMock()
+    windowManagerMock.closeAllSecondaryWindowsClosure = {}
+    windowManagerMock.closeSecondaryWindowForTypeClosure = { _ in }
+    mock.underlyingWindowManager = windowManagerMock
+
+    return mock
+  }
 }

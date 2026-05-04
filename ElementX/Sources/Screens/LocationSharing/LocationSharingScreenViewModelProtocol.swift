@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol LocationSharingScreenViewModelProtocol {
-    var actions: AnyPublisher<LocationSharingScreenViewModelAction, Never> { get }
-    var context: LocationSharingScreenViewModelType.Context { get }
+  var actions: AnyPublisher<LocationSharingScreenViewModelAction, Never> { get }
+  var context: LocationSharingScreenViewModelType.Context { get }
 }

@@ -9,18 +9,18 @@
 import SwiftUI
 
 struct EmojiPickerScreenHeaderView: View {
-    let title: String
-    
-    var body: some View {
-        Text(title)
-            .font(.compound.bodyMD.bold())
-            .foregroundColor(.compound.textPrimary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
+  let title: String
+
+  var body: some View {
+    Text(title)
+      .font(.compound.bodyMD.bold())
+      .foregroundColor(.compound.textPrimary)
+      .frame(maxWidth: .infinity, alignment: .leading)
+  }
 }
 
 struct EmojiPickerScreenHeaderView_Previews: PreviewProvider, TestablePreview {
-    static var previews: some View {
-        EmojiPickerScreenHeaderView(title: "Title")
-    }
+  static var previews: some View {
+    EmojiPickerScreenHeaderView(title: "Title")
+  }
 }

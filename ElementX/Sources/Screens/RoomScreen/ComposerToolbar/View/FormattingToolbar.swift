@@ -10,67 +10,67 @@ import Compound
 import SwiftUI
 
 struct FormattingToolbar: View {
-    /// The list of items to render in the toolbar
-    var formatItems: [FormatItem]
-    /// The action when an item is selected
-    var formatAction: (FormatType) -> Void
+  /// The list of items to render in the toolbar
+  var formatItems: [FormatItem]
+  /// The action when an item is selected
+  var formatAction: (FormatType) -> Void
 
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 5) {
-                ForEach(formatItems) { item in
-                    Button {
-                        formatAction(item.type)
-                    } label: {
-                        CompoundIcon(item.icon, size: .small, relativeTo: .compound.headingLG)
-                            .foregroundColor(item.foregroundColor)
-                            .padding(8)
-                            .background(item.backgroundColor)
-                            .cornerRadius(8)
-                            .padding(.vertical, Compound.supportsGlass ? 10 : 3)
-                    }
-                    .disabled(item.state == .disabled)
-                    .accessibilityIdentifier(item.accessibilityIdentifier)
-                    .accessibilityLabel(item.accessibilityLabel)
-                }
-            }
+  var body: some View {
+    ScrollView(.horizontal) {
+      HStack(spacing: 5) {
+        ForEach(formatItems) { item in
+          Button {
+            formatAction(item.type)
+          } label: {
+            CompoundIcon(item.icon, size: .small, relativeTo: .compound.headingLG)
+              .foregroundColor(item.foregroundColor)
+              .padding(8)
+              .background(item.backgroundColor)
+              .cornerRadius(8)
+              .padding(.vertical, Compound.supportsGlass ? 10 : 3)
+          }
+          .disabled(item.state == .disabled)
+          .accessibilityIdentifier(item.accessibilityIdentifier)
+          .accessibilityLabel(item.accessibilityLabel)
         }
+      }
     }
+  }
 }
 
 @MainActor
-private extension FormatItem {
-    var foregroundColor: Color {
-        switch state {
-        case .reversed:
-            return .compound.iconAccentPrimary
-        case .enabled:
-            return .compound.iconSecondary
-        case .disabled:
-            return .compound.iconDisabled
-        }
+extension FormatItem {
+  fileprivate var foregroundColor: Color {
+    switch state {
+    case .reversed:
+      return .compound.iconAccentPrimary
+    case .enabled:
+      return .compound.iconSecondary
+    case .disabled:
+      return .compound.iconDisabled
     }
+  }
 
-    var backgroundColor: Color {
-        switch state {
-        case .reversed:
-            return .compound.bgAccentSelected
-        case .enabled, .disabled:
-            return .compound.bgCanvasDefault
-        }
+  fileprivate var backgroundColor: Color {
+    switch state {
+    case .reversed:
+      return .compound.bgAccentSelected
+    case .enabled, .disabled:
+      return .compound.bgCanvasDefault
     }
+  }
 }
 
 struct FormattingToolbar_Previews: PreviewProvider, TestablePreview {
-    static let items = FormatType.allCases.map { FormatItem(type: $0, state: .enabled) }
-    static let reversedItems = FormatType.allCases.map { FormatItem(type: $0, state: .reversed) }
-    static let disabledItems = FormatType.allCases.map { FormatItem(type: $0, state: .disabled) }
-    
-    static var previews: some View {
-        VStack(spacing: 16.0) {
-            FormattingToolbar(formatItems: items) { _ in }
-            FormattingToolbar(formatItems: reversedItems) { _ in }
-            FormattingToolbar(formatItems: disabledItems) { _ in }
-        }
+  static let items = FormatType.allCases.map { FormatItem(type: $0, state: .enabled) }
+  static let reversedItems = FormatType.allCases.map { FormatItem(type: $0, state: .reversed) }
+  static let disabledItems = FormatType.allCases.map { FormatItem(type: $0, state: .disabled) }
+
+  static var previews: some View {
+    VStack(spacing: 16.0) {
+      FormattingToolbar(formatItems: items) { _ in }
+      FormattingToolbar(formatItems: reversedItems) { _ in }
+      FormattingToolbar(formatItems: disabledItems) { _ in }
     }
+  }
 }

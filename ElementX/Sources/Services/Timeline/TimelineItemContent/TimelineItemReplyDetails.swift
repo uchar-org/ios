@@ -9,20 +9,21 @@
 import Foundation
 
 struct TimelineItemReply {
-    let details: TimelineItemReplyDetails
-    let isThreaded: Bool
+  let details: TimelineItemReplyDetails
+  let isThreaded: Bool
 }
 
 enum TimelineItemReplyDetails: Hashable {
-    case notLoaded(eventID: String)
-    case loading(eventID: String)
-    case loaded(sender: TimelineItemSender, eventID: String, eventContent: TimelineEventContent)
-    case error(eventID: String, message: String)
-    
-    var eventID: String {
-        switch self {
-        case .notLoaded(let eventID), .loading(let eventID), .loaded(_, let eventID, _), .error(let eventID, _):
-            return eventID
-        }
+  case notLoaded(eventID: String)
+  case loading(eventID: String)
+  case loaded(sender: TimelineItemSender, eventID: String, eventContent: TimelineEventContent)
+  case error(eventID: String, message: String)
+
+  var eventID: String {
+    switch self {
+    case .notLoaded(let eventID), .loading(let eventID), .loaded(_, let eventID, _),
+      .error(let eventID, _):
+      return eventID
     }
+  }
 }

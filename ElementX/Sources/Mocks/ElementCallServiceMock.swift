@@ -10,14 +10,14 @@ import Combine
 import Foundation
 
 struct ElementCallServiceMockConfiguration {
-    var ongoingCallRoomID: String?
+  var ongoingCallRoomID: String?
 }
 
 extension ElementCallServiceMock {
-    convenience init(_ configuration: ElementCallServiceMockConfiguration) {
-        self.init()
-        
-        underlyingActions = PassthroughSubject().eraseToAnyPublisher()
-        underlyingOngoingCallRoomIDPublisher = .init(.init(configuration.ongoingCallRoomID))
-    }
+  convenience init(_ configuration: ElementCallServiceMockConfiguration) {
+    self.init()
+
+    underlyingActions = PassthroughSubject().eraseToAnyPublisher()
+    underlyingOngoingCallRoomIDPublisher = .init(.init(configuration.ongoingCallRoomID))
+  }
 }

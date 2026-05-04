@@ -9,18 +9,18 @@
 import Foundation
 
 enum EncryptionResetPasswordScreenViewModelAction {
-    case passwordEntered
+  case passwordEntered
 }
 
 struct EncryptionResetPasswordScreenViewState: BindableState {
-    var bindings: EncryptionResetPasswordScreenViewStateBindings
+  var bindings: EncryptionResetPasswordScreenViewStateBindings
 }
 
 struct EncryptionResetPasswordScreenViewStateBindings {
-    var password: String
-    var alertInfo: AlertInfo<UUID>?
+  var password: String
+  var alertInfo: AlertInfo<UUID>?
 }
 
 enum EncryptionResetPasswordScreenViewAction {
-    case submit
+  case submit
 }

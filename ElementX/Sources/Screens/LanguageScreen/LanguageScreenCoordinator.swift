@@ -10,12 +10,12 @@ import Combine
 import SwiftUI
 
 struct LanguageScreenCoordinatorParameters {
-    let appSettings: AppSettings
-    let language: AnalyticsService
+  let appSettings: AppSettings
+  let language: AnalyticsService
 }
 
 final class LanguageScreenCoordinator: CoordinatorProtocol {
-    func toPresentable() -> AnyView {
-        AnyView(LanguageScreen())
-    }
+  func toPresentable() -> AnyView {
+    AnyView(LanguageScreen())
+  }
 }

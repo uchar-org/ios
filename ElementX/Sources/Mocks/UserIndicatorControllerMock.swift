@@ -10,11 +10,11 @@ import Combine
 import Foundation
 
 extension UserIndicatorControllerMock {
-    static var `default`: UserIndicatorControllerMock {
-        let mock = UserIndicatorControllerMock()
-        mock.submitIndicatorDelayClosure = { _, _ in }
-        mock.retractIndicatorWithIdClosure = { _ in }
-        mock.retractAllIndicatorsClosure = { }
-        return mock
-    }
+  static var `default`: UserIndicatorControllerMock {
+    let mock = UserIndicatorControllerMock()
+    mock.submitIndicatorDelayClosure = { _, _ in }
+    mock.retractIndicatorWithIdClosure = { _ in }
+    mock.retractAllIndicatorsClosure = {}
+    return mock
+  }
 }

@@ -9,28 +9,27 @@
 import Foundation
 
 enum EditRoomAddressScreenViewModelAction {
-    case dismiss
+  case dismiss
 }
 
 struct EditRoomAddressScreenViewState: BindableState {
-    let serverName: String
-    var currentAliasLocalPart: String?
-    var aliasErrors: Set<EditRoomAddressErrorState> = []
-    
-    var canSave: Bool {
-        currentAliasLocalPart != bindings.desiredAliasLocalPart &&
-            aliasErrors.isEmpty &&
-            !bindings.desiredAliasLocalPart.isEmpty
-    }
-    
-    var bindings = EditRoomAddressScreenViewStateBindings()
+  let serverName: String
+  var currentAliasLocalPart: String?
+  var aliasErrors: Set<EditRoomAddressErrorState> = []
+
+  var canSave: Bool {
+    currentAliasLocalPart != bindings.desiredAliasLocalPart && aliasErrors.isEmpty
+      && !bindings.desiredAliasLocalPart.isEmpty
+  }
+
+  var bindings = EditRoomAddressScreenViewStateBindings()
 }
 
 struct EditRoomAddressScreenViewStateBindings {
-    var desiredAliasLocalPart = ""
+  var desiredAliasLocalPart = ""
 }
 
 enum EditRoomAddressScreenViewAction {
-    case save
-    case cancel
+  case save
+  case cancel
 }

@@ -9,13 +9,13 @@
 import Foundation
 
 enum LogViewerScreenViewModelAction {
-    case done
+  case done
 }
 
 struct LogViewerScreenViewState: BindableState {
-    let urls: [URL]
+  let urls: [URL]
 }
 
 enum LogViewerScreenViewAction {
-    case done
+  case done
 }

@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol DeclineAndBlockScreenViewModelProtocol {
-    var actionsPublisher: AnyPublisher<DeclineAndBlockScreenViewModelAction, Never> { get }
-    var context: DeclineAndBlockScreenViewModelType.Context { get }
+  var actionsPublisher: AnyPublisher<DeclineAndBlockScreenViewModelAction, Never> { get }
+  var context: DeclineAndBlockScreenViewModelType.Context { get }
 }

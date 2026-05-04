@@ -9,12 +9,12 @@
 import Foundation
 
 // periphery:ignore - required for the architecture
-enum LegalInformationScreenViewModelAction { }
+enum LegalInformationScreenViewModelAction {}
 
 struct LegalInformationScreenViewState: BindableState {
-    let copyrightURL: URL
-    let acceptableUseURL: URL
-    let privacyURL: URL
+  let copyrightURL: URL
+  let acceptableUseURL: URL
+  let privacyURL: URL
 }
 
-enum LegalInformationScreenViewAction { }
+enum LegalInformationScreenViewAction {}

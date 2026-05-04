@@ -10,35 +10,35 @@ import Foundation
 import MatrixRustSDK
 
 enum LogLevel: String, Codable, Hashable {
-    case error, warn, info, debug, trace
-    
-    var title: String {
-        switch self {
-        case .error:
-            return "Error"
-        case .warn:
-            return "Warning"
-        case .info:
-            return "Info"
-        case .debug:
-            return "Debug"
-        case .trace:
-            return "Trace"
-        }
+  case error, warn, info, debug, trace
+
+  var title: String {
+    switch self {
+    case .error:
+      return "Error"
+    case .warn:
+      return "Warning"
+    case .info:
+      return "Info"
+    case .debug:
+      return "Debug"
+    case .trace:
+      return "Trace"
     }
-    
-    var rustLogLevel: MatrixRustSDK.LogLevel {
-        switch self {
-        case .error:
-            .error
-        case .warn:
-            .warn
-        case .info:
-            .info
-        case .debug:
-            .debug
-        case .trace:
-            .trace
-        }
+  }
+
+  var rustLogLevel: MatrixRustSDK.LogLevel {
+    switch self {
+    case .error:
+      .error
+    case .warn:
+      .warn
+    case .info:
+      .info
+    case .debug:
+      .debug
+    case .trace:
+      .trace
     }
+  }
 }

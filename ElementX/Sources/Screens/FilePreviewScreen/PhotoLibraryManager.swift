@@ -9,30 +9,34 @@
 import Photos
 
 enum PhotoLibraryManagerError: Error {
-    case notAuthorized
-    case unknown(Error)
+  case notAuthorized
+  case unknown(Error)
 }
 
 // sourcery: AutoMockable
 protocol PhotoLibraryManagerProtocol {
-    func addResource(_ type: PHAssetResourceType, at url: URL) async -> Result<Void, PhotoLibraryManagerError>
+  func addResource(_ type: PHAssetResourceType, at url: URL) async -> Result<
+    Void, PhotoLibraryManagerError
+  >
 }
 
 struct PhotoLibraryManager: PhotoLibraryManagerProtocol {
-    func addResource(_ type: PHAssetResourceType, at url: URL) async -> Result<Void, PhotoLibraryManagerError> {
-        do {
-            try await PHPhotoLibrary.shared().performChanges {
-                let request = PHAssetCreationRequest.forAsset()
-                let options = PHAssetResourceCreationOptions()
-                request.addResource(with: type, fileURL: url, options: options)
-            }
-            return .success(())
-        } catch {
-            if (error as NSError).code == PHPhotosError.accessUserDenied.rawValue {
-                return .failure(.notAuthorized)
-            } else {
-                return .failure(.unknown(error))
-            }
-        }
+  func addResource(_ type: PHAssetResourceType, at url: URL) async -> Result<
+    Void, PhotoLibraryManagerError
+  > {
+    do {
+      try await PHPhotoLibrary.shared().performChanges {
+        let request = PHAssetCreationRequest.forAsset()
+        let options = PHAssetResourceCreationOptions()
+        request.addResource(with: type, fileURL: url, options: options)
+      }
+      return .success(())
+    } catch {
+      if (error as NSError).code == PHPhotosError.accessUserDenied.rawValue {
+        return .failure(.notAuthorized)
+      } else {
+        return .failure(.unknown(error))
+      }
     }
+  }
 }

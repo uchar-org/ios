@@ -10,6 +10,6 @@ import Combine
 
 @MainActor
 protocol AppLockSetupBiometricsScreenViewModelProtocol {
-    var actions: AnyPublisher<AppLockSetupBiometricsScreenViewModelAction, Never> { get }
-    var context: AppLockSetupBiometricsScreenViewModelType.Context { get }
+  var actions: AnyPublisher<AppLockSetupBiometricsScreenViewModelAction, Never> { get }
+  var context: AppLockSetupBiometricsScreenViewModelType.Context { get }
 }

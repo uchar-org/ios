@@ -9,14 +9,14 @@
 import Foundation
 
 struct ComposerDraftServiceMockConfiguration {
-    var draft: ComposerDraftProxy?
+  var draft: ComposerDraftProxy?
 }
 
 extension ComposerDraftServiceMock {
-    convenience init(_ config: ComposerDraftServiceMockConfiguration) {
-        self.init()
-        loadDraftReturnValue = .success(config.draft)
-        saveDraftReturnValue = .success(())
-        clearDraftReturnValue = .success(())
-    }
+  convenience init(_ config: ComposerDraftServiceMockConfiguration) {
+    self.init()
+    loadDraftReturnValue = .success(config.draft)
+    saveDraftReturnValue = .success(())
+    clearDraftReturnValue = .success(())
+  }
 }

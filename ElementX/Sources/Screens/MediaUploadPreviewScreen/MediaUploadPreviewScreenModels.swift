@@ -9,34 +9,34 @@
 import Foundation
 
 enum MediaUploadPreviewScreenViewModelAction {
-    case dismiss
+  case dismiss
 }
 
 struct MediaUploadPreviewScreenViewState: BindableState {
-    let mediaURLs: [URL]
-    let title: String?
-    let shouldShowCaptionWarning: Bool
-    let isRoomEncrypted: Bool
-    var shouldDisableInteraction = false
-    
-    var bindings = MediaUploadPreviewScreenBindings()
+  let mediaURLs: [URL]
+  let title: String?
+  let shouldShowCaptionWarning: Bool
+  let isRoomEncrypted: Bool
+  var shouldDisableInteraction = false
+
+  var bindings = MediaUploadPreviewScreenBindings()
 }
 
 struct MediaUploadPreviewScreenBindings: BindableState {
-    var caption = NSAttributedString()
-    var presendCallback: (() -> Void)?
-    var selectedRange = NSRange(location: 0, length: 0)
-    
-    var isPresentingMediaCaptionWarning = false
-    var alertInfo: AlertInfo<MediaUploadPreviewAlertType>?
+  var caption = NSAttributedString()
+  var presendCallback: (() -> Void)?
+  var selectedRange = NSRange(location: 0, length: 0)
+
+  var isPresentingMediaCaptionWarning = false
+  var alertInfo: AlertInfo<MediaUploadPreviewAlertType>?
 }
 
 enum MediaUploadPreviewAlertType: Hashable {
-    case maxUploadSizeUnknown
-    case maxUploadSizeExceeded(limit: UInt)
+  case maxUploadSizeUnknown
+  case maxUploadSizeExceeded(limit: UInt)
 }
 
 enum MediaUploadPreviewScreenViewAction {
-    case send
-    case cancel
+  case send
+  case cancel
 }

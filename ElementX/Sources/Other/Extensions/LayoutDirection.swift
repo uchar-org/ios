@@ -9,14 +9,14 @@
 import SwiftUI
 
 extension LayoutDirection {
-    var isolateLayoutUnicodeString: String {
-        switch self {
-        case .leftToRight:
-            return "\u{2066}"
-        case .rightToLeft:
-            return "\u{2067}"
-        default:
-            return ""
-        }
+  var isolateLayoutUnicodeString: String {
+    switch self {
+    case .leftToRight:
+      return "\u{2066}"
+    case .rightToLeft:
+      return "\u{2067}"
+    default:
+      return ""
     }
+  }
 }

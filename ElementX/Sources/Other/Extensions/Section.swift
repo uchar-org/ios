@@ -9,13 +9,13 @@
 import SwiftUI
 
 extension Section where Parent == Color, Content == EmptyView, Footer == EmptyView {
-    /// An empty section whose purpose is to keep Form's background color when there is no content into it.
-    static var empty: some View {
-        Section {
-            EmptyView()
-        } header: {
-            Color.clear
-        }
-        .accessibilityHidden(true)
+  /// An empty section whose purpose is to keep Form's background color when there is no content into it.
+  static var empty: some View {
+    Section {
+      EmptyView()
+    } header: {
+      Color.clear
     }
+    .accessibilityHidden(true)
+  }
 }

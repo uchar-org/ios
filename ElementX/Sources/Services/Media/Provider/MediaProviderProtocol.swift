@@ -10,35 +10,45 @@ import Foundation
 import UIKit
 
 enum MediaProviderError: Error {
-    case failedRetrievingImage
-    case failedRetrievingFile
-    case invalidImageData
-    case failedRetrievingThumbnail
-    case cancelled
+  case failedRetrievingImage
+  case failedRetrievingFile
+  case invalidImageData
+  case failedRetrievingThumbnail
+  case cancelled
 }
 
 // sourcery: AutoMockable
 protocol MediaProviderProtocol {
-    func imageFromSource(_ source: MediaSourceProxy?, size: CGSize?) -> UIImage?
-    func loadImageFromSource(_ source: MediaSourceProxy, size: CGSize?) async -> Result<UIImage, MediaProviderError>
-    func loadImageDataFromSource(_ source: MediaSourceProxy) async -> Result<Data, MediaProviderError>
-    func loadImageRetryingOnReconnection(_ source: MediaSourceProxy, size: CGSize?) -> Task<UIImage, Error>
-    
-    func loadThumbnailForSource(source: MediaSourceProxy, size: CGSize) async -> Result<Data, MediaProviderError>
-    
-    func loadFileFromSource(_ source: MediaSourceProxy, filename: String?) async -> Result<MediaFileHandleProxy, MediaProviderError>
+  func imageFromSource(_ source: MediaSourceProxy?, size: CGSize?) -> UIImage?
+  func loadImageFromSource(_ source: MediaSourceProxy, size: CGSize?) async -> Result<
+    UIImage, MediaProviderError
+  >
+  func loadImageDataFromSource(_ source: MediaSourceProxy) async -> Result<Data, MediaProviderError>
+  func loadImageRetryingOnReconnection(_ source: MediaSourceProxy, size: CGSize?) -> Task<
+    UIImage, Error
+  >
+
+  func loadThumbnailForSource(source: MediaSourceProxy, size: CGSize) async -> Result<
+    Data, MediaProviderError
+  >
+
+  func loadFileFromSource(_ source: MediaSourceProxy, filename: String?) async -> Result<
+    MediaFileHandleProxy, MediaProviderError
+  >
 }
 
 extension MediaProviderProtocol {
-    func imageFromSource(_ source: MediaSourceProxy?) -> UIImage? {
-        imageFromSource(source, size: nil)
-    }
-    
-    func loadImageRetryingOnReconnection(_ source: MediaSourceProxy) -> Task<UIImage, Error> {
-        loadImageRetryingOnReconnection(source, size: nil)
-    }
-    
-    func loadFileFromSource(_ source: MediaSourceProxy) async -> Result<MediaFileHandleProxy, MediaProviderError> {
-        await loadFileFromSource(source, filename: nil)
-    }
+  func imageFromSource(_ source: MediaSourceProxy?) -> UIImage? {
+    imageFromSource(source, size: nil)
+  }
+
+  func loadImageRetryingOnReconnection(_ source: MediaSourceProxy) -> Task<UIImage, Error> {
+    loadImageRetryingOnReconnection(source, size: nil)
+  }
+
+  func loadFileFromSource(_ source: MediaSourceProxy) async -> Result<
+    MediaFileHandleProxy, MediaProviderError
+  > {
+    await loadFileFromSource(source, filename: nil)
+  }
 }

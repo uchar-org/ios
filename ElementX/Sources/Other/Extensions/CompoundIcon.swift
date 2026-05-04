@@ -10,11 +10,11 @@ import Compound
 import SwiftUI
 
 extension CompoundIcon {
-    init(asset: ImageAsset) {
-        self.init(customImage: asset.swiftUIImage)
-    }
-    
-    init(asset: ImageAsset, size: CompoundIcon.Size, relativeTo font: Font) {
-        self.init(customImage: asset.swiftUIImage, size: size, relativeTo: font)
-    }
+  init(asset: ImageAsset) {
+    self.init(customImage: asset.swiftUIImage)
+  }
+
+  init(asset: ImageAsset, size: CompoundIcon.Size, relativeTo font: Font) {
+    self.init(customImage: asset.swiftUIImage, size: size, relativeTo: font)
+  }
 }

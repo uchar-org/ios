@@ -10,9 +10,9 @@ import Foundation
 
 /// A preview object for the Room. useful to get all the possible info for rooms to which the user is not invited to
 protocol RoomPreviewProxyProtocol {
-    var info: RoomPreviewInfoProxy { get }
-    var ownMembershipDetails: RoomMembershipDetailsProxyProtocol? { get async }
+  var info: RoomPreviewInfoProxy { get }
+  var ownMembershipDetails: RoomMembershipDetailsProxyProtocol? { get async }
 }
 
 // sourcery: AutoMockable
-extension RoomPreviewProxyProtocol { }
+extension RoomPreviewProxyProtocol {}

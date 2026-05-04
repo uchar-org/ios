@@ -9,6 +9,6 @@
 import Foundation
 
 struct RoomMembershipDetailsProxy: RoomMembershipDetailsProxyProtocol {
-    let ownRoomMember: RoomMemberProxyProtocol
-    let senderRoomMember: RoomMemberProxyProtocol?
+  let ownRoomMember: RoomMemberProxyProtocol
+  let senderRoomMember: RoomMemberProxyProtocol?
 }

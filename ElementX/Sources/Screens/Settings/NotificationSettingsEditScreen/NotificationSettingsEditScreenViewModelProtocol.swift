@@ -10,8 +10,8 @@ import Combine
 
 @MainActor
 protocol NotificationSettingsEditScreenViewModelProtocol {
-    var actions: AnyPublisher<NotificationSettingsEditScreenViewModelAction, Never> { get }
-    var context: NotificationSettingsEditScreenViewModelType.Context { get }
-    
-    func fetchInitialContent()
+  var actions: AnyPublisher<NotificationSettingsEditScreenViewModelAction, Never> { get }
+  var context: NotificationSettingsEditScreenViewModelType.Context { get }
+
+  func fetchInitialContent()
 }

@@ -11,53 +11,69 @@ import MatrixRustSDK
 
 // sourcery: AutoMockable
 protocol AuthenticationClientFactoryProtocol {
-    func makeClient(homeserverAddress: String,
-                    sessionDirectories: SessionDirectories,
-                    passphrase: String,
-                    clientSessionDelegate: ClientSessionDelegate,
-                    appSettings: AppSettings,
-                    appHooks: AppHooks) async throws -> ClientProtocol
-    
-    func makeInMemoryClient(homeserverAddress: String,
-                            clientSessionDelegate: ClientSessionDelegate,
-                            appSettings: AppSettings,
-                            appHooks: AppHooks) async throws -> ClientProtocol
+  func makeClient(
+    homeserverAddress: String,
+    sessionDirectories: SessionDirectories,
+    passphrase: String,
+    clientSessionDelegate: ClientSessionDelegate,
+    appSettings: AppSettings,
+    appHooks: AppHooks
+  ) async throws -> ClientProtocol
+
+  func makeInMemoryClient(
+    homeserverAddress: String,
+    clientSessionDelegate: ClientSessionDelegate,
+    appSettings: AppSettings,
+    appHooks: AppHooks
+  ) async throws -> ClientProtocol
 }
 
 /// A wrapper around `ClientBuilder` to allow for mocked clients to be injected into authentication tests.
 struct AuthenticationClientFactory: AuthenticationClientFactoryProtocol {
-    func makeClient(homeserverAddress: String,
-                    sessionDirectories: SessionDirectories,
-                    passphrase: String,
-                    clientSessionDelegate: ClientSessionDelegate,
-                    appSettings: AppSettings,
-                    appHooks: AppHooks) async throws -> ClientProtocol {
-        try await ClientBuilder
-            .baseBuilder(httpProxy: appSettings.websiteURL.globalProxy,
-                         slidingSync: .discover,
-                         sessionDelegate: clientSessionDelegate,
-                         appHooks: appHooks,
-                         enableOnlySignedDeviceIsolationMode: appSettings.enableOnlySignedDeviceIsolationMode,
-                         threadsEnabled: appSettings.threadsEnabled)
-            .sqliteStore(config: .init(dataPath: sessionDirectories.dataPath, cachePath: sessionDirectories.cachePath)
-                .passphrase(passphrase: passphrase))
-            .serverNameOrHomeserverUrl(serverNameOrUrl: homeserverAddress)
-            .build()
-    }
-    
-    func makeInMemoryClient(homeserverAddress: String,
-                            clientSessionDelegate: ClientSessionDelegate,
-                            appSettings: AppSettings,
-                            appHooks: AppHooks) async throws -> ClientProtocol {
-        try await ClientBuilder
-            .baseBuilder(httpProxy: appSettings.websiteURL.globalProxy,
-                         slidingSync: .discover,
-                         sessionDelegate: clientSessionDelegate,
-                         appHooks: appHooks,
-                         enableOnlySignedDeviceIsolationMode: appSettings.enableOnlySignedDeviceIsolationMode,
-                         threadsEnabled: appSettings.threadsEnabled)
-            .inMemoryStore()
-            .serverNameOrHomeserverUrl(serverNameOrUrl: homeserverAddress)
-            .build()
-    }
+  func makeClient(
+    homeserverAddress: String,
+    sessionDirectories: SessionDirectories,
+    passphrase: String,
+    clientSessionDelegate: ClientSessionDelegate,
+    appSettings: AppSettings,
+    appHooks: AppHooks
+  ) async throws -> ClientProtocol {
+    try await ClientBuilder
+      .baseBuilder(
+        httpProxy: appSettings.websiteURL.globalProxy,
+        slidingSync: .discover,
+        sessionDelegate: clientSessionDelegate,
+        appHooks: appHooks,
+        enableOnlySignedDeviceIsolationMode: appSettings.enableOnlySignedDeviceIsolationMode,
+        threadsEnabled: appSettings.threadsEnabled
+      )
+      .sqliteStore(
+        config: .init(
+          dataPath: sessionDirectories.dataPath, cachePath: sessionDirectories.cachePath
+        )
+        .passphrase(passphrase: passphrase)
+      )
+      .serverNameOrHomeserverUrl(serverNameOrUrl: homeserverAddress)
+      .build()
+  }
+
+  func makeInMemoryClient(
+    homeserverAddress: String,
+    clientSessionDelegate: ClientSessionDelegate,
+    appSettings: AppSettings,
+    appHooks: AppHooks
+  ) async throws -> ClientProtocol {
+    try await ClientBuilder
+      .baseBuilder(
+        httpProxy: appSettings.websiteURL.globalProxy,
+        slidingSync: .discover,
+        sessionDelegate: clientSessionDelegate,
+        appHooks: appHooks,
+        enableOnlySignedDeviceIsolationMode: appSettings.enableOnlySignedDeviceIsolationMode,
+        threadsEnabled: appSettings.threadsEnabled
+      )
+      .inMemoryStore()
+      .serverNameOrHomeserverUrl(serverNameOrUrl: homeserverAddress)
+      .build()
+  }
 }

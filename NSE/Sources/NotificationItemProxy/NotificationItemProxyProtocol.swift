@@ -12,39 +12,39 @@ import UserNotifications
 
 // sourcery: AutoMockable
 protocol NotificationItemProxyProtocol {
-    var event: NotificationEvent? { get }
-    
-    var senderID: String { get }
+  var event: NotificationEvent? { get }
 
-    var roomID: String { get }
+  var senderID: String { get }
 
-    var receiverID: String { get }
+  var roomID: String { get }
 
-    var senderDisplayName: String? { get }
+  var receiverID: String { get }
 
-    var senderAvatarMediaSource: MediaSourceProxy? { get }
+  var senderDisplayName: String? { get }
 
-    var roomDisplayName: String { get }
+  var senderAvatarMediaSource: MediaSourceProxy? { get }
 
-    var roomAvatarMediaSource: MediaSourceProxy? { get }
+  var roomDisplayName: String { get }
 
-    var roomJoinedMembers: Int { get }
-    
-    var isRoomSpace: Bool { get }
+  var roomAvatarMediaSource: MediaSourceProxy? { get }
 
-    var isRoomDirect: Bool { get }
-    
-    var isRoomPrivate: Bool { get }
+  var roomJoinedMembers: Int { get }
 
-    var isNoisy: Bool { get }
+  var isRoomSpace: Bool { get }
 
-    var hasMention: Bool { get }
-    
-    var threadRootEventID: String? { get }
+  var isRoomDirect: Bool { get }
+
+  var isRoomPrivate: Bool { get }
+
+  var isNoisy: Bool { get }
+
+  var hasMention: Bool { get }
+
+  var threadRootEventID: String? { get }
 }
 
 extension NotificationItemProxyProtocol {
-    var isDM: Bool {
-        isRoomDirect && roomJoinedMembers <= 2
-    }
+  var isDM: Bool {
+    isRoomDirect && roomJoinedMembers <= 2
+  }
 }

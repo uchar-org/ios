@@ -9,13 +9,13 @@
 import Foundation
 
 extension BugReportServiceMock {
-    struct Configuration {
-        var isEnabled = true
-    }
-    
-    convenience init(_ configuration: Configuration) {
-        self.init()
-        
-        isEnabled = configuration.isEnabled
-    }
+  struct Configuration {
+    var isEnabled = true
+  }
+
+  convenience init(_ configuration: Configuration) {
+    self.init()
+
+    isEnabled = configuration.isEnabled
+  }
 }

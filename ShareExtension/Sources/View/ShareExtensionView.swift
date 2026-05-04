@@ -10,15 +10,15 @@ import Compound
 import SwiftUI
 
 struct ShareExtensionView: View {
-    var body: some View {
-        ZStack {
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .background(.compound.bgCanvasDefault)
+  var body: some View {
+    ZStack {
+      ProgressView()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    .background(.compound.bgCanvasDefault)
+  }
 }
 
 #Preview {
-    ShareExtensionView()
+  ShareExtensionView()
 }
