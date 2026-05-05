@@ -6,8 +6,7 @@
 // Please see LICENSE files in the repository root for full details.
 //
 
-import Foundation
-import UIKit
+import SwiftUI
 
 enum SettingsScreenViewModelAction: Equatable {
     case close
@@ -20,7 +19,6 @@ enum SettingsScreenViewModelAction: Equatable {
     case about
     case blockedUsers
     case secureBackup
-    case language
     case notifications
     case advancedSettings
     case labs
@@ -43,15 +41,17 @@ struct SettingsScreenViewState: BindableState {
     var userAvatarURL: URL?
     var userDisplayName: String?
     var showDeveloperOptions: Bool
-
+    
     var securitySectionMode = SettingsScreenSecuritySectionMode.none
     var showSecuritySectionBadge = false
-
+    
     var showBlockedUsers = false
     let showAnalyticsSettings: Bool
-
+    
     let isBugReportServiceEnabled: Bool
-
+    
+    let navigationBarVisibility: Visibility
+    
     var bindings = SettingsScreenViewStateBindings()
 }
 
@@ -70,7 +70,6 @@ enum SettingsScreenViewAction {
     case secureBackup
     case linkNewDevice
     case manageAccount(url: URL)
-    case language
     case notifications
     case enableDeveloperOptions
     case developerOptions

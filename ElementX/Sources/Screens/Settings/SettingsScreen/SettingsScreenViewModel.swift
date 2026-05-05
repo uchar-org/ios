@@ -13,48 +13,49 @@ typealias SettingsScreenViewModelType = StateStoreViewModelV2<SettingsScreenView
 
 class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewModelProtocol {
     private let appSettings: AppSettings
-
+    
     private var actionsSubject: PassthroughSubject<SettingsScreenViewModelAction, Never> = .init()
-
+    
     var actions: AnyPublisher<SettingsScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
-    init(userSession: UserSessionProtocol, appSettings: AppSettings, isBugReportServiceEnabled: Bool) {
+    
+    init(userSession: UserSessionProtocol, appSettings: AppSettings, isBugReportServiceEnabled: Bool, isInSecondaryWindow: Bool) {
         self.appSettings = appSettings
-
+        
         super.init(initialViewState: .init(deviceID: userSession.clientProxy.deviceID,
                                            userID: userSession.clientProxy.userID,
                                            showLinkNewDeviceButton: appSettings.linkNewDeviceEnabled,
                                            showAccountDeactivation: userSession.clientProxy.canDeactivateAccount,
                                            showDeveloperOptions: appSettings.developerOptionsEnabled,
                                            showAnalyticsSettings: appSettings.canPromptForAnalytics,
-                                           isBugReportServiceEnabled: isBugReportServiceEnabled),
+                                           isBugReportServiceEnabled: isBugReportServiceEnabled,
+                                           navigationBarVisibility: isInSecondaryWindow ? .hidden : .automatic),
                    mediaProvider: userSession.mediaProvider)
-
+        
         appSettings.$developerOptionsEnabled
             .weakAssign(to: \.state.showDeveloperOptions, on: self)
             .store(in: &cancellables)
-
+        
         appSettings.$linkNewDeviceEnabled
             .weakAssign(to: \.state.showLinkNewDeviceButton, on: self)
             .store(in: &cancellables)
-
+        
         userSession.clientProxy.userAvatarURLPublisher
             .receive(on: DispatchQueue.main)
             .weakAssign(to: \.state.userAvatarURL, on: self)
             .store(in: &cancellables)
-
+        
         userSession.clientProxy.userDisplayNamePublisher
             .receive(on: DispatchQueue.main)
             .weakAssign(to: \.state.userDisplayName, on: self)
             .store(in: &cancellables)
-
+        
         userSession.sessionSecurityStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] securityState in
                 guard let self else { return }
-
+                
                 switch (securityState.verificationState, securityState.recoveryState) {
                 case (.verified, .disabled):
                     state.showSecuritySectionBadge = true
@@ -71,26 +72,26 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
                 }
             }
             .store(in: &cancellables)
-
+        
         userSession.clientProxy.ignoredUsersPublisher
             .receive(on: DispatchQueue.main)
             .map {
                 guard let blockedUsers = $0 else {
                     return false
                 }
-
+                
                 return !blockedUsers.isEmpty
             }
             .weakAssign(to: \.state.showBlockedUsers, on: self)
             .store(in: &cancellables)
-
+        
         Task {
             await userSession.clientProxy.loadUserAvatarURL()
             await userSession.clientProxy.loadUserDisplayName()
             await state.accountProfileURL = userSession.clientProxy.accountURL(action: .profile)
         }
     }
-
+    
     override func process(viewAction: SettingsScreenViewAction) {
         switch viewAction {
         case .close:
@@ -99,7 +100,7 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             actionsSubject.send(.userDetails)
         case .linkNewDevice:
             actionsSubject.send(.linkNewDevice)
-        case .manageAccount(let url):
+        case let .manageAccount(url):
             actionsSubject.send(.manageAccount(url: url))
         case .analytics:
             actionsSubject.send(.analytics)
@@ -115,8 +116,6 @@ class SettingsScreenViewModel: SettingsScreenViewModelType, SettingsScreenViewMo
             actionsSubject.send(.logout)
         case .secureBackup:
             actionsSubject.send(.secureBackup)
-        case .language:
-            actionsSubject.send(.language)
         case .notifications:
             actionsSubject.send(.notifications)
         case .advancedSettings:

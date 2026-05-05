@@ -732,7 +732,6 @@ struct RoomDetailsScreenViewModelTests {
 
     @Test
     mutating func knockRequestsCounter() async throws {
-        ServiceLocator.shared.settings.knockingEnabled = true
         let mockedRequests: [KnockRequestProxyMock] = [.init(), .init()]
         roomProxyMock = JoinedRoomProxyMock(.init(name: "Test", isDirect: false, knockRequestsState: .loaded(mockedRequests), joinRule: .knock))
         viewModel = RoomDetailsScreenViewModel(roomProxy: roomProxyMock,
@@ -755,7 +754,6 @@ struct RoomDetailsScreenViewModelTests {
 
     @Test
     mutating func knockRequestsCounterIsLoading() async throws {
-        ServiceLocator.shared.settings.knockingEnabled = true
         roomProxyMock = JoinedRoomProxyMock(.init(name: "Test", isDirect: false, knockRequestsState: .loading, joinRule: .knock))
         viewModel = RoomDetailsScreenViewModel(roomProxy: roomProxyMock,
                                                userSession: UserSessionMock(.init()),
@@ -774,7 +772,6 @@ struct RoomDetailsScreenViewModelTests {
 
     @Test
     mutating func knockRequestsCounterIsNotShownIfNoPermissions() async throws {
-        ServiceLocator.shared.settings.knockingEnabled = true
         let mockedRequests: [KnockRequestProxyMock] = [.init(), .init()]
         roomProxyMock = JoinedRoomProxyMock(.init(name: "Test",
                                                   isDirect: false,
@@ -799,7 +796,6 @@ struct RoomDetailsScreenViewModelTests {
 
     @Test
     mutating func knockRequestsCounterIsNotShownIfDM() async throws {
-        ServiceLocator.shared.settings.knockingEnabled = true
         let mockedRequests: [KnockRequestProxyMock] = [.init(), .init()]
         let mockedMembers: [RoomMemberProxyMock] = [.mockMe, .mockAlice]
         roomProxyMock = JoinedRoomProxyMock(.init(name: "Test", isDirect: true, members: mockedMembers,

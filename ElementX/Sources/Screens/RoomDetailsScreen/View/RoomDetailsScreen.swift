@@ -7,24 +7,23 @@
 //
 
 import Compound
-import MatrixRustSDK
 import SwiftUI
 
 struct RoomDetailsScreen: View {
     @Bindable var context: RoomDetailsScreenViewModel.Context
-
+    
     @State private var isTopicExpanded = false
-
+    
     var body: some View {
         Form {
             roomHeaderSection
 
             topicSection
-
+            
             aboutSection
-
+            
             configurationSection
-
+            
             if context.viewState.dmRecipientInfo == nil {
                 peopleSection
             }
@@ -34,7 +33,7 @@ struct RoomDetailsScreen: View {
             if let recipient = context.viewState.dmRecipientInfo?.member {
                 ignoreUserSection(user: recipient)
             }
-
+            
             leaveRoomSection
         }
         .compoundList()
@@ -59,9 +58,9 @@ struct RoomDetailsScreen: View {
         .track(screen: .RoomDetails)
         .interactiveQuickLook(item: $context.mediaPreviewItem, allowEditing: false)
     }
-
+    
     // MARK: - Private
-
+    
     private var roomHeaderSection: some View {
         AvatarHeaderView(room: context.viewState.details,
                          avatarSize: .room(on: .details),
@@ -74,7 +73,7 @@ struct RoomDetailsScreen: View {
         }
         .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.avatar)
     }
-
+    
     private var headerSectionShortcuts: some View {
         HStack(spacing: 8) {
             ForEach(context.viewState.shortcuts, id: \.self) { shortcut in
@@ -114,13 +113,12 @@ struct RoomDetailsScreen: View {
         }
         .padding(.top, 32)
     }
-
+    
     @ViewBuilder
     private var topicSection: some View {
         if context.viewState.hasTopicSection {
             Section {
-                if let topic = context.viewState.topic, !topic.characters.isEmpty,
-                   let topicSummary = context.viewState.topicSummary {
+                if let topic = context.viewState.topic, !topic.characters.isEmpty, let topicSummary = context.viewState.topicSummary {
                     ListRow(kind: .custom {
                         Text(isTopicExpanded ? topic : topicSummary)
                             .font(.compound.bodySM)
@@ -151,17 +149,14 @@ struct RoomDetailsScreen: View {
                     kind: .navigationLink {
                         context.send(viewAction: .processTapMediaEvents)
                     })
-
+            
             ListRow(label: .default(title: L10n.screenRoomDetailsPinnedEventsRowTitle, icon: \.pin),
-                    details: context.viewState.pinnedEventsActionState.isLoading
-                        ? .isWaiting(true) : .title(context.viewState.pinnedEventsActionState.count),
-                    kind: context.viewState.pinnedEventsActionState.isLoading
-                        ? .label
-                        : .navigationLink {
-                            context.send(viewAction: .processTapPinnedEvents)
-                        })
-                        .disabled(context.viewState.pinnedEventsActionState.isLoading)
-
+                    details: context.viewState.pinnedEventsActionState.isLoading ? .isWaiting(true) : .title(context.viewState.pinnedEventsActionState.count),
+                    kind: context.viewState.pinnedEventsActionState.isLoading ? .label : .navigationLink {
+                        context.send(viewAction: .processTapPinnedEvents)
+                    })
+                    .disabled(context.viewState.pinnedEventsActionState.isLoading)
+            
             ListRow(label: .default(title: L10n.screenPollsHistoryTitle, icon: \.polls),
                     kind: .navigationLink {
                         context.send(viewAction: .processTapPolls)
@@ -169,35 +164,33 @@ struct RoomDetailsScreen: View {
                     .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.pollsHistory)
         }
     }
-
+    
     private var configurationSection: some View {
         Section {
             ListRow(label: .default(title: L10n.screenRoomDetailsNotificationTitle, icon: \.notifications),
-                    details: context.viewState.notificationSettingsState.isLoading
-                        ? .isWaiting(true)
-                        : context.viewState.notificationSettingsState.isError
-                        ? .systemIcon(.exclamationmarkCircle)
+                    details: context.viewState.notificationSettingsState.isLoading ? .isWaiting(true)
+                        : context.viewState.notificationSettingsState.isError ? .systemIcon(.exclamationmarkCircle)
                         : .title(context.viewState.notificationSettingsState.label),
                     kind: .navigationLink {
                         context.send(viewAction: .processTapNotifications)
                     })
                     .disabled(context.viewState.notificationSettingsState.isLoading)
                     .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.notifications)
-
+            
             ListRow(label: .default(title: L10n.commonFavourite, icon: \.favourite),
                     kind: .toggle($context.isFavourite))
                 .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.favourite)
                 .onChange(of: context.isFavourite) { _, newValue in
                     context.send(viewAction: .toggleFavourite(isFavourite: newValue))
                 }
-
+            
             if context.viewState.canSeeSecurityAndPrivacy {
                 ListRow(label: .default(title: L10n.screenRoomDetailsSecurityAndPrivacyTitle, icon: \.lock),
                         kind: .navigationLink {
                             context.send(viewAction: .processTapSecurityAndPrivacy)
                         })
             }
-
+            
             if context.viewState.dmRecipientInfo != nil {
                 switch context.viewState.dmRecipientInfo?.verificationState {
                 case .verified:
@@ -221,7 +214,7 @@ struct RoomDetailsScreen: View {
             }
         }
     }
-
+    
     private var peopleSection: some View {
         Section {
             if context.viewState.hasMemberIdentityVerificationStateViolations {
@@ -231,7 +224,7 @@ struct RoomDetailsScreen: View {
                             context.send(viewAction: .processTapPeople)
                         })
                         .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.people)
-
+                
             } else {
                 ListRow(label: .default(title: L10n.commonPeople, icon: \.user),
                         details: .title(String(context.viewState.joinedMembersCount)),
@@ -240,16 +233,15 @@ struct RoomDetailsScreen: View {
                         })
                         .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.people)
             }
-
+        
             if context.viewState.canSeeKnockingRequests {
                 ListRow(label: .default(title: L10n.screenRoomDetailsRequestsToJoinTitle, icon: \.askToJoin),
-                        details: context.viewState.knockRequestsCount > 0
-                            ? .counter(context.viewState.knockRequestsCount) : nil,
+                        details: context.viewState.knockRequestsCount > 0 ? .counter(context.viewState.knockRequestsCount) : nil,
                         kind: .navigationLink {
                             context.send(viewAction: .processTapRequestsToJoin)
                         })
             }
-
+            
             if context.viewState.canEditRolesOrPermissions, context.viewState.dmRecipientInfo == nil {
                 ListRow(label: .default(title: L10n.screenRoomDetailsRolesAndPermissions, icon: \.admin),
                         kind: .navigationLink {
@@ -258,7 +250,7 @@ struct RoomDetailsScreen: View {
             }
         }
     }
-
+    
     private var toggleMuteButton: some View {
         Button {
             context.send(viewAction: .processToggleMuteNotifications)
@@ -272,7 +264,7 @@ struct RoomDetailsScreen: View {
         .buttonStyle(FormActionButtonStyle(title: context.viewState.notificationShortcutButtonTitle))
         .disabled(context.viewState.isProcessingMuteToggleAction)
     }
-
+    
     @ViewBuilder
     private var securitySection: some View {
         if context.viewState.isEncrypted {
@@ -288,7 +280,7 @@ struct RoomDetailsScreen: View {
             }
         }
     }
-
+    
     private var leaveRoomSection: some View {
         Section {
             if context.viewState.reportRoomEnabled {
@@ -303,7 +295,7 @@ struct RoomDetailsScreen: View {
                     kind: .button { context.send(viewAction: .processTapLeave) })
         }
     }
-
+    
     private func ignoreUserSection(user: RoomMemberDetails) -> some View {
         Section {
             ListRow(label: .default(title: user.isIgnored ? L10n.screenDmDetailsUnblockUser : L10n.screenDmDetailsBlockUser,
@@ -330,8 +322,7 @@ struct RoomDetailsScreen: View {
     }
 
     @ViewBuilder
-    private func blockUserAlertActions(_ item: RoomDetailsScreenViewStateBindings.IgnoreUserAlertItem)
-        -> some View {
+    private func blockUserAlertActions(_ item: RoomDetailsScreenViewStateBindings.IgnoreUserAlertItem) -> some View {
         Button(item.cancelTitle, role: .cancel) { }
         Button(item.confirmationTitle,
                role: item.action == .ignore ? .destructive : nil) {
@@ -339,13 +330,14 @@ struct RoomDetailsScreen: View {
         }
     }
 
-    private func blockUserAlertMessage(_ item: RoomDetailsScreenViewStateBindings.IgnoreUserAlertItem)
-        -> some View {
+    private func blockUserAlertMessage(_ item: RoomDetailsScreenViewStateBindings.IgnoreUserAlertItem) -> some View {
         Text(item.description)
     }
 }
 
 // MARK: - Previews
+
+import MatrixRustSDK
 
 struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
     static let genericWorldReadableRoomViewModel = makeGenericRoomViewModel(historyVisibility: .worldReadable)
@@ -354,49 +346,43 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
     static let dmRoomViewModel = makeDMViewModel(verificationState: .notVerified)
     static let dmRoomVerifiedViewModel = makeDMViewModel(verificationState: .verified)
     static let dmRoomVerificationViolationViewModel = makeDMViewModel(verificationState: .verificationViolation)
-
+    
     static var previews: some View {
         RoomDetailsScreen(context: genericJoinedRoomViewModel.context)
             .snapshotPreferences(expect: genericJoinedRoomViewModel.context.observe(\.viewState.permalink).map { $0 != nil })
             .previewDisplayName("Generic Room - Joined History Visibility")
-
+        
         RoomDetailsScreen(context: genericWorldReadableRoomViewModel.context)
-            .snapshotPreferences(expect: genericWorldReadableRoomViewModel.context.observe(\.viewState.permalink).map {
-                $0 != nil
-            })
+            .snapshotPreferences(expect: genericWorldReadableRoomViewModel.context.observe(\.viewState.permalink).map { $0 != nil })
             .previewDisplayName("Generic Room - World Readable History Visibility")
-
+        
         RoomDetailsScreen(context: simpleRoomViewModel.context)
             .snapshotPreferences(expect: simpleRoomViewModel.context.observe(\.viewState.permalink).map { $0 != nil })
             .previewDisplayName("Simple Room")
-
+        
         RoomDetailsScreen(context: dmRoomViewModel.context)
             .snapshotPreferences(expect: dmRoomViewModel.context.observe(\.viewState.accountOwner).map { $0 != nil })
             .previewDisplayName("DM Room")
-
+        
         RoomDetailsScreen(context: dmRoomVerifiedViewModel.context)
             .snapshotPreferences(expect: dmRoomVerifiedViewModel.context.observe(\.viewState.dmRecipientInfo?.verificationState).map { $0 == .verified })
             .previewDisplayName("DM Room Verified")
-
+        
         RoomDetailsScreen(context: dmRoomVerificationViolationViewModel.context)
-            .snapshotPreferences(expect: dmRoomVerificationViolationViewModel.context.observe(\.viewState.accountOwner).map {
-                $0 != nil
-            })
+            .snapshotPreferences(expect: dmRoomVerificationViolationViewModel.context.observe(\.viewState.accountOwner).map { $0 != nil })
             .previewDisplayName("DM Room Verification Violation")
     }
-
-    private static func makeGenericRoomViewModel(historyVisibility: RoomHistoryVisibility)
-        -> RoomDetailsScreenViewModel {
-        ServiceLocator.shared.settings.knockingEnabled = true
+    
+    private static func makeGenericRoomViewModel(historyVisibility: RoomHistoryVisibility) -> RoomDetailsScreenViewModel {
         let knockRequests: [KnockRequestProxyMock] = [.init()]
-
+        
         let members: [RoomMemberProxyMock] = [
             .mockMeAdmin,
             .mockAlice,
             .mockBob,
             .mockCharlie
         ]
-
+        
         let roomProxy = JoinedRoomProxyMock(.init(id: "room_a_id",
                                                   name: "Room A",
                                                   topic: """
@@ -414,12 +400,12 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
                                                   members: members,
                                                   knockRequestsState: .loaded(knockRequests),
                                                   joinRule: .knock))
-
+        
         let notificationSettingsProxyMockConfiguration = NotificationSettingsProxyMockConfiguration()
         notificationSettingsProxyMockConfiguration.roomMode.isDefault = false
-
+        
         let notificationSettingsProxy = NotificationSettingsProxyMock(with: notificationSettingsProxyMockConfiguration)
-
+        
         return .init(roomProxy: roomProxy,
                      userSession: UserSessionMock(.init()),
                      analyticsService: ServiceLocator.shared.analytics,
@@ -428,11 +414,10 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
                      attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
                      appSettings: ServiceLocator.shared.settings)
     }
-
+    
     private static func makeSimpleRoomViewModel() -> RoomDetailsScreenViewModel {
-        ServiceLocator.shared.settings.knockingEnabled = true
         let knockRequests: [KnockRequestProxyMock] = [.init()]
-
+        
         let members: [RoomMemberProxyMock] = [
             .mockMeAdmin,
             .mockAlice,
@@ -446,9 +431,9 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
                                                   members: members,
                                                   knockRequestsState: .loaded(knockRequests),
                                                   joinRule: .knock))
-
+        
         let notificationSettingsProxy = NotificationSettingsProxyMock(with: .init())
-
+        
         return .init(roomProxy: roomProxy,
                      userSession: UserSessionMock(.init()),
                      analyticsService: ServiceLocator.shared.analytics,
@@ -457,39 +442,36 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
                      attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
                      appSettings: ServiceLocator.shared.settings)
     }
-
-    private static func makeDMViewModel(verificationState: UserIdentityVerificationState)
-        -> RoomDetailsScreenViewModel {
+    
+    private static func makeDMViewModel(verificationState: UserIdentityVerificationState) -> RoomDetailsScreenViewModel {
         let members: [RoomMemberProxyMock] = [
             .mockMe,
             .mockDan
         ]
-
+        
         let roomProxy = JoinedRoomProxyMock(.init(id: "dm_room_id",
                                                   name: "Dan",
-                                                  topic:
-                                                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                                                  topic: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
                                                   isDirect: true,
                                                   isEncrypted: true,
                                                   members: members,
                                                   heroes: [.mockDan]))
-
+        
         let clientProxyMock = ClientProxyMock(.init())
-
+        
         clientProxyMock.userIdentityForFallBackToServerClosure = { userID, _ in
-            let identity =
-                switch userID {
-                case RoomMemberProxyMock.mockDan.userID:
-                    UserIdentityProxyMock(configuration: .init(verificationState: verificationState))
-                default:
-                    UserIdentityProxyMock(configuration: .init())
-                }
-
+            let identity = switch userID {
+            case RoomMemberProxyMock.mockDan.userID:
+                UserIdentityProxyMock(configuration: .init(verificationState: verificationState))
+            default:
+                UserIdentityProxyMock(configuration: .init())
+            }
+            
             return .success(identity)
         }
-
+        
         let notificationSettingsProxy = NotificationSettingsProxyMock(with: .init())
-
+        
         return .init(roomProxy: roomProxy,
                      userSession: UserSessionMock(.init(clientProxy: clientProxyMock)),
                      analyticsService: ServiceLocator.shared.analytics,

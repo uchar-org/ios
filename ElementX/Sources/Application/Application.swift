@@ -34,7 +34,7 @@ struct Application: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: SceneDelegate.mainSceneID) {
             appCoordinator.toPresentable()
                 .statusBarHidden(shouldHideStatusBar)
                 .overlay(alignment: .top) {
@@ -55,7 +55,7 @@ struct Application: App {
                 }
                 .task {
                     appCoordinator.start()
-                    appCoordinator.windowManager.configure(withOpenWinddowAction: openWindow,
+                    appCoordinator.windowManager.configure(withOpenWindowAction: openWindow,
                                                            dismissWindowAction: dismissWindow)
                 }
         }

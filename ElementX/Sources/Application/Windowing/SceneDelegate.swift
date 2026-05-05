@@ -13,10 +13,19 @@ import SwiftUI
 /// We don't support multiple scenes right now, so the implementation is pretty basic.
 class SceneDelegate: NSObject, UIWindowSceneDelegate {
     weak static var windowManager: SecureWindowManagerProtocol!
-
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
-               options connectionOptions: UIScene.ConnectionOptions) {
+    
+    /// The app's main window scene identifier.
+    static let mainSceneID = "Main"
+    /// The user info key used by SwiftUI for a `WindowGroup`s `id` parameter.
+    static let sceneIDKey = "com.apple.SwiftUI.sceneID"
+    
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
         Self.windowManager.configure(withScene: windowScene, session: session)
+    }
+    
+    func sceneDidDisconnect(_ scene: UIScene) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        Self.windowManager.handleSceneDisconnection(windowScene)
     }
 }

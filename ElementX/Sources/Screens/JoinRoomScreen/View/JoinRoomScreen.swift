@@ -12,14 +12,14 @@ import SwiftUI
 struct JoinRoomScreen: View {
     private let maxKnockMessageLength = 500
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
+    
     @ObservedObject var context: JoinRoomScreenViewModel.Context
     @FocusState private var focus: Focus?
-
+    
     private enum Focus {
         case knockMessage
     }
-
+    
     private var topPadding: CGFloat {
         if context.viewState.roomDetails?.inviter != nil {
             return 32
@@ -45,7 +45,7 @@ struct JoinRoomScreen: View {
         .toolbar { toolbar }
         .shouldScrollOnKeyboardDidShow(focus == .knockMessage, to: Focus.knockMessage)
     }
-
+    
     @ViewBuilder
     var mainContent: some View {
         switch context.viewState.mode {
@@ -55,7 +55,7 @@ struct JoinRoomScreen: View {
             defaultView
         }
     }
-
+    
     private var defaultView: some View {
         VStack(spacing: 16) {
             RoomAvatarImage(avatar: context.viewState.avatar ?? .room(id: "", name: nil, avatarURL: nil),
@@ -64,13 +64,13 @@ struct JoinRoomScreen: View {
                 .dynamicTypeSize(dynamicTypeSize < .accessibility1 ? dynamicTypeSize : .accessibility1)
                 .opacity(context.viewState.avatar == nil ? 0 : 1)
                 .accessibilityHidden(true)
-
+            
             VStack(spacing: 8) {
                 Text(context.viewState.title)
                     .font(.compound.headingLGBold)
                     .foregroundStyle(.compound.textPrimary)
                     .multilineTextAlignment(.center)
-
+                
                 if let subtitle = context.viewState.subtitle {
                     Label {
                         Text(subtitle)
@@ -84,16 +84,15 @@ struct JoinRoomScreen: View {
                         }
                     }
                 }
-
-                if !context.viewState.isDMInvite,
-                   let memberCount = context.viewState.roomDetails?.memberCount {
+                
+                if !context.viewState.isDMInvite, let memberCount = context.viewState.roomDetails?.memberCount {
                     JoinedMembersBadgeView(heroes: context.viewState.roomDetails?.heroes ?? [],
                                            shouldHideAvatars: context.viewState.shouldHideAvatars,
                                            joinedCount: memberCount,
                                            mediaProvider: context.mediaProvider)
                 }
             }
-
+            
             if let topic = context.viewState.roomDetails?.topic {
                 Text(topic)
                     .font(.compound.bodyMD)
@@ -101,21 +100,21 @@ struct JoinRoomScreen: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
             }
-
+            
             if let inviter = context.viewState.roomDetails?.inviter {
                 InviterView(inviter: inviter,
                             shouldHideAvatar: context.viewState.shouldHideAvatars,
                             mediaProvider: context.mediaProvider)
                     .padding(.top, 16)
             }
-
+            
             if context.viewState.mode == .knockable {
                 knockMessage
                     .padding(.top, 19)
             }
         }
     }
-
+    
     private var knockedView: some View {
         VStack(spacing: 16) {
             BigIcon(icon: \.checkCircleSolid, style: .successSolid)
@@ -131,7 +130,7 @@ struct JoinRoomScreen: View {
             }
         }
     }
-
+        
     private var knockMessage: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 0) {
@@ -155,7 +154,7 @@ struct JoinRoomScreen: View {
                     .stroke(.compound.borderInteractivePrimary)
                     .accessibilityHidden(true)
             }
-
+            
             Text("\(context.knockMessage.count)/\(maxKnockMessageLength)")
                 .font(.compound.bodySM)
                 .foregroundStyle(.compound.textSecondary)
@@ -163,7 +162,7 @@ struct JoinRoomScreen: View {
                 .accessibilityHidden(true)
         }
     }
-
+    
     @ViewBuilder
     var bottomContent: some View {
         switch context.viewState.mode {
@@ -174,7 +173,7 @@ struct JoinRoomScreen: View {
         case .unknown, .restricted: // If unknown, do our best.
             VStack(spacing: 24) {
                 bottomNoticeMessage(L10n.screenJoinRoomJoinRestrictedMessage)
-
+                
                 joinButton
             }
         case .knockable:
@@ -193,7 +192,7 @@ struct JoinRoomScreen: View {
                     }
                     declineAndBlockButton
                 }
-
+                
                 VStack(spacing: 16) {
                     inviteButtons
                     declineAndBlockButton
@@ -207,7 +206,7 @@ struct JoinRoomScreen: View {
                 } else {
                     bottomErrorMessage(title: L10n.screenJoinRoomBanMessage, subtitle: nil)
                 }
-
+                
                 Button(L10n.screenJoinRoomForgetAction) {
                     context.send(viewAction: .forget)
                 }
@@ -217,7 +216,7 @@ struct JoinRoomScreen: View {
             forbiddenView
         }
     }
-
+    
     private var forbiddenView: some View {
         VStack(spacing: 24) {
             bottomErrorMessage(title: L10n.screenJoinRoomFailMessage, subtitle: L10n.screenJoinRoomFailReason)
@@ -227,7 +226,7 @@ struct JoinRoomScreen: View {
             .buttonStyle(.compound(.primary))
         }
     }
-
+    
     func bottomNoticeMessage(_ notice: String) -> some View {
         Label(notice, icon: \.info)
             .labelStyle(.custom(spacing: 12, alignment: .top))
@@ -238,14 +237,14 @@ struct JoinRoomScreen: View {
             .background(.compound.bgSubtleSecondary)
             .cornerRadius(14, corners: .allCorners)
     }
-
+    
     func bottomErrorMessage(title: String, subtitle: String?) -> some View {
         Label {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.compound.bodyLGSemibold)
                     .foregroundStyle(.compound.textCriticalPrimary)
-
+                
                 if let subtitle {
                     Text(subtitle)
                         .font(.compound.bodyMD)
@@ -262,7 +261,7 @@ struct JoinRoomScreen: View {
         .background(.compound.bgSubtleSecondary)
         .cornerRadius(14, corners: .allCorners)
     }
-
+    
     @ViewBuilder
     var inviteButtons: some View {
         Button(L10n.actionDecline) { context.send(viewAction: .declineInvite) }
@@ -270,7 +269,7 @@ struct JoinRoomScreen: View {
         Button(L10n.actionAccept) { context.send(viewAction: .acceptInvite) }
             .buttonStyle(.compound(.primary))
     }
-
+    
     @ViewBuilder
     var declineAndBlockButton: some View {
         if let inviter = context.viewState.roomDetails?.inviter {
@@ -280,13 +279,13 @@ struct JoinRoomScreen: View {
             .buttonStyle(.compound(.tertiary))
         }
     }
-
+    
     var joinButton: some View {
         Button(L10n.screenJoinRoomJoinAction) { context.send(viewAction: .join) }
             .buttonStyle(.compound(.super))
             .accessibilityIdentifier(A11yIdentifiers.joinRoomScreen.join)
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         if context.viewState.mode == .knocked {
@@ -306,23 +305,23 @@ struct JoinRoomScreen: View {
 private struct InviterView: View {
     let inviter: RoomInviterDetails
     let shouldHideAvatar: Bool
-
+    
     let mediaProvider: MediaProviderProtocol?
-
+    
     var body: some View {
         VStack(spacing: 8) {
             Text(L10n.screenJoinRoomInvitedBy)
                 .font(.compound.bodyMD)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
-
+            
             LoadableAvatarImage(url: shouldHideAvatar ? nil : inviter.avatarURL,
                                 name: inviter.displayName,
                                 contentID: inviter.id,
                                 avatarSize: .custom(52),
                                 mediaProvider: mediaProvider)
                 .accessibilityHidden(true)
-
+            
             VStack(spacing: 4) {
                 if let displayName = inviter.displayName {
                     Text(displayName)
@@ -330,7 +329,7 @@ private struct InviterView: View {
                         .foregroundStyle(.compound.textPrimary)
                         .multilineTextAlignment(.center)
                 }
-
+                
                 Text(inviter.id)
                     .font(.compound.bodySM)
                     .foregroundStyle(.compound.textSecondary)
@@ -352,14 +351,13 @@ struct JoinRoomScreen_Previews: PreviewProvider, TestablePreview {
         .init(mode: .inviteRequired),
         .init(mode: .invited(isDM: false)),
         .init(mode: .invited(isDM: true)),
-        .init(mode: .invited(isDM: false), hideInviteAvatars: true,
-              customPreviewName: "InvitedWithHiddenAvatars"),
+        .init(mode: .invited(isDM: false), hideInviteAvatars: true, customPreviewName: "InvitedWithHiddenAvatars"),
         .init(mode: .knockable),
         .init(mode: .knocked),
         .init(mode: .banned(sender: "Bob", reason: "Spamming")),
         .init(mode: .forbidden)
     ]
-
+    
     static var previews: some View {
         ForEach(previewWrappers) { wrapper in
             wrapper.preview
@@ -374,14 +372,13 @@ struct JoinRoomScreenSpace_Previews: PreviewProvider, TestablePreview {
         .init(isSpace: true, mode: .restricted, customPreviewName: "RestrictedJoinable"),
         .init(isSpace: true, mode: .inviteRequired),
         .init(isSpace: true, mode: .invited(isDM: false)),
-        .init(isSpace: true, mode: .invited(isDM: false), hideInviteAvatars: true,
-              customPreviewName: "InvitedWithHiddenAvatars"),
+        .init(isSpace: true, mode: .invited(isDM: false), hideInviteAvatars: true, customPreviewName: "InvitedWithHiddenAvatars"),
         .init(isSpace: true, mode: .knockable),
         .init(isSpace: true, mode: .knocked),
         .init(isSpace: true, mode: .banned(sender: "Bob", reason: "Spamming")),
         .init(isSpace: true, mode: .forbidden)
     ]
-
+    
     static var previews: some View {
         ForEach(previewWrappers) { wrapper in
             wrapper.preview
@@ -396,7 +393,7 @@ struct JoinRoomScreenPreviewWrapper: Identifiable {
     let mode: JoinRoomScreenMode
     let isSpace: Bool
     let customPreviewName: String?
-
+    
     init(isSpace: Bool = false,
          mode: JoinRoomScreenMode,
          canJoinRoom: Bool = true,
@@ -405,13 +402,12 @@ struct JoinRoomScreenPreviewWrapper: Identifiable {
         self.mode = mode
         self.isSpace = isSpace
         self.customPreviewName = customPreviewName
-
+        
         let appSettings = AppSettings()
-        appSettings.knockingEnabled = true
 
         let clientProxy = ClientProxyMock(.init(hideInviteAvatars: hideInviteAvatars))
         clientProxy.canJoinRoomWithReturnValue = canJoinRoom
-
+        
         switch mode {
         case .unknown:
             clientProxy.roomPreviewForIdentifierViaReturnValue = .failure(.roomPreviewIsPrivate)
@@ -452,20 +448,19 @@ struct JoinRoomScreenPreviewWrapper: Identifiable {
         default:
             break
         }
-
-        let source: JoinRoomScreenSource =
-            if isSpace {
-                .space(SpaceServiceRoom.mock(joinRoomScreenMode: mode))
-            } else {
-                .generic(roomID: "1", via: [])
-            }
-
+        
+        let source: JoinRoomScreenSource = if isSpace {
+            .space(SpaceServiceRoom.mock(joinRoomScreenMode: mode))
+        } else {
+            .generic(roomID: "1", via: [])
+        }
+        
         viewModel = JoinRoomScreenViewModel(source: source,
                                             appSettings: appSettings,
                                             userSession: UserSessionMock(.init(clientProxy: clientProxy)),
                                             userIndicatorController: ServiceLocator.shared.userIndicatorController)
     }
-
+    
     var previewDisplayName: String {
         switch mode {
         case .unknown:
@@ -478,7 +473,7 @@ struct JoinRoomScreenPreviewWrapper: Identifiable {
             return "Restricted"
         case .inviteRequired:
             return "InviteRequired"
-        case .invited(let isDM):
+        case .invited(isDM: let isDM):
             return isDM ? "InvitedDM" : "Invited"
         case .knockable:
             return "Knockable"
@@ -490,7 +485,7 @@ struct JoinRoomScreenPreviewWrapper: Identifiable {
             return "Forbidden"
         }
     }
-
+    
     @ViewBuilder
     var preview: some View {
         let previewDisplayName = customPreviewName ?? previewDisplayName

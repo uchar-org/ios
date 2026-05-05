@@ -13,6 +13,7 @@ struct SettingsScreenCoordinatorParameters {
     let userSession: UserSessionProtocol
     let appSettings: AppSettings
     let isBugReportServiceEnabled: Bool
+    let isInSecondaryWindow: Bool
 }
 
 enum SettingsScreenCoordinatorAction {
@@ -27,7 +28,6 @@ enum SettingsScreenCoordinatorAction {
     case blockedUsers
     case linkNewDevice
     case manageAccount(url: URL)
-    case language
     case notifications
     case advancedSettings
     case labs
@@ -37,25 +37,26 @@ enum SettingsScreenCoordinatorAction {
 
 final class SettingsScreenCoordinator: CoordinatorProtocol {
     private var viewModel: SettingsScreenViewModelProtocol
-
+    
     private let actionsSubject: PassthroughSubject<SettingsScreenCoordinatorAction, Never> = .init()
     var actions: AnyPublisher<SettingsScreenCoordinatorAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     private var cancellables = Set<AnyCancellable>()
-
+    
     // MARK: - Setup
-
+    
     init(parameters: SettingsScreenCoordinatorParameters) {
         viewModel = SettingsScreenViewModel(userSession: parameters.userSession,
                                             appSettings: parameters.appSettings,
-                                            isBugReportServiceEnabled: parameters.isBugReportServiceEnabled)
-
+                                            isBugReportServiceEnabled: parameters.isBugReportServiceEnabled,
+                                            isInSecondaryWindow: parameters.isInSecondaryWindow)
+        
         viewModel.actions
             .sink { [weak self] action in
                 guard let self else { return }
-
+                
                 switch action {
                 case .close:
                     actionsSubject.send(.dismiss)
@@ -63,7 +64,7 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.userDetails)
                 case .linkNewDevice:
                     actionsSubject.send(.linkNewDevice)
-                case .manageAccount(let url):
+                case let .manageAccount(url):
                     actionsSubject.send(.manageAccount(url: url))
                 case .analytics:
                     actionsSubject.send(.analytics)
@@ -77,8 +78,6 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.blockedUsers)
                 case .secureBackup:
                     actionsSubject.send(.secureBackup)
-                case .language:
-                    actionsSubject.send(.language)
                 case .notifications:
                     actionsSubject.send(.notifications)
                 case .advancedSettings:
@@ -95,9 +94,9 @@ final class SettingsScreenCoordinator: CoordinatorProtocol {
             }
             .store(in: &cancellables)
     }
-
+    
     // MARK: - Public
-
+    
     func toPresentable() -> AnyView {
         AnyView(SettingsScreen(context: viewModel.context))
     }

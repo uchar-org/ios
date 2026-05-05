@@ -43,18 +43,18 @@ struct RoomScreenViewState: BindableState {
     var roomTitle = ""
     var roomAvatar: RoomAvatar
     var dmRecipientVerificationState: UserIdentityVerificationState?
-
+    
     var lastScrollDirection: ScrollDirection?
     // This is used to control the banner
     var pinnedEventsBannerState: PinnedEventsBannerState = .loading(numbersOfEvents: 0)
     var shouldShowPinnedEventsBanner: Bool {
         !pinnedEventsBannerState.isEmpty && lastScrollDirection != .top
     }
-
+    
     var isSharingLiveLocation = false
-
+    
     var canSendMessage = true
-
+    
     /// Whether or not starting a call is supported.
     var isCallingEnabled = true
     /// Whether or not the user is allowed to join calls in this room.
@@ -68,35 +68,35 @@ struct RoomScreenViewState: BindableState {
     var shouldShowCallButton: Bool {
         isCallingEnabled && !isParticipatingInOngoingCall // Hide the join call button when already in the call
     }
-
+    
     /// Whether the current room is a DM
     var isDirectOneToOneRoom: Bool
-
+    
     var roomThreadListEnabled = false
-    var isKnockingEnabled = false
     var isKnockableRoom = false
     var canAcceptKnocks = false
     var canDeclineKnocks = false
     var canBan = false
     var unseenKnockRequests: [KnockRequestInfo] = []
     var handledEventIDs: Set<String> = []
-
+    
     var hasSuccessor: Bool
-
+    
     var displayedKnockRequests: [KnockRequestInfo] {
         unseenKnockRequests.filter { !handledEventIDs.contains($0.eventID) }
     }
-
+    
     var shouldSeeKnockRequests: Bool {
-        isKnockingEnabled && isKnockableRoom && !displayedKnockRequests.isEmpty
-            && (canAcceptKnocks || canDeclineKnocks || canBan)
+        isKnockableRoom &&
+            !displayedKnockRequests.isEmpty &&
+            (canAcceptKnocks || canDeclineKnocks || canBan)
     }
-
+    
     /// The current history sharing state.
     var roomHistorySharingState: RoomHistorySharingState?
-
+    
     var footerDetails: RoomScreenFooterViewDetails?
-
+    
     var bindings = RoomScreenViewStateBindings()
 }
 
@@ -124,7 +124,7 @@ enum RoomScreenFooterViewDetails {
 enum PinnedEventsBannerState: Equatable {
     case loading(numbersOfEvents: Int)
     case loaded(state: PinnedEventsState)
-
+    
     var isEmpty: Bool {
         switch self {
         case .loaded(let state):
@@ -133,7 +133,7 @@ enum PinnedEventsBannerState: Equatable {
             return numberOfEvents == 0
         }
     }
-
+    
     var isLoading: Bool {
         switch self {
         case .loading:
@@ -142,7 +142,7 @@ enum PinnedEventsBannerState: Equatable {
             return false
         }
     }
-
+    
     var selectedPinnedEventID: String? {
         switch self {
         case .loaded(let state):
@@ -151,7 +151,7 @@ enum PinnedEventsBannerState: Equatable {
             return nil
         }
     }
-
+    
     var count: Int {
         switch self {
         case .loaded(let state):
@@ -160,7 +160,7 @@ enum PinnedEventsBannerState: Equatable {
             return numberOfEvents
         }
     }
-
+    
     var selectedPinnedIndex: Int {
         switch self {
         case .loaded(let state):
@@ -170,7 +170,7 @@ enum PinnedEventsBannerState: Equatable {
             return numbersOfEvents - 1
         }
     }
-
+    
     var displayedMessage: AttributedString {
         switch self {
         case .loading:
@@ -179,7 +179,7 @@ enum PinnedEventsBannerState: Equatable {
             return state.selectedPinnedContent
         }
     }
-
+    
     var bannerIndicatorDescription: AttributedString {
         let index = selectedPinnedIndex + 1
         let boldPlaceholder = "{bold}"
@@ -189,7 +189,7 @@ enum PinnedEventsBannerState: Equatable {
         finalString.replace(boldPlaceholder, with: boldString)
         return finalString
     }
-
+    
     mutating func previousPin() {
         switch self {
         case .loaded(var state):
@@ -199,19 +199,18 @@ enum PinnedEventsBannerState: Equatable {
             break
         }
     }
-
+    
     mutating func setPinnedEventContents(_ pinnedEventContents: OrderedDictionary<String, AttributedString>) {
         switch self {
         case .loading:
             // The default selected event should always be the last one.
-            self = .loaded(state: .init(pinnedEventContents: pinnedEventContents,
-                                        selectedPinnedEventID: pinnedEventContents.keys.last))
+            self = .loaded(state: .init(pinnedEventContents: pinnedEventContents, selectedPinnedEventID: pinnedEventContents.keys.last))
         case .loaded(var state):
             state.pinnedEventContents = pinnedEventContents
             self = .loaded(state: state)
         }
     }
-
+    
     /// Note that if we are setting this value, this is definitely sent from the pinned events timeline
     /// so we can assume that the pinned events timeline is already loaded and we only need to set the
     /// selection for the loaded state
@@ -235,15 +234,14 @@ struct PinnedEventsState: Equatable {
                 selectedPinnedEventID = pinnedEventContents.keys.last
             } else if pinnedEventContents.isEmpty {
                 selectedPinnedEventID = nil
-            } else if let selectedPinnedEventID,
-                      !pinnedEventContents.keys.set.contains(selectedPinnedEventID) {
+            } else if let selectedPinnedEventID, !pinnedEventContents.keys.set.contains(selectedPinnedEventID) {
                 self.selectedPinnedEventID = pinnedEventContents.keys.last
             }
         }
     }
-
+    
     var selectedPinnedEventID: String?
-
+    
     var selectedPinnedIndex: Int {
         let defaultValue = pinnedEventContents.isEmpty ? 0 : pinnedEventContents.count - 1
         guard let selectedPinnedEventID else {
@@ -251,7 +249,7 @@ struct PinnedEventsState: Equatable {
         }
         return pinnedEventContents.keys.firstIndex(of: selectedPinnedEventID) ?? defaultValue
     }
-
+    
     var selectedPinnedContent: AttributedString {
         var content = AttributedString(" ")
         if let selectedPinnedEventID,
@@ -262,7 +260,7 @@ struct PinnedEventsState: Equatable {
         content.link = nil
         return content
     }
-
+    
     mutating func previousPin() {
         guard !pinnedEventContents.isEmpty else {
             return

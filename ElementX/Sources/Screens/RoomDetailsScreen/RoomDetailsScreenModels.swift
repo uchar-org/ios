@@ -40,17 +40,17 @@ struct DMRecipientInfo {
 
 struct RoomDetailsScreenViewState: BindableState {
     var details: RoomDetails
-
+    
     var isEncrypted: Bool
     var isDirect: Bool
     var permalink: URL?
 
     var topic: AttributedString?
     var topicSummary: AttributedString?
-
+    
     var joinedMembersCount: Int
     var hasMemberIdentityVerificationStateViolations = false
-
+    
     var isProcessingIgnoreRequest = false
     var canInviteUsers = false
     var canEditRoomName = false
@@ -63,26 +63,24 @@ struct RoomDetailsScreenViewState: BindableState {
     var notificationSettingsState: RoomDetailsNotificationSettingsState = .loading
     var canJoinCall = false
     var pinnedEventsActionState = RoomDetailsScreenPinnedEventsActionState.loading
-
-    var knockingEnabled = false
+    
     var isKnockableRoom = false
     var knockRequestsCount = 0
 
     var reportRoomEnabled = false
 
     var canSeeKnockingRequests: Bool {
-        knockingEnabled && dmRecipientInfo == nil && isKnockableRoom
-            && (canInviteUsers || canKickUsers || canBanUsers)
+        dmRecipientInfo == nil && isKnockableRoom && (canInviteUsers || canKickUsers || canBanUsers)
     }
-
+    
     var canSeeSecurityAndPrivacy: Bool {
         dmRecipientInfo == nil && canEditSecurityAndPrivacy
     }
-
+    
     var canEditBaseInfo: Bool {
         !isDirect && (canEditRoomName || canEditRoomTopic || canEditRoomAvatar)
     }
-
+    
     var hasTopicSection: Bool {
         topic != nil || canEditRoomTopic
     }
@@ -91,7 +89,7 @@ struct RoomDetailsScreenViewState: BindableState {
 
     var dmRecipientInfo: DMRecipientInfo?
     var accountOwner: RoomMemberDetails?
-
+    
     var shortcuts: [RoomDetailsScreenViewShortcut] {
         var shortcuts: [RoomDetailsScreenViewShortcut] = [.mute]
         if !ProcessInfo.processInfo.isiOSAppOnMac, canJoinCall {
@@ -110,20 +108,20 @@ struct RoomDetailsScreenViewState: BindableState {
         }
         return shortcuts
     }
-
+    
     var isProcessingMuteToggleAction = false
-
+    
     var areNotificationsMuted: Bool {
         if case .loaded(let settings) = notificationSettingsState {
             return settings.mode == .mute
         }
         return false
     }
-
+    
     var notificationShortcutButtonTitle: String {
         areNotificationsMuted ? L10n.commonUnmute : L10n.commonMute
     }
-
+    
     var notificationShortcutButtonIcon: KeyPath<CompoundIcons, Image> {
         areNotificationsMuted ? \.notificationsOff : \.notifications
     }
@@ -167,17 +165,17 @@ struct RoomDetailsScreenViewStateBindings {
             }
         }
     }
-
+    
     var isFavourite = false
 
     /// Information describing the currently displayed alert.
     var alertInfo: AlertInfo<RoomDetailsScreenErrorType>?
     var leaveRoomAlertItem: LeaveRoomAlertItem?
     var ignoreUserRoomAlertItem: IgnoreUserAlertItem?
-
+    
     /// A media item that will be previewed with QuickLook.
     var mediaPreviewItem: MediaPreviewItem?
-
+    
     /// The view model used to display the leave space sheet, will only be used if the room is a space.
     var leaveSpaceViewModel: LeaveSpaceViewModel?
 }
@@ -194,7 +192,7 @@ struct LeaveRoomAlertItem: AlertProtocol {
     let state: RoomState
     let confirmationTitle = L10n.actionLeave
     let cancelTitle = L10n.actionCancel
-
+    
     var title: String {
         isDM ? L10n.actionLeaveConversation : L10n.actionLeaveRoom
     }
@@ -202,8 +200,7 @@ struct LeaveRoomAlertItem: AlertProtocol {
     var subtitle: String {
         switch state {
         case .empty: return L10n.leaveRoomAlertEmptySubtitle
-        case .private:
-            return isDM ? L10n.leaveConversationAlertSubtitle : L10n.leaveRoomAlertPrivateSubtitle
+        case .private: return isDM ? L10n.leaveConversationAlertSubtitle : L10n.leaveRoomAlertPrivateSubtitle
         case .public: return L10n.leaveRoomAlertSubtitle
         }
     }
@@ -266,27 +263,27 @@ extension RoomDetailsNotificationSettingsState {
             return L10n.commonError
         }
     }
-
+    
     var isLoading: Bool {
         if case .loading = self {
             return true
         }
         return false
     }
-
+    
     var isLoaded: Bool {
         if case .loaded = self {
             return true
         }
         return false
     }
-
+    
     /// Returns `true` when the settings are loaded and `isDefault` is false.
     var isCustom: Bool {
-        guard case .loaded(let settings) = self else { return false }
+        guard case let .loaded(settings) = self else { return false }
         return !settings.isDefault
     }
-
+    
     var isError: Bool {
         if case .error = self {
             return true
@@ -307,7 +304,7 @@ enum RoomDetailsScreenErrorType: Hashable {
 enum RoomDetailsScreenPinnedEventsActionState {
     case loading
     case loaded(numberOfItems: Int)
-
+    
     var count: String {
         switch self {
         case .loading:
@@ -316,7 +313,7 @@ enum RoomDetailsScreenPinnedEventsActionState {
             return "\(numberOfItems)"
         }
     }
-
+    
     var isLoading: Bool {
         switch self {
         case .loading:

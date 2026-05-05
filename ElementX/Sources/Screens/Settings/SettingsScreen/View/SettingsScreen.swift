@@ -12,28 +12,27 @@ import SwiftUI
 
 struct SettingsScreen: View {
     let context: SettingsScreenViewModel.Context
-
+    
     private var shouldHideManageAccountSection: Bool {
-        context.viewState.accountProfileURL == nil && !context.viewState.showBlockedUsers
-            && !context.viewState.showLinkNewDeviceButton
+        context.viewState.accountProfileURL == nil &&
+            !context.viewState.showBlockedUsers &&
+            !context.viewState.showLinkNewDeviceButton
     }
-
-    @Environment(LanguageManager.self) var languageManager
-
+    
     var body: some View {
         Form {
             userSection
-
+            
             if !shouldHideManageAccountSection {
                 manageAccountSection
             }
-
+            
             manageMyAppSection
-
+            
             generalSection
-
+            
             signOutSection
-
+            
             if context.viewState.showDeveloperOptions {
                 developerOptionsSection
             }
@@ -41,10 +40,10 @@ struct SettingsScreen: View {
         .compoundList()
         .navigationTitle(L10n.commonSettings)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarVisibility(ProcessInfo.processInfo.isiOSAppOnMac ? .hidden : .automatic, for: .navigationBar)
-        //        .toolbar { toolbar }
+        .toolbarVisibility(context.viewState.navigationBarVisibility, for: .navigationBar)
+        .toolbar { toolbar }
     }
-
+    
     private var userSection: some View {
         Section {
             ListRow(kind: .custom {
@@ -58,7 +57,7 @@ struct SettingsScreen: View {
                                             avatarSize: .user(on: .settings),
                                             mediaProvider: context.mediaProvider)
                             .accessibilityHidden(true)
-
+                        
                         VStack(alignment: .leading, spacing: 2) {
                             Text(context.viewState.userDisplayName ?? "")
                                 .font(.compound.headingMD)
@@ -67,9 +66,9 @@ struct SettingsScreen: View {
                                 .font(.compound.bodySM)
                                 .foregroundColor(.compound.textSecondary)
                         }
-
+                        
                         Spacer()
-
+                        
                         ListRowAccessory.navigationLink
                     }
                     .padding(.horizontal, ListRowPadding.horizontal)
@@ -78,7 +77,7 @@ struct SettingsScreen: View {
             })
         }
     }
-
+    
     private var manageMyAppSection: some View {
         Section {
             ListRow(label: .default(title: L10n.screenNotificationSettingsTitle,
@@ -87,21 +86,14 @@ struct SettingsScreen: View {
                         context.send(viewAction: .notifications)
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.notifications)
-
-            ListRow(label: .default(title: L10n.languageTitle,
-                                    icon: Image(systemName: "globe")),
-                    kind: .navigationLink {
-                        context.send(viewAction: .language)
-                    })
-                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.language)
-
+            
             ListRow(label: .default(title: L10n.commonScreenLock,
                                     icon: \.lock),
                     kind: .navigationLink {
                         context.send(viewAction: .appLock)
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.screenLock)
-
+            
             switch context.viewState.securitySectionMode {
             case .secureBackup:
                 ListRow(label: .default(title: L10n.commonEncryption,
@@ -114,7 +106,7 @@ struct SettingsScreen: View {
             }
         }
     }
-
+    
     private var manageAccountSection: some View {
         Section {
             if let url = context.viewState.accountProfileURL {
@@ -125,7 +117,7 @@ struct SettingsScreen: View {
                         })
                         .accessibilityIdentifier(A11yIdentifiers.settingsScreen.account)
             }
-
+            
             if context.viewState.showLinkNewDeviceButton {
                 ListRow(label: .default(title: L10n.commonLinkNewDevice,
                                         icon: \.devices),
@@ -133,7 +125,7 @@ struct SettingsScreen: View {
                             context.send(viewAction: .linkNewDevice)
                         })
             }
-
+            
             if context.viewState.showBlockedUsers {
                 ListRow(label: .default(title: L10n.commonBlockedUsers,
                                         icon: \.block),
@@ -144,7 +136,7 @@ struct SettingsScreen: View {
             }
         }
     }
-
+    
     private var generalSection: some View {
         Section {
             ListRow(label: .default(title: L10n.commonAdvancedSettings,
@@ -153,20 +145,20 @@ struct SettingsScreen: View {
                         context.send(viewAction: .advancedSettings)
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.advancedSettings)
-
+            
             ListRow(label: .default(title: L10n.screenAdvancedSettingsLabs,
                                     icon: \.labs),
                     kind: .navigationLink {
                         context.send(viewAction: .labs)
                     })
-
+            
             ListRow(label: .default(title: L10n.commonAbout,
                                     icon: \.info),
                     kind: .navigationLink {
                         context.send(viewAction: .about)
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.about)
-
+            
             if context.viewState.isBugReportServiceEnabled {
                 ListRow(label: .default(title: L10n.commonReportAProblem,
                                         icon: \.chatProblem),
@@ -175,7 +167,7 @@ struct SettingsScreen: View {
                         })
                         .accessibilityIdentifier(A11yIdentifiers.settingsScreen.reportBug)
             }
-
+            
             if context.viewState.showAnalyticsSettings {
                 ListRow(label: .default(title: L10n.commonAnalytics,
                                         icon: \.chart),
@@ -186,7 +178,7 @@ struct SettingsScreen: View {
             }
         }
     }
-
+    
     private var signOutSection: some View {
         Section {
             ListRow(label: .action(title: L10n.screenSignoutPreferenceItem,
@@ -196,7 +188,7 @@ struct SettingsScreen: View {
                         context.send(viewAction: .logout)
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.logout)
-
+            
             if context.viewState.showAccountDeactivation {
                 ListRow(label: .action(title: L10n.actionDeleteAccount,
                                        icon: \.delete,
@@ -211,7 +203,7 @@ struct SettingsScreen: View {
             }
         }
     }
-
+    
     private var developerOptionsSection: some View {
         Section {
             ListRow(label: .default(title: L10n.commonDeveloperOptions,
@@ -224,12 +216,12 @@ struct SettingsScreen: View {
             versionSection
         }
     }
-
+    
     private var versionSection: some View {
         VStack(spacing: 0) {
             versionText
                 .frame(maxWidth: .infinity)
-
+            
             if let deviceID = context.viewState.deviceID {
                 Text(deviceID)
             }
@@ -241,18 +233,18 @@ struct SettingsScreen: View {
             context.send(viewAction: .enableDeveloperOptions)
         }
     }
-
+    
     private var versionText: Text {
         Text(L10n.settingsVersionNumber(InfoPlistReader.main.bundleShortVersionString, InfoPlistReader.main.bundleVersion))
     }
-
+    
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
             ToolbarButton(role: .close) { context.send(viewAction: .close) }
                 .accessibilityIdentifier(A11yIdentifiers.settingsScreen.done)
         }
     }
-
+    
     @ViewBuilder
     private var securitySectionBadge: some View {
         if context.viewState.showSecuritySectionBadge {
@@ -266,28 +258,27 @@ struct SettingsScreen: View {
 struct SettingsScreen_Previews: PreviewProvider, TestablePreview {
     static let viewModel = makeViewModel()
     static let bugReportDisabledViewModel = makeViewModel(isBugReportServiceEnabled: false)
-
+    
     static var previews: some View {
         ElementNavigationStack {
             SettingsScreen(context: viewModel.context)
         }
         .snapshotPreferences(expect: viewModel.context.observe(\.viewState.accountProfileURL).map { $0 != nil })
         .previewDisplayName("Default")
-
+        
         ElementNavigationStack {
             SettingsScreen(context: bugReportDisabledViewModel.context)
         }
-        .snapshotPreferences(expect: bugReportDisabledViewModel.context.observe(\.viewState.accountProfileURL).map {
-            $0 != nil
-        })
+        .snapshotPreferences(expect: bugReportDisabledViewModel.context.observe(\.viewState.accountProfileURL).map { $0 != nil })
         .previewDisplayName("Bug report disabled")
     }
-
+    
     static func makeViewModel(isBugReportServiceEnabled: Bool = true) -> SettingsScreenViewModel {
         let userSession = UserSessionMock(.init(clientProxy: ClientProxyMock(.init(userID: "@userid:example.com",
                                                                                    deviceID: "AAAAAAAAAAA"))))
         return SettingsScreenViewModel(userSession: userSession,
                                        appSettings: ServiceLocator.shared.settings,
-                                       isBugReportServiceEnabled: isBugReportServiceEnabled)
+                                       isBugReportServiceEnabled: isBugReportServiceEnabled,
+                                       isInSecondaryWindow: false)
     }
 }
