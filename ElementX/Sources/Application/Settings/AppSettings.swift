@@ -204,30 +204,30 @@ final class AppSettings {
     let backgroundAppRefreshTaskIdentifier = "io.element.elementx.background.refresh"
 
     /// A URL where users can go read more about the app.
-    private(set) var websiteURL: URL = "https://element.io"
+    private(set) var websiteURL: URL = "https://uchar.uz"
     /// A URL that contains the app's logo that may be used when showing content in a web view.
-    private(set) var logoURL: URL = "https://element.io/mobile-icon.png"
+    private(set) var logoURL: URL = "https://uchar.uz/mobile-icon.png"
     /// A URL that contains that app's copyright notice.
-    private(set) var copyrightURL: URL = "https://element.io/copyright"
+    private(set) var copyrightURL: URL = "https://uchar.uz/copyright"
     /// A URL that contains the app's Terms of use.
-    private(set) var acceptableUseURL: URL = "https://element.io/acceptable-use-policy-terms"
+    private(set) var acceptableUseURL: URL = "https://uchar.uz/acceptable-use-policy-terms"
     /// A URL that contains the app's Privacy Policy.
-    private(set) var privacyURL: URL = "https://element.io/privacy"
+    private(set) var privacyURL: URL = "https://uchar.uz/privacy"
     /// A URL where users can go read more about encryption in general.
-    private(set) var encryptionURL: URL = "https://element.io/help#encryption"
+    private(set) var encryptionURL: URL = "https://uchar.uz/help#encryption"
     /// A URL where users can go read more about device verification..
-    private(set) var deviceVerificationURL: URL = "https://element.io/help#encryption-device-verification"
+    private(set) var deviceVerificationURL: URL = "https://uchar.uz/help#encryption-device-verification"
     /// A URL where users can go read more about the chat backup.
-    private(set) var chatBackupDetailsURL: URL = "https://element.io/help#encryption5"
+    private(set) var chatBackupDetailsURL: URL = "https://uchar.uz/help#encryption5"
     /// A URL where users can go read more about identity pinning violations
-    private(set) var identityPinningViolationDetailsURL: URL = "https://element.io/help#encryption18"
+    private(set) var identityPinningViolationDetailsURL: URL = "https://uchar.uz/help#encryption18"
     /// A URL describing how history sharing works
-    private(set) var historySharingDetailsURL: URL = "https://element.io/en/help#e2ee-history-sharing"
+    private(set) var historySharingDetailsURL: URL = "https://uchar.uz/en/help#e2ee-history-sharing"
 
     /// Any domains that Element web may be hosted on - used for handling links.
-    private(set) var elementWebHosts = ["app.element.io", "staging.element.io", "develop.element.io"]
+    private(set) var elementWebHosts = ["app.uchar.uz", "staging.uchar.uz", "develop.uchar.uz", "*.uchar.uz"]
     /// The domain that account provisioning links will be hosted on - used for handling the links.
-    private(set) var accountProvisioningHost = "mobile.element.io"
+    private(set) var accountProvisioningHost = "mobile.uchar.uz"
     /// The App Store URL for Element Pro, shown to the user when a homeserver requires that app.
     /// **Note:** This property isn't overridable as it in unexpected for forks to come across the error (or to even have a "Pro" app).
     let elementProAppStoreURL: URL = "https://apps.apple.com/app/element-pro-for-work/id6502951615"
@@ -253,7 +253,7 @@ final class AppSettings {
     let oAuthStaticRegistrations: [URL: String] = ["https://id.thirdroom.io/realms/thirdroom": "elementx"]
     /// The redirect URL used for OAuth. For the normal case we don't actually need the bundle ID as the web authentication session handles the redirect internally.
     /// However in the case where MAS sends the user to an external app, we need to make sure that the system will open the correct variant of the app (e.g. Nightly).
-    private(set) var oAuthRedirectURL: URL! = URL(string: "https://element.io/oauth/ios/\(InfoPlistReader.main.bundleIdentifier)")
+    private(set) var oAuthRedirectURL: URL! = URL(string: "https://uchar.uz/oauth/ios/\(InfoPlistReader.main.bundleIdentifier)")
     
     private(set) lazy var oAuthConfiguration = OAuthConfiguration(clientName: InfoPlistReader.main.bundleDisplayName,
                                                                   redirectURI: oAuthRedirectURL,
@@ -324,7 +324,7 @@ final class AppSettings {
     /// The configuration to use for analytics. Set to `nil` to disable analytics.
     let analyticsConfiguration: AnalyticsConfiguration? = AppSettings.makeAnalyticsConfiguration()
     /// The URL to open with more information about analytics terms. When this is `nil` the "Learn more" link will be hidden.
-    private(set) var analyticsTermsURL: URL? = "https://element.io/cookie-policy"
+    private(set) var analyticsTermsURL: URL? = "https://uchar.uz/cookie-policy"
     /// Whether or not there the app is able ask for user consent to enable analytics or sentry reporting.
     var canPromptForAnalytics: Bool {
         analyticsConfiguration != nil || bugReportSentryURL != nil
@@ -389,10 +389,10 @@ final class AppSettings {
     let elementCallBaseURL: URL = EmbeddedElementCall.appURL!
     #endif
     
-    // These are publicly availble on https://call.element.io so we don't neeed to treat them as secrets
-    let elementCallPosthogAPIHost = "https://posthog-element-call.element.io"
+    // These are publicly availble on https://call.uchar.uz so we don't neeed to treat them as secrets
+    let elementCallPosthogAPIHost = "https://posthog-element-call.uchar.uz"
     let elementCallPosthogAPIKey = "phc_rXGHx9vDmyEvyRxPziYtdVIv0ahEv8A9uLWFcCi1WcU"
-    let elementCallPosthogSentryDSN = "https://3bd2f95ba5554d4497da7153b552ffb5@sentry.tools.element.io/41"
+    let elementCallPosthogSentryDSN = "https://3bd2f95ba5554d4497da7153b552ffb5@sentry.tools.uchar.uz/41"
     
     @UserPreference(key: UserDefaultsKeys.elementCallBaseURLOverride, defaultValue: nil, storageType: .userDefaults(store))
     var elementCallBaseURLOverride: URL?
