@@ -14,22 +14,22 @@ class AuthenticationService: AuthenticationServiceProtocol {
     private var client: ClientProtocol?
     private var sessionDirectories: SessionDirectories
     private let passphrase: String
-
+    
     private let userSessionStore: UserSessionStoreProtocol
     private let classicAppManager: ClassicAppManagerProtocol?
     private let clientFactory: AuthenticationClientFactoryProtocol
     private let appSettings: AppSettings
     private let appHooks: AppHooks
-
+    
     private let homeserverSubject: CurrentValueSubject<LoginHomeserver, Never>
     var homeserver: CurrentValuePublisher<LoginHomeserver, Never> {
         homeserverSubject.asCurrentValuePublisher()
     }
 
     private(set) var flow: AuthenticationFlow
-
+    
     let classicAppAccount: ClassicAppAccount?
-
+    
     init(userSessionStore: UserSessionStoreProtocol,
          encryptionKeyProvider: EncryptionKeyProviderProtocol,
          classicAppManager: ClassicAppManagerProtocol?,
@@ -38,13 +38,13 @@ class AuthenticationService: AuthenticationServiceProtocol {
          appHooks: AppHooks) {
         sessionDirectories = .init()
         passphrase = encryptionKeyProvider.generateKey().base64EncodedString()
-
+        
         self.userSessionStore = userSessionStore
         self.classicAppManager = classicAppManager
         self.clientFactory = clientFactory
         self.appSettings = appSettings
         self.appHooks = appHooks
-
+        
         do {
             if let classicAppManager {
                 classicAppAccount = try classicAppManager.loadAccounts().first
@@ -57,37 +57,36 @@ class AuthenticationService: AuthenticationServiceProtocol {
             MXLog.error("Failed loading accounts from the Classic app: \(error)")
             classicAppAccount = nil
         }
-
+        
         // When updating these, don't forget to update the reset method too.
         homeserverSubject = .init(LoginHomeserver(address: appSettings.accountProviders[0], loginMode: .unknown))
         flow = .login
     }
-
+    
     // MARK: - Public
-
+    
     func configure(for homeserverAddress: String, flow: AuthenticationFlow) async -> Result<Void, AuthenticationServiceError> {
         do {
             var homeserver = LoginHomeserver(address: homeserverAddress, loginMode: .unknown)
-
+            
             let client = try await makeClient(homeserverAddress: homeserverAddress)
             let loginDetails = await client.homeserverLoginDetails()
-
-            homeserver.loginMode =
-                if loginDetails.supportsOauthLogin() {
-                    .oidc(supportsCreatePrompt: loginDetails.supportedOauthPrompts().contains(.create))
-                } else if loginDetails.supportsPasswordLogin() {
-                    .password
-                } else {
-                    .unsupported
-                }
-
+            
+            homeserver.loginMode = if loginDetails.supportsOauthLogin() {
+                .oAuth(supportsCreatePrompt: loginDetails.supportedOauthPrompts().contains(.create))
+            } else if loginDetails.supportsPasswordLogin() {
+                .password
+            } else {
+                .unsupported
+            }
+            
             if flow == .login, homeserver.loginMode == .unsupported {
                 return .failure(.loginNotSupported)
             }
-            if flow == .register, !homeserver.loginMode.supportsOIDCFlow {
+            if flow == .register, !homeserver.loginMode.supportsOAuthFlow {
                 return .failure(.registrationNotSupported)
             }
-
+            
             self.client = client
             self.flow = flow
             homeserverSubject.send(homeserver)
@@ -105,60 +104,58 @@ class AuthenticationService: AuthenticationServiceProtocol {
             return .failure(.invalidHomeserverAddress)
         }
     }
-
-    func urlForOIDCLogin(loginHint: String?) async -> Result<OIDCAuthorizationDataProxy, AuthenticationServiceError> {
-        guard let client else { return .failure(.oidcError(.urlFailure)) }
+    
+    func urlForOAuthLogin(loginHint: String?) async -> Result<OAuthAuthorizationDataProxy, AuthenticationServiceError> {
+        guard let client else { return .failure(.oAuthError(.urlFailure)) }
         do {
             // The create prompt is broken: https://github.com/element-hq/matrix-authentication-service/issues/3429
-            // let prompt: OidcPrompt = flow == .register ? .create : .consent
-            let oidcData = try await client.urlForOauth(oauthConfiguration: appSettings.oidcConfiguration.rustValue,
-                                                        prompt: .consent,
-                                                        loginHint: loginHint,
-                                                        deviceId: nil,
-                                                        additionalScopes: nil)
-            return .success(OIDCAuthorizationDataProxy(underlyingData: oidcData))
+            // let prompt: OAuthPrompt = flow == .register ? .create : .consent
+            let oAuthData = try await client.urlForOauth(oauthConfiguration: appSettings.oAuthConfiguration.rustValue,
+                                                         prompt: .consent,
+                                                         loginHint: loginHint,
+                                                         deviceId: nil,
+                                                         additionalScopes: nil)
+            return .success(OAuthAuthorizationDataProxy(underlyingData: oAuthData))
         } catch {
-            MXLog.error("Failed to get URL for OIDC login: \(error)")
-            return .failure(.oidcError(.urlFailure))
+            MXLog.error("Failed to get URL for OAuth login: \(error)")
+            return .failure(.oAuthError(.urlFailure))
         }
     }
-
-    func abortOIDCLogin(data: OIDCAuthorizationDataProxy) async {
+    
+    func abortOAuthLogin(data: OAuthAuthorizationDataProxy) async {
         guard let client else { return }
-        MXLog.info("Aborting OIDC login.")
+        MXLog.info("Aborting OAuth login.")
         await client.abortOauthAuth(authorizationData: data.underlyingData)
     }
-
-    func loginWithOIDCCallback(_ callbackURL: URL) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
+    
+    func loginWithOAuthCallback(_ callbackURL: URL) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         guard let client else { return .failure(.failedLoggingIn) }
         do {
             try await client.loginWithOauthCallback(callbackUrl: callbackURL.absoluteString)
             await verifyClientIfPossible(client: client)
             return await userSession(for: client)
-        } catch OAuthError.Cancelled {
-            return .failure(.oidcError(.userCancellation))
+        } catch MatrixRustSDK.OAuthError.Cancelled {
+            return .failure(.oAuthError(.userCancellation))
         } catch {
-            MXLog.error("Login with OIDC failed: \(error)")
+            MXLog.error("Login with OAuth failed: \(error)")
             return .failure(.failedLoggingIn)
         }
     }
-
-    func login(username: String, password: String, initialDeviceName: String?, deviceID: String?)
-        async -> Result<UserSessionProtocol, AuthenticationServiceError> {
+    
+    func login(username: String, password: String, initialDeviceName: String?, deviceID: String?) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         guard let client else { return .failure(.failedLoggingIn) }
         do {
-            try await client.login(username: username, password: password, initialDeviceName: initialDeviceName,
-                                   deviceId: deviceID)
-
+            try await client.login(username: username, password: password, initialDeviceName: initialDeviceName, deviceId: deviceID)
+            
             let refreshToken = try? client.session().refreshToken
             if refreshToken != nil {
-                MXLog.warning("Refresh token found for a non oidc session, can't restore session, logging out")
+                MXLog.warning("Refresh token found for a non OAuth session, can't restore session, logging out")
                 _ = try? await client.logout()
                 return .failure(.sessionTokenRefreshNotSupported)
             }
-
+            
             await verifyClientIfPossible(client: client)
-
+            
             return await userSession(for: client)
         } catch let ClientError.MatrixApi(errorKind, _, _, _) {
             MXLog.error("Failed logging in with error kind: \(errorKind)")
@@ -175,10 +172,10 @@ class AuthenticationService: AuthenticationServiceProtocol {
             return .failure(.failedLoggingIn)
         }
     }
-
+    
     func loginWithQRCode(data: Data) -> QRLoginProgressPublisher {
         let progressSubject = CurrentValueSubject<QRLoginProgress, AuthenticationServiceError>(.starting)
-
+        
         let qrData: QrCodeData
         do {
             qrData = try QrCodeData.fromBytes(bytes: data)
@@ -187,9 +184,9 @@ class AuthenticationService: AuthenticationServiceProtocol {
             progressSubject.send(completion: .failure(.qrCodeError(.invalidQRCode)))
             return progressSubject.asCurrentValuePublisher()
         }
-
+        
         // n.b. We rely on the SDK checking that the intent of the QR is suitable for us to login with.
-
+        
         // Future versions of the QR should always give us the baseUrl
         guard let scannedServerNameOrBaseUrl = qrData.baseUrl() ?? qrData.serverName() else {
             // With the older version of QR we treat the presence of serverName as meaning that the other device
@@ -200,21 +197,21 @@ class AuthenticationService: AuthenticationServiceProtocol {
         }
 
         // n.b. We deliberatley don't check whether the received server is in our appSettings.accountProviders
-
+        
         let listener = SDKListener { progress in
             guard let progress = QRLoginProgress(rustProgress: progress) else { return }
             progressSubject.send(progress)
         }
-
+        
         Task {
             do {
                 let client = try await makeClient(homeserverAddress: scannedServerNameOrBaseUrl)
-                let qrCodeHandler = client.newLoginWithQrCodeHandler(oauthConfiguration: appSettings.oidcConfiguration.rustValue)
+                let qrCodeHandler = client.newLoginWithQrCodeHandler(oauthConfiguration: appSettings.oAuthConfiguration.rustValue)
                 try await qrCodeHandler.scan(qrCodeData: qrData, progressListener: listener)
-
+                
                 // Since the QR code login flow includes verification.
                 appSettings.hasRunIdentityConfirmationOnboarding = true
-
+                
                 switch await userSession(for: client) {
                 case .success(let userSession):
                     progressSubject.send(.signedIn(userSession))
@@ -231,40 +228,39 @@ class AuthenticationService: AuthenticationServiceProtocol {
                 progressSubject.send(completion: .failure(.qrCodeError(.unknown)))
             }
         }
-
+        
         return progressSubject.asCurrentValuePublisher()
     }
-
+    
     func reset() {
         homeserverSubject.send(LoginHomeserver(address: appSettings.accountProviders[0], loginMode: .unknown))
         flow = .login
         client = nil
     }
-
+    
     // MARK: - Private
-
+    
     private func makeClient(homeserverAddress: String) async throws -> ClientProtocol {
         // Use a fresh session directory each time the user enters a different server
         // so that caches (e.g. server versions) are always fresh for the new server.
         rotateSessionDirectory()
-
+        
         let client = try await clientFactory.makeClient(homeserverAddress: homeserverAddress,
                                                         sessionDirectories: sessionDirectories,
                                                         passphrase: passphrase,
                                                         clientSessionDelegate: userSessionStore.clientSessionDelegate,
                                                         appSettings: appSettings,
                                                         appHooks: appHooks)
-        try await appHooks.remoteSettingsHook.initializeCache(using: client, applyingTo: appSettings)
-            .get()
-
+        try await appHooks.remoteSettingsHook.initializeCache(using: client, applyingTo: appSettings).get()
+        
         return client
     }
-
+    
     private func rotateSessionDirectory() {
         sessionDirectories.delete()
         sessionDirectories = .init()
     }
-
+    
     private func userSession(for client: ClientProtocol) async -> Result<UserSessionProtocol, AuthenticationServiceError> {
         switch await userSessionStore.userSession(for: client, sessionDirectories: sessionDirectories, passphrase: passphrase) {
         case .success(let clientProxy):
@@ -273,33 +269,32 @@ class AuthenticationService: AuthenticationServiceProtocol {
             return .failure(.failedLoggingIn)
         }
     }
-
+    
     // MARK: - Classic App
-
+    
     /// Populates the Classic app account's state by checking whether the account's homeserver is supported
-    /// (has Sliding Sync and OIDC or password login) and whether all of the required secrets are available.
+    /// (has Sliding Sync and OAuth or password login) and whether all of the required secrets are available.
     func setupClassicAppAccountState() async {
         guard let classicAppAccount, classicAppAccount.state.isServerSupported == nil else { return }
         MXLog.info("Checking Classic app account: \(classicAppAccount)")
-
+        
         do {
             let client = try await clientFactory.makeInMemoryClient(homeserverAddress: classicAppAccount.homeserverURL.absoluteString,
                                                                     clientSessionDelegate: userSessionStore.clientSessionDelegate,
                                                                     appSettings: appSettings,
                                                                     appHooks: appHooks)
             let loginDetails = await client.homeserverLoginDetails()
-            let isServerSupported =
-                loginDetails.supportsOauthLogin() || loginDetails.supportsPasswordLogin()
+            let isServerSupported = loginDetails.supportsOauthLogin() || loginDetails.supportsPasswordLogin()
             MXLog.info("Classic app homeserver supported: \(isServerSupported)")
             classicAppAccount.state.isServerSupported = isServerSupported
-
+            
             await refreshClassicAppAccountState()
         } catch {
             MXLog.info("Classic app account support check failed: \(error)")
             classicAppAccount.state.isServerSupported = false
         }
     }
-
+    
     /// Checks which encryption secrets are currently available from the Classic app and updates the account's state accordingly. We will handle the
     /// Classic account differently, depending on which secrets are available:
     /// - When they're `.complete` (the session is verified and has a key backup) we can automatically verify the account once signed in.
@@ -309,12 +304,10 @@ class AuthenticationService: AuthenticationServiceProtocol {
     ///
     /// This should be called whenever the user has potentially updated their secrets in the Classic app.
     func refreshClassicAppAccountState() async {
-        guard let classicAppManager, let classicAppAccount,
-              classicAppAccount.state.isServerSupported != nil
-        else { return }
-
+        guard let classicAppManager, let classicAppAccount, classicAppAccount.state.isServerSupported != nil else { return }
+        
         classicAppAccount.state.availableSecrets = nil
-
+        
         do {
             let availableSecrets = try await classicAppManager.availableSecrets(for: classicAppAccount)
             guard !Task.isCancelled else { return }
@@ -325,31 +318,31 @@ class AuthenticationService: AuthenticationServiceProtocol {
             classicAppAccount.state.availableSecrets = .unavailable
         }
     }
-
+    
     /// Imports the Classic app's encryption secrets into the signed-in client, automatically verifying the session. This will no-op if
     /// the user signed in with a different account or when the Classic app doesn't have a complete set of secrets (meaning either
     /// key backup is disabled or the session hasn't been verified).
     private func verifyClientIfPossible(client: ClientProtocol) async {
         guard let classicAppManager, let classicAppAccount else { return }
-
+        
         // Technically the SDK makes sure the secrets are for the correct account, but as
         // we want to verify the classic account regardless which flow was used, it seems
         // sane to avoid loading the secrets when we know that they're not relevant.
         guard classicAppAccount.userID == (try? client.userId()) else { return }
-
+        
         guard classicAppAccount.state.availableSecrets == .complete else {
             MXLog.info("The matching Classic app account is missing secrets, ignoring.")
             return
         }
-
+        
         MXLog.info("Found matching Classic app account, importing secrets.")
-
+        
         do {
             let secrets = try await classicAppManager.secretsBundle(for: classicAppAccount)
             try await client.encryption().importSecretsBundle(secretsBundle: secrets)
-
+            
             MXLog.info("Classic app account secrets imported.")
-
+            
             // Importing the secrets automatically verifies the session.
             appSettings.hasRunIdentityConfirmationOnboarding = true
         } catch {
@@ -389,7 +382,7 @@ extension AuthenticationService {
     static var mock: AuthenticationService {
         mock(classicAppManager: nil)
     }
-
+    
     static func mock(classicAppManager: ClassicAppManagerProtocol?) -> AuthenticationService {
         AuthenticationService(userSessionStore: UserSessionStoreMock(configuration: .init()),
                               encryptionKeyProvider: EncryptionKeyProvider(),

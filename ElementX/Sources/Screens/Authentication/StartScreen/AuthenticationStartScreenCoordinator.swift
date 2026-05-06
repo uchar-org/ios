@@ -23,24 +23,23 @@ enum AuthenticationStartScreenCoordinatorAction {
     case loginWithQR
     case login
     case register
-
-    case loginDirectlyWithOIDC(data: OIDCAuthorizationDataProxy, window: UIWindow)
+    
+    case loginDirectlyWithOAuth(data: OAuthAuthorizationDataProxy, window: UIWindow)
     case loginDirectlyWithPassword(loginHint: String?)
-
+    
     case reportProblem
     case developerOptions
 }
 
 final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
     private var viewModel: AuthenticationStartScreenViewModelProtocol
-    private let actionsSubject:
-        PassthroughSubject<AuthenticationStartScreenCoordinatorAction, Never> = .init()
+    private let actionsSubject: PassthroughSubject<AuthenticationStartScreenCoordinatorAction, Never> = .init()
     private var cancellables = Set<AnyCancellable>()
-
+    
     var actions: AnyPublisher<AuthenticationStartScreenCoordinatorAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(parameters: AuthenticationStartScreenParameters) {
         viewModel = AuthenticationStartScreenViewModel(authenticationService: parameters.authenticationService,
                                                        provisioningParameters: parameters.provisioningParameters,
@@ -50,14 +49,14 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
                                                        mediaProvider: parameters.mediaProvider,
                                                        userIndicatorController: parameters.userIndicatorController)
     }
-
+    
     // MARK: - Public
-
+    
     func start() {
         viewModel.actions
             .sink { [weak self] action in
                 guard let self else { return }
-
+                
                 switch action {
                 case .loginWithQR:
                     actionsSubject.send(.loginWithQR)
@@ -65,12 +64,12 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
                     actionsSubject.send(.login)
                 case .register:
                     actionsSubject.send(.register)
-
-                case .loginDirectlyWithOIDC(let data, let window):
-                    actionsSubject.send(.loginDirectlyWithOIDC(data: data, window: window))
+                
+                case .loginDirectlyWithOAuth(let data, let window):
+                    actionsSubject.send(.loginDirectlyWithOAuth(data: data, window: window))
                 case .loginDirectlyWithPassword(let loginHint):
                     actionsSubject.send(.loginDirectlyWithPassword(loginHint: loginHint))
-
+                
                 case .reportProblem:
                     actionsSubject.send(.reportProblem)
                 case .developerOptions:
@@ -79,7 +78,7 @@ final class AuthenticationStartScreenCoordinator: CoordinatorProtocol {
             }
             .store(in: &cancellables)
     }
-
+    
     func toPresentable() -> AnyView {
         AnyView(AuthenticationStartScreen(context: viewModel.context))
     }

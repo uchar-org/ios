@@ -13,18 +13,18 @@ import MatrixRustSDKMocks
 extension ClientSDKMock {
     struct Configuration {
         // MARK: Authentication
-
+        
         var serverAddress = "matrix.org"
         var homeserverURL = "https://matrix-client.matrix.org"
         var slidingSyncVersion = SlidingSyncVersion.native
-        var oidcLoginURL: String? = "https://account.matrix.org/authorize"
-        var supportsOIDCCreatePrompt = true
+        var oAuthLoginURL: String? = "https://account.matrix.org/authorize"
+        var supportsOAuthCreatePrompt = true
         var supportsPasswordLogin = true
         var elementWellKnown: String?
         var validCredentials = (username: "alice", password: "12345678")
-
+        
         // MARK: Session
-
+        
         var userID: String?
         var session = Session(accessToken: UUID().uuidString,
                               refreshToken: nil,
@@ -34,24 +34,21 @@ extension ClientSDKMock {
                               oauthData: nil,
                               slidingSyncVersion: .native)
     }
-
+    
     enum MockError: Error { case generic }
-
+    
     convenience init(configuration: Configuration) {
         self.init()
-
+        
         homeserverLoginDetailsReturnValue = HomeserverLoginDetailsSDKMock(configuration: configuration)
         slidingSyncVersionReturnValue = configuration.slidingSyncVersion
         userIdServerNameThrowableError = MockError.generic
         serverReturnValue = "https://\(configuration.serverAddress)"
         homeserverReturnValue = configuration.homeserverURL
-        urlForOauthOauthConfigurationPromptLoginHintDeviceIdAdditionalScopesReturnValue =
-            OAuthAuthorizationDataSDKMock(configuration: configuration)
-        loginUsernamePasswordInitialDeviceNameDeviceIdClosure = {
-            [weak self] username, password, _, _ in
+        urlForOauthOauthConfigurationPromptLoginHintDeviceIdAdditionalScopesReturnValue = OAuthAuthorizationDataSDKMock(configuration: configuration)
+        loginUsernamePasswordInitialDeviceNameDeviceIdClosure = { [weak self] username, password, _, _ in
             guard username == configuration.validCredentials.username,
-                  password == configuration.validCredentials.password
-            else {
+                  password == configuration.validCredentials.password else {
                 throw MockError.generic // use the matrix error
             }
             if username.hasPrefix("@"), username.contains(":") {
@@ -60,7 +57,7 @@ extension ClientSDKMock {
                 self?.userIdReturnValue = "@\(username):\(configuration.serverAddress)"
             }
         }
-
+        
         userIdReturnValue = configuration.userID
         sessionReturnValue = configuration.session
         getUrlUrlClosure = { url in
@@ -77,16 +74,15 @@ extension ClientSDKMock {
 extension HomeserverLoginDetailsSDKMock {
     convenience init(configuration: ClientSDKMock.Configuration) {
         self.init()
-
+        
         slidingSyncVersionReturnValue = configuration.slidingSyncVersion
         supportsPasswordLoginReturnValue = configuration.supportsPasswordLogin
-        supportsOauthLoginReturnValue = configuration.oidcLoginURL != nil
-        supportedOauthPromptsReturnValue =
-            switch (configuration.oidcLoginURL, configuration.supportsOIDCCreatePrompt) {
-            case (.none, _): []
-            case (.some, true): [.consent, .create]
-            case (.some, false): [.consent]
-            }
+        supportsOauthLoginReturnValue = configuration.oAuthLoginURL != nil
+        supportedOauthPromptsReturnValue = switch (configuration.oAuthLoginURL, configuration.supportsOAuthCreatePrompt) {
+        case (.none, _): []
+        case (.some, true): [.consent, .create]
+        case (.some, false): [.consent]
+        }
         urlReturnValue = configuration.homeserverURL
     }
 }
@@ -94,7 +90,7 @@ extension HomeserverLoginDetailsSDKMock {
 extension OAuthAuthorizationDataSDKMock {
     convenience init(configuration: ClientSDKMock.Configuration) {
         self.init()
-
-        loginUrlReturnValue = configuration.oidcLoginURL
+        
+        loginUrlReturnValue = configuration.oAuthLoginURL
     }
 }

@@ -15,52 +15,62 @@ import AuthenticationServices
 /// have access to this session, and for some reason `prefersEphemeralWebBrowserSession`
 /// isn't sharing the session back to Safari.
 @MainActor
-class OIDCAccountSettingsPresenter: NSObject {
+class OAuthAccountSettingsPresenter: NSObject {
     private let accountURL: URL
+    private let redirectURL: URL
     private let presentationAnchor: UIWindow
-    private let oidcRedirectURL: URL
-
-    typealias Continuation = AsyncStream<Result<Void, OIDCError>>.Continuation
+    private let appMediator: AppMediatorProtocol
+    
+    typealias Continuation = AsyncStream<Result<Void, OAuthError>>.Continuation
     private let continuation: Continuation?
-
-    init(accountURL: URL, presentationAnchor: UIWindow, appSettings: AppSettings,
+    
+    init(accountURL: URL,
+         presentationAnchor: UIWindow,
+         appMediator: AppMediatorProtocol,
+         appSettings: AppSettings,
          continuation: Continuation? = nil) {
         self.accountURL = accountURL
+        redirectURL = appSettings.oAuthRedirectURL
         self.presentationAnchor = presentationAnchor
-        oidcRedirectURL = appSettings.oidcRedirectURL
+        self.appMediator = appMediator
         self.continuation = continuation
+        
         super.init()
     }
-
+    
     /// Presents a web authentication session for the supplied data.
     func start() {
-        let session = ASWebAuthenticationSession(url: accountURL, callback: .oidcRedirectURL(oidcRedirectURL)) { [continuation] _, error in
+        let session = ASWebAuthenticationSession(url: accountURL, callback: .oAuthRedirectURL(redirectURL)) { [continuation] _, error in
             guard let continuation else { return }
-
-            if error?.isOIDCUserCancellation == true {
+            
+            if error?.isOAuthUserCancellation == true {
                 continuation.yield(.failure(.userCancellation))
             } else {
                 let errorDescription = error.map(String.init(describing:)) ?? "Unknown error"
                 MXLog.error("A web authentication session error occurred: \(errorDescription)")
                 continuation.yield(.failure(.unknown))
             }
-
+            
             continuation.finish()
         }
-
+        
         session.prefersEphemeralWebBrowserSession = false
         session.presentationContextProvider = self
         session.additionalHeaderFields = [
             "X-Element-User-Agent": UserAgentBuilder.makeASCIIUserAgent()
         ]
-
-        session.start()
+        
+        if accountURL.scheme == "https" || accountURL.scheme == "http" {
+            session.start()
+        } else {
+            appMediator.open(accountURL)
+        }
     }
 }
 
 // MARK: ASWebAuthenticationPresentationContextProviding
 
-extension OIDCAccountSettingsPresenter: ASWebAuthenticationPresentationContextProviding {
+extension OAuthAccountSettingsPresenter: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         presentationAnchor
     }

@@ -15,7 +15,7 @@ struct SoftLogoutScreen: View {
     @FocusState private var isPasswordFocused: Bool
 
     @Bindable var context: SoftLogoutScreenViewModel.Context
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -26,8 +26,8 @@ struct SoftLogoutScreen: View {
                 switch context.viewState.loginMode {
                 case .password:
                     loginForm
-                case .oidc:
-                    oidcButton
+                case .oAuth:
+                    oAuthButton
                 default:
                     loginUnavailableText
                 }
@@ -55,8 +55,7 @@ struct SoftLogoutScreen: View {
                 .foregroundColor(.compound.textPrimary)
                 .accessibilityIdentifier(A11yIdentifiers.softLogoutScreen.title)
 
-            Text(UntranslatedL10n.softLogoutSigninNotice(context.viewState.credentials.homeserverName,
-                                                         context.viewState.credentials.userDisplayName, context.viewState.credentials.userID))
+            Text(UntranslatedL10n.softLogoutSigninNotice(context.viewState.credentials.homeserverName, context.viewState.credentials.userDisplayName, context.viewState.credentials.userID))
                 .font(.compound.bodyLG)
                 .multilineTextAlignment(.leading)
                 .foregroundColor(.compound.textPrimary)
@@ -82,9 +81,7 @@ struct SoftLogoutScreen: View {
                 .onSubmit(submit)
                 .accessibilityIdentifier(A11yIdentifiers.softLogoutScreen.password)
 
-            Button {
-                context.send(viewAction: .forgotPassword)
-            } label: {
+            Button { context.send(viewAction: .forgotPassword) } label: {
                 Text(L10n.actionForgotPassword)
                     .font(.compound.bodyLG)
             }
@@ -101,17 +98,15 @@ struct SoftLogoutScreen: View {
         }
     }
 
-    /// The OIDC button that can be used for login.
-    var oidcButton: some View {
-        Button {
-            context.send(viewAction: .continueWithOIDC)
-        } label: {
+    /// The OAuth button that can be used for login.
+    var oAuthButton: some View {
+        Button { context.send(viewAction: .continueWithOAuth) } label: {
             Text(L10n.actionContinue)
         }
         .buttonStyle(.compound(.primary))
     }
 
-    /// Text shown if neither password or OIDC login is supported.
+    /// Text shown if neither password or OAuth login is supported.
     var loginUnavailableText: some View {
         Text(L10n.screenLoginErrorUnsupportedAuthentication)
             .font(.body)

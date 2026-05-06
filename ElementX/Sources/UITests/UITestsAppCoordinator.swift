@@ -143,7 +143,7 @@ class MockScreen: Identifiable {
                                      allowOtherAccountProviders: false,
                                      hideBrandChrome: false,
                                      pushGatewayBaseURL: appSettings.pushGatewayBaseURL,
-                                     oidcRedirectURL: appSettings.oidcRedirectURL,
+                                     oAuthRedirectURL: appSettings.oAuthRedirectURL,
                                      websiteURL: appSettings.websiteURL,
                                      logoURL: appSettings.logoURL,
                                      copyrightURL: appSettings.copyrightURL,
@@ -765,6 +765,7 @@ class MockScreen: Identifiable {
             let navigationStackCoordinator = NavigationStackCoordinator()
 
             let coordinator = EncryptionResetFlowCoordinator(parameters: .init(userSession: userSession,
+                                                                               appMediator: AppMediatorMock.default,
                                                                                appSettings: ServiceLocator.shared.settings,
                                                                                userIndicatorController: userIndicatorController,
                                                                                navigationStackCoordinator: navigationStackCoordinator,
@@ -803,7 +804,7 @@ class MockScreen: Identifiable {
                     switch action {
                     case .dismiss:
                         navigationRootCoordinator.setSheetCoordinator(nil)
-                    case .requestOIDCAuthorisation:
+                    case .requestOAuthAuthorisation:
                         break
                     }
                 }

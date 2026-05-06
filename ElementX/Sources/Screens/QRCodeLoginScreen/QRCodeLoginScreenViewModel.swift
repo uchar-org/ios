@@ -13,41 +13,40 @@ typealias QRCodeLoginScreenViewModelType = StateStoreViewModel<QRCodeLoginScreen
 
 class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScreenViewModelProtocol {
     private let appMediator: AppMediatorProtocol
-
+    
     private let actionsSubject: PassthroughSubject<QRCodeLoginScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<QRCodeLoginScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     private var currentTask: AnyCancellable?
-    private var oidcResultTask: AnyCancellable?
-
+    private var oAuthResultTask: AnyCancellable?
+    
     init(mode: QRCodeLoginScreenMode,
          canSignInManually: Bool,
          appMediator: AppMediatorProtocol) {
         self.appMediator = appMediator
-
-        let initialViewState: QRCodeLoginState =
-            switch mode {
-            case .login: .loginInstructions
-            case .linkDesktop: .linkDesktopInstructions
-            case .linkMobile(let progressPublisher):
-                switch progressPublisher.value {
-                case .qrReady(let image): .displayQR(image)
-                default: .error(.unknown)
-                }
+        
+        let initialViewState: QRCodeLoginState = switch mode {
+        case .login: .loginInstructions
+        case .linkDesktop: .linkDesktopInstructions
+        case .linkMobile(let progressPublisher):
+            switch progressPublisher.value {
+            case .qrReady(let image): .displayQR(image)
+            default: .error(.unknown)
             }
-
+        }
+        
         super.init(initialViewState: .init(state: initialViewState, mode: mode, canSignInManually: canSignInManually))
         setupSubscriptions()
-
+        
         if case .linkMobile(let progressPublisher) = mode {
             listenToDisplayQRProgress(progressPublisher: progressPublisher)
         }
     }
-
+    
     // MARK: - Public
-
+    
     override func process(viewAction: QRCodeLoginScreenViewAction) {
         switch viewAction {
         case .cancel, .errorAction(.cancel):
@@ -72,9 +71,9 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
             actionsSubject.send(.signInManually)
         }
     }
-
+    
     // MARK: - Private
-
+    
     private func setupSubscriptions() {
         context.$viewState
             // not using compactMap before remove duplicates because if there is an error, and the same
@@ -97,166 +96,158 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
             }
             .store(in: &cancellables)
     }
-
+    
     private func startScanIfPossible() async {
         state.bindings.qrResult = nil
-        state.state =
-            await appMediator.requestAuthorizationIfNeeded()
-                ? .scan(.scanning) : .error(.noCameraPermission)
+        state.state = await appMediator.requestAuthorizationIfNeeded() ? .scan(.scanning) : .error(.noCameraPermission)
     }
-
+    
     private func handleScan(qrData: Data, loginService: QRCodeLoginServiceProtocol) {
         guard currentTask == nil else { return }
-
+        
         state.state = .scan(.connecting)
-
+        
         MXLog.info("Login scanning QR code")
         let progressPublisher = loginService.loginWithQRCode(data: qrData)
-
-        currentTask =
-            progressPublisher
-                .removeDuplicates()
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] completion in
-                    guard let self else { return }
-                    currentTask = nil
-
-                    switch completion {
-                    case .finished: break
-                    case .failure(.qrCodeError(let error)):
-                        handleError(error)
-                    case .failure:
-                        handleError(.unknown)
-                    }
-                } receiveValue: { [weak self] progress in
-                    MXLog.info("QR Login Progress changed to: \(progress)")
-
-                    guard let self,
-                          // Let's not advance the state if the current state is already invalid
-                          !state.state.isError
-                    else {
-                        return
-                    }
-
-                    switch progress {
-                    case .starting:
-                        break // Nothing to do, the state was set above.
-                    case .establishingSecureChannel(_, let stringCode):
-                        state.state = .displayCode(.deviceCode(stringCode))
-                    case .waitingForToken(let code):
-                        state.state = .displayCode(.verificationCode(code))
-                    case .syncingSecrets:
-                        break // Nothing to do.
-                    case .signedIn(let session):
-                        MXLog.info("QR Login completed")
-                        actionsSubject.send(.signedIn(userSession: session))
-                    }
+        
+        currentTask = progressPublisher
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self else { return }
+                currentTask = nil
+                
+                switch completion {
+                case .finished: break
+                case .failure(.qrCodeError(let error)):
+                    handleError(error)
+                case .failure:
+                    handleError(.unknown)
                 }
+            } receiveValue: { [weak self] progress in
+                MXLog.info("QR Login Progress changed to: \(progress)")
+                
+                guard let self,
+                      // Let's not advance the state if the current state is already invalid
+                      !state.state.isError else {
+                    return
+                }
+                
+                switch progress {
+                case .starting:
+                    break // Nothing to do, the state was set above.
+                case .establishingSecureChannel(_, let stringCode):
+                    state.state = .displayCode(.deviceCode(stringCode))
+                case .waitingForToken(let code):
+                    state.state = .displayCode(.verificationCode(code))
+                case .syncingSecrets:
+                    break // Nothing to do.
+                case .signedIn(let session):
+                    MXLog.info("QR Login completed")
+                    actionsSubject.send(.signedIn(userSession: session))
+                }
+            }
     }
-
+    
     private func handleScan(qrData: Data, linkService: LinkNewDeviceServiceProtocol) {
         guard currentTask == nil else { return }
-
+        
         state.state = .scan(.connecting)
-
+        
         MXLog.info("Link scanning QR code")
         let progressPublisher = linkService.linkDesktopDevice(with: qrData)
-
-        currentTask =
-            progressPublisher
-                .removeDuplicates()
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] completion in
-                    guard let self else { return }
-                    currentTask = nil
-
-                    if case .failure(let error) = completion {
-                        handleError(error)
-                    }
-                } receiveValue: { [weak self] progress in
-                    MXLog.info("Linking with QR progress changed to: \(progress)")
-
-                    guard let self,
-                          // Let's not advance the state if the current state is already invalid
-                          !state.state.isError
-                    else {
-                        return
-                    }
-
-                    switch progress {
-                    case .starting:
-                        break // Nothing to do, the state was set above.
-                    case .establishingSecureChannel(let checkCodeString):
-                        state.state = .displayCode(.deviceCode(checkCodeString))
-                    case .waitingForAuthorisation(let url):
-                        requestOIDCAuthorization(url: url)
-                    case .syncingSecrets:
-                        break // Nothing to do.
-                    case .done:
-                        MXLog.info("Link with QR code completed.")
-                        actionsSubject.send(.linkedDevice)
-                    }
+        
+        currentTask = progressPublisher
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self else { return }
+                currentTask = nil
+                
+                if case .failure(let error) = completion {
+                    handleError(error)
                 }
+            } receiveValue: { [weak self] progress in
+                MXLog.info("Linking with QR progress changed to: \(progress)")
+                
+                guard let self,
+                      // Let's not advance the state if the current state is already invalid
+                      !state.state.isError else {
+                    return
+                }
+                
+                switch progress {
+                case .starting:
+                    break // Nothing to do, the state was set above.
+                case .establishingSecureChannel(let checkCodeString):
+                    state.state = .displayCode(.deviceCode(checkCodeString))
+                case .waitingForAuthorisation(let url):
+                    requestOAuthAuthorization(url: url)
+                case .syncingSecrets:
+                    break // Nothing to do.
+                case .done:
+                    MXLog.info("Link with QR code completed.")
+                    actionsSubject.send(.linkedDevice)
+                }
+            }
     }
-
+    
     private func listenToDisplayQRProgress(progressPublisher: LinkNewDeviceService.LinkMobileProgressPublisher) {
         state.bindings.qrResult = nil
-
+            
         MXLog.info("Link showing QR code.")
-
-        currentTask =
-            progressPublisher
-                .removeDuplicates()
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] completion in
-                    guard let self else { return }
-                    currentTask = nil
-
-                    if case .failure(let error) = completion {
-                        handleError(error)
-                    }
-                } receiveValue: { [weak self] progress in
-                    MXLog.info("Linking with QR progress changed to: \(progress)")
-
-                    guard let self,
-                          // Let's not advance the state if the current state is already invalid
-                          !state.state.isError
-                    else {
-                        return
-                    }
-
-                    switch progress {
-                    case .starting, .qrReady:
-                        break // Nothing to do, we are already showing the code by the time this method is called.
-                    case .qrScanned(let checkCodeSender):
-                        state.state = .confirmCode(.inputCode(checkCodeSender))
-                    case .waitingForAuthorisation(let url):
-                        requestOIDCAuthorization(url: url)
-                    case .syncingSecrets:
-                        break // Nothing to do.
-                    case .done:
-                        MXLog.info("Link with QR code completed.")
-                        actionsSubject.send(.linkedDevice)
-                    }
+        
+        currentTask = progressPublisher
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self else { return }
+                currentTask = nil
+                
+                if case .failure(let error) = completion {
+                    handleError(error)
                 }
+            } receiveValue: { [weak self] progress in
+                MXLog.info("Linking with QR progress changed to: \(progress)")
+                
+                guard let self,
+                      // Let's not advance the state if the current state is already invalid
+                      !state.state.isError else {
+                    return
+                }
+                
+                switch progress {
+                case .starting, .qrReady:
+                    break // Nothing to do, we are already showing the code by the time this method is called.
+                case .qrScanned(let checkCodeSender):
+                    state.state = .confirmCode(.inputCode(checkCodeSender))
+                case .waitingForAuthorisation(let url):
+                    requestOAuthAuthorization(url: url)
+                case .syncingSecrets:
+                    break // Nothing to do.
+                case .done:
+                    MXLog.info("Link with QR code completed.")
+                    actionsSubject.send(.linkedDevice)
+                }
+            }
     }
-
+    
     private func sendCheckCode() async {
-        guard case .confirmCode(.inputCode(let checkCodeSender)) = state.state else {
+        guard case let .confirmCode(.inputCode(checkCodeSender)) = state.state else {
             fatalError("Attempting to check code from the wrong state.")
         }
-
+        
         let stringValue = state.bindings.checkCodeInput
         let code = UInt8(stringValue) ?? 0
-
+        
         if !checkCodeSender.validate(checkCode: code) {
             MXLog.error("Invalid code entered.")
             state.state = .confirmCode(.invalidCode)
             return
         }
-
+        
         state.state = .confirmCode(.sendingCode)
-
+        
         do {
             MXLog.info("Valid code entered, sending.")
             try await checkCodeSender.send(code: code)
@@ -265,12 +256,12 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
             handleError(.unknown)
         }
     }
-
-    private func requestOIDCAuthorization(url: URL) {
-        let (stream, continuation) = AsyncStream<Result<Void, OIDCError>>.makeStream()
-        actionsSubject.send(.requestOIDCAuthorisation(url, continuation))
-
-        oidcResultTask = Task { [weak self] in
+    
+    private func requestOAuthAuthorization(url: URL) {
+        let (stream, continuation) = AsyncStream<Result<Void, OAuthError>>.makeStream()
+        actionsSubject.send(.requestOAuthAuthorisation(url, continuation))
+        
+        oAuthResultTask = Task { [weak self] in
             for await result in stream {
                 guard let self else { return }
                 switch result {
@@ -286,7 +277,7 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
         }
         .asCancellable()
     }
-
+    
     private func handleError(_ error: QRCodeLoginError) {
         MXLog.error("Failed to scan the QR code: \(error)")
         switch error {
@@ -314,10 +305,9 @@ class QRCodeLoginScreenViewModel: QRCodeLoginScreenViewModelType, QRCodeLoginScr
             state.state = .error(.unknown)
         }
     }
-
+        
     /// Only for mocking initial states
-    fileprivate init(state: QRCodeLoginState, mode: QRCodeLoginScreenMode, canSignInManually: Bool,
-                     checkCodeInput: String) {
+    fileprivate init(state: QRCodeLoginState, mode: QRCodeLoginScreenMode, canSignInManually: Bool, checkCodeInput: String) {
         appMediator = AppMediatorMock.default
         super.init(initialViewState: .init(state: state,
                                            mode: mode,

@@ -14,7 +14,10 @@ import MatrixRustSDK
 enum AppRoute: Hashable {
     /// An account provisioning link generated externally.
     case accountProvisioningLink(AccountProvisioningParameters)
-
+    /// An external callback used to complete login with OAuth. This is only used when authentication
+    /// requires an external app so cannot be handled directly by the web authentication session.
+    case oAuthCallback(url: URL)
+    
     /// The app's home screen.
     case roomList
     /// A room, shown as the root of the stack (popping any child rooms).
@@ -53,11 +56,12 @@ enum AppRoute: Hashable {
     case thread(roomID: String, threadRootEventID: String, focusEventID: String?)
     /// The global search screen
     case globalSearch
-
+    
     /// Whether or not the route should be handled by the authentication flow.
     var isAuthenticationRoute: Bool {
         switch self {
         case .accountProvisioningLink: true
+        case .oAuthCallback: true
         default: false
         }
     }
@@ -67,7 +71,7 @@ enum AppRoute: Hashable {
 struct AccountProvisioningParameters: Hashable {
     let accountProvider: String
     let loginHint: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case accountProvider = "account_provider"
         case loginHint = "login_hint"
@@ -76,23 +80,24 @@ struct AccountProvisioningParameters: Hashable {
 
 struct AppRouteURLParser {
     let urlParsers: [URLParser]
-
+    
     init(appSettings: AppSettings) {
         urlParsers = [
             AppGroupURLParser(),
             MatrixPermalinkParser(),
             ElementWebURLParser(domains: appSettings.elementWebHosts),
-            AccountProvisioningURLParser(domain: appSettings.accountProvisioningHost)
+            AccountProvisioningURLParser(domain: appSettings.accountProvisioningHost),
+            OAuthCallbackURLParser(redirectURL: appSettings.oAuthRedirectURL)
         ]
     }
-
+    
     func route(from url: URL) -> AppRoute? {
         for parser in urlParsers {
             if let appRoute = parser.route(from: url) {
                 return appRoute
             }
         }
-
+        
         return nil
     }
 }
@@ -112,18 +117,16 @@ private struct AppGroupURLParser: URLParser {
     func route(from url: URL) -> AppRoute? {
         guard let scheme = url.scheme,
               scheme == InfoPlistReader.app.appScheme,
-              url.pathComponents.last == ShareExtensionConstants.urlPath
-        else {
+              url.pathComponents.last == ShareExtensionConstants.urlPath else {
             return nil
         }
-
+        
         guard let query = url.query(percentEncoded: false),
-              let queryData = query.data(using: .utf8)
-        else {
+              let queryData = query.data(using: .utf8) else {
             MXLog.error("Failed processing share parameters")
             return nil
         }
-
+        
         do {
             let payload = try JSONDecoder().decode(ShareExtensionPayload.self, from: queryData)
             return .share(payload)
@@ -137,7 +140,7 @@ private struct AppGroupURLParser: URLParser {
 private struct MatrixPermalinkParser: URLParser {
     func route(from url: URL) -> AppRoute? {
         guard let entity = parseMatrixEntityFrom(uri: url.absoluteString) else { return nil }
-
+        
         switch entity.id {
         case .room(let id):
             return .room(roomID: id, via: entity.via)
@@ -156,29 +159,29 @@ private struct MatrixPermalinkParser: URLParser {
 private struct ElementWebURLParser: URLParser {
     let domains: [String]
     let paths = ["room", "user"]
-
+    
     private let permalinkParser = MatrixPermalinkParser()
-
+    
     func route(from url: URL) -> AppRoute? {
         guard let matrixToURL = buildMatrixToURL(from: url) else { return nil }
         return permalinkParser.route(from: matrixToURL)
     }
-
+    
     private func buildMatrixToURL(from url: URL) -> URL? {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return url
         }
-
+        
         for domain in domains where domain == url.host {
             components.host = "matrix.to"
             for path in paths {
                 components.fragment?.replace("/\(path)", with: "")
             }
-
+            
             guard let matrixToURL = components.url else { continue }
             return matrixToURL
         }
-
+        
         return url
     }
 }
@@ -186,22 +189,27 @@ private struct ElementWebURLParser: URLParser {
 /// The parser for user provisioning links.
 private struct AccountProvisioningURLParser: URLParser {
     let domain: String
-
+    
     func route(from url: URL) -> AppRoute? {
         guard url.host() == domain else { return nil }
-
+        
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let serverName = components.queryItems?.first(where: {
-                  $0.name == AccountProvisioningParameters.CodingKeys.accountProvider.rawValue
-              })?.value
-        else {
+              let serverName = components.queryItems?.first(where: { $0.name == AccountProvisioningParameters.CodingKeys.accountProvider.rawValue })?.value else {
             return nil
         }
-
-        let loginHint = components.queryItems?.first {
-            $0.name == AccountProvisioningParameters.CodingKeys.loginHint.rawValue
-        }?.value
-
+        
+        let loginHint = components.queryItems?.first { $0.name == AccountProvisioningParameters.CodingKeys.loginHint.rawValue }?.value
+        
         return .accountProvisioningLink(.init(accountProvider: serverName, loginHint: loginHint))
+    }
+}
+
+/// The parser for the OAuth callback URL. This always returns an `.oAuthCallback`.
+struct OAuthCallbackURLParser: URLParser {
+    let redirectURL: URL
+    
+    func route(from url: URL) -> AppRoute? {
+        guard url.absoluteString.starts(with: redirectURL.absoluteString) else { return nil }
+        return .oAuthCallback(url: url)
     }
 }

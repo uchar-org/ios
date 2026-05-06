@@ -122,7 +122,8 @@ final class RoomMembersFlowCoordinator: FlowCoordinatorProtocol {
             }
         case .roomAlias, .childRoomAlias, .eventOnRoomAlias, .childEventOnRoomAlias:
             break // These are converted to a room ID route one level above.
-        case .accountProvisioningLink, .roomList, .room, .roomDetails, .event,
+        case .accountProvisioningLink, .oAuthCallback,
+             .roomList, .room, .roomDetails, .event,
              .userProfile, .call, .settings, .chatBackupSettings,
              .share, .transferOwnership, .thread, .globalSearch:
             break

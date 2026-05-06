@@ -12,29 +12,27 @@ import SwiftUI
 
 typealias EncryptionResetScreenViewModelType = StateStoreViewModelV2<EncryptionResetScreenViewState, EncryptionResetScreenViewAction>
 
-class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType,
-    EncryptionResetScreenViewModelProtocol {
+class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType, EncryptionResetScreenViewModelProtocol {
     private let clientProxy: ClientProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
-
-    private let actionsSubject: PassthroughSubject<EncryptionResetScreenViewModelAction, Never> =
-        .init()
+    
+    private let actionsSubject: PassthroughSubject<EncryptionResetScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<EncryptionResetScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     private var identityResetHandle: IdentityResetHandle?
     private var passwordCancellable: AnyCancellable?
 
     init(clientProxy: ClientProxyProtocol, userIndicatorController: UserIndicatorControllerProtocol) {
         self.clientProxy = clientProxy
         self.userIndicatorController = userIndicatorController
-
+        
         super.init(initialViewState: EncryptionResetScreenViewState(bindings: .init()))
     }
-
+    
     // MARK: - Public
-
+    
     override func process(viewAction: EncryptionResetScreenViewAction) {
         switch viewAction {
         case .reset:
@@ -49,22 +47,22 @@ class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType,
             actionsSubject.send(.cancel)
         }
     }
-
+    
     func stop() {
         Task {
             await identityResetHandle?.cancel()
         }
     }
-
+    
     // MARK: - Private
-
+    
     private func startResetFlow() async {
         showLoadingIndicator()
-
+        
         defer {
             hideLoadingIndicator()
         }
-
+        
         switch await clientProxy.resetIdentity() {
         case .success(let handle):
             // If the handle is missing then interactive authentication wasn't
@@ -73,9 +71,9 @@ class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType,
                 actionsSubject.send(.resetFinished)
                 return
             }
-
+            
             identityResetHandle = handle
-
+            
             switch handle.authType() {
             case .uiaa:
                 let passwordPublisher = PassthroughSubject<String, Never>()
@@ -84,36 +82,36 @@ class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType,
                     passwordCancellable = nil
                     Task { await self.resetWith(password: password) }
                 }
-
+                
                 actionsSubject.send(.requestPassword(passwordPublisher: passwordPublisher))
             case .oAuth(let oAuthInfo):
                 guard let url = URL(string: oAuthInfo.approvalUrl) else {
                     fatalError("Invalid URL received through identity reset handle: \(oAuthInfo.approvalUrl)")
                 }
-
+                
                 hideLoadingIndicator()
-
-                actionsSubject.send(.requestOIDCAuthorisation(url: url))
-
-                await resetWithOIDCAuthorisation()
+                
+                actionsSubject.send(.requestOAuthAuthorisation(url: url))
+                
+                await resetWithOAuthAuthorisation()
             }
         case .failure(let error):
             MXLog.error("Failed resetting encryption with error \(error)")
             showErrorToast()
         }
     }
-
+    
     func resetWith(password: String) async {
         guard let identityResetHandle else {
             fatalError("Requested reset flow continuation without a stored handle")
         }
-
+        
         showLoadingIndicator()
-
+        
         defer {
             hideLoadingIndicator()
         }
-
+        
         do {
             try await identityResetHandle.reset(auth: .password(passwordDetails: .init(identifier: clientProxy.userID, password: password)))
             actionsSubject.send(.resetFinished)
@@ -122,12 +120,12 @@ class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType,
             showErrorToast()
         }
     }
-
-    private func resetWithOIDCAuthorisation() async {
+    
+    private func resetWithOAuthAuthorisation() async {
         guard let identityResetHandle else {
             fatalError("Requested reset flow continuation without a stored handle")
         }
-
+        
         do {
             try await identityResetHandle.reset(auth: nil)
             actionsSubject.send(.resetFinished)
@@ -136,22 +134,22 @@ class EncryptionResetScreenViewModel: EncryptionResetScreenViewModelType,
             showErrorToast()
         }
     }
-
+    
     // MARK: Toasts and loading indicators
-
+    
     private static let loadingIndicatorIdentifier = "\(EncryptionResetScreenViewModel.self)-Loading"
-
+    
     private func showLoadingIndicator() {
         userIndicatorController.submitIndicator(UserIndicator(id: Self.loadingIndicatorIdentifier,
                                                               type: .modal,
                                                               title: L10n.commonLoading,
                                                               persistent: true))
     }
-
+    
     private func hideLoadingIndicator() {
         userIndicatorController.retractIndicatorWithId(Self.loadingIndicatorIdentifier)
     }
-
+    
     private func showErrorToast() {
         userIndicatorController.submitIndicator(UserIndicator(title: L10n.errorUnknown))
     }

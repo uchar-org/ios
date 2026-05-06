@@ -15,23 +15,21 @@ struct SoftLogoutScreenViewModelTests {
                                                           homeserverName: "https://example.com",
                                                           userDisplayName: "mock_username",
                                                           deviceID: "ABCDEFGH")
-
+    
     @Test
     func initialStateForBasicServer() {
         let viewModel = SoftLogoutScreenViewModel(credentials: credentials,
                                                   homeserver: .mockBasicServer,
                                                   keyBackupNeeded: false)
         let context = viewModel.context
-
+        
         // Given a view model where the user hasn't yet sent the verification email.
         #expect(context.password.isEmpty, "The view model should start with an empty password.")
         #expect(!context.viewState.canSubmit, "The view model should start with an invalid password.")
-        #expect(context.viewState.loginMode == .password,
-                "The view model should show login form for the given homeserver.")
-        #expect(!context.viewState.showRecoverEncryptionKeysMessage,
-                "The view model should not show recover encryption keys message.")
+        #expect(context.viewState.loginMode == .password, "The view model should show login form for the given homeserver.")
+        #expect(!context.viewState.showRecoverEncryptionKeysMessage, "The view model should not show recover encryption keys message.")
     }
-
+    
     @Test
     func initialStateForBasicServerPasswordEntered() {
         let viewModel = SoftLogoutScreenViewModel(credentials: credentials,
@@ -42,28 +40,24 @@ struct SoftLogoutScreenViewModelTests {
 
         // Given a view model where the user hasn't yet sent the verification email.
         #expect(context.viewState.canSubmit, "The view model should start with a valid password.")
-        #expect(context.viewState.loginMode == .password,
-                "The view model should show login form for the given homeserver.")
-        #expect(context.viewState.showRecoverEncryptionKeysMessage,
-                "The view model should show recover encryption keys message.")
+        #expect(context.viewState.loginMode == .password, "The view model should show login form for the given homeserver.")
+        #expect(context.viewState.showRecoverEncryptionKeysMessage, "The view model should show recover encryption keys message.")
     }
 
     @Test
-    func initialStateForOIDC() {
+    func initialStateForOAuth() {
         let viewModel = SoftLogoutScreenViewModel(credentials: credentials,
                                                   homeserver: .mockMatrixDotOrg,
                                                   keyBackupNeeded: false)
         let context = viewModel.context
-
+        
         // Given a view model where the user hasn't yet sent the verification email.
         #expect(context.password.isEmpty, "The view model should start with an empty password.")
         #expect(!context.viewState.canSubmit, "The view model should start with an invalid password.")
-        #expect(context.viewState.loginMode.supportsOIDCFlow,
-                "The view model should show OIDC button for the given homeserver.")
-        #expect(!context.viewState.showRecoverEncryptionKeysMessage,
-                "The view model should not show recover encryption keys message.")
+        #expect(context.viewState.loginMode.supportsOAuthFlow, "The view model should show OAuth button for the given homeserver.")
+        #expect(!context.viewState.showRecoverEncryptionKeysMessage, "The view model should not show recover encryption keys message.")
     }
-
+    
     @Test
     func initialStateForUnsupported() {
         let viewModel = SoftLogoutScreenViewModel(credentials: credentials,
@@ -74,9 +68,7 @@ struct SoftLogoutScreenViewModelTests {
         // Given a view model where the user hasn't yet sent the verification email.
         #expect(context.password.isEmpty, "The view model should start with an empty password.")
         #expect(!context.viewState.canSubmit, "The view model should start with an invalid password.")
-        #expect(context.viewState.loginMode == .unsupported,
-                "The view model should show unsupported text for the given homeserver.")
-        #expect(!context.viewState.showRecoverEncryptionKeysMessage,
-                "The view model should not show recover encryption keys message.")
+        #expect(context.viewState.loginMode == .unsupported, "The view model should show unsupported text for the given homeserver.")
+        #expect(!context.viewState.showRecoverEncryptionKeysMessage, "The view model should not show recover encryption keys message.")
     }
 }

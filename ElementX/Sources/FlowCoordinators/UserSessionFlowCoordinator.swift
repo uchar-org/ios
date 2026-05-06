@@ -124,8 +124,8 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         MXLog.info("Handling app route: \(appRoute)")
         
         switch appRoute {
-        case .accountProvisioningLink:
-            break // We always ignore this flow when logged in.
+        case .accountProvisioningLink, .oAuthCallback:
+            break // We always ignore these flows when logged in.
         case .settings, .chatBackupSettings:
             navigationTabCoordinator.selectedTab = .settings
             settingsTabFlowCoordinator.handleAppRoute(appRoute, animated: animated)
