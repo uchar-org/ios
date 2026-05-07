@@ -60,13 +60,17 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
         actionsSubject.eraseToAnyPublisher()
     }
     
+    private let languageManager: LanguageManager
+    
     init(isNewLogin: Bool,
          navigationRootCoordinator: NavigationRootCoordinator,
          appLockService: AppLockServiceProtocol,
-         flowParameters: CommonFlowParameters) {
+         flowParameters: CommonFlowParameters,
+         languageManager: LanguageManager) {
         self.navigationRootCoordinator = navigationRootCoordinator
         self.appLockService = appLockService
         self.flowParameters = flowParameters
+        self.languageManager = languageManager
         
         navigationTabCoordinator = NavigationTabCoordinator()
         navigationRootCoordinator.setRootCoordinator(navigationTabCoordinator)
@@ -282,6 +286,19 @@ class UserSessionFlowCoordinator: FlowCoordinatorProtocol {
                 }
             }
             .store(in: &cancellables)
+        
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateTabTitles()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateTabTitles() {
+        chatsTabDetails.title = L10n.screenHomeTabChats
+        spacesTabDetails.title = L10n.screenHomeTabSpaces
+        settingsTabDetails.title = L10n.commonSettings
     }
     
     // MARK: - Onboarding

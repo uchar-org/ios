@@ -64,8 +64,11 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
     private var storedAppRoute: AppRoute?
     @Consumable private var storedInlineReply: (roomID: String, message: String)?
     @Consumable private var storedRoomsToAwait: Set<String>?
+    
+    private let languageManager: LanguageManager
 
-    init(appDelegate: AppDelegate) {
+    init(appDelegate: AppDelegate, languageManager: LanguageManager) {
+        self.languageManager = languageManager
         let appHooks = AppHooks()
         appHooks.setUp()
 
@@ -785,7 +788,8 @@ class AppCoordinator: AppCoordinatorProtocol, AuthenticationFlowCoordinatorDeleg
         let userSessionFlowCoordinator = UserSessionFlowCoordinator(isNewLogin: isNewLogin,
                                                                     navigationRootCoordinator: navigationRootCoordinator,
                                                                     appLockService: appLockFlowCoordinator.appLockService,
-                                                                    flowParameters: flowParameters)
+                                                                    flowParameters: flowParameters,
+                                                                    languageManager: languageManager)
 
         userSessionFlowCoordinator.actionsPublisher
             .sink { [weak self] action in

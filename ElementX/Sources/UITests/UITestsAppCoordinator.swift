@@ -21,8 +21,11 @@ class UITestsAppCoordinator: AppCoordinatorProtocol, SecureWindowManagerDelegate
     private var alternateWindowMockScreen: MockScreen?
 
     let windowManager: SecureWindowManagerProtocol
+    
+    private let languageManager: LanguageManager
 
-    init(appDelegate: AppDelegate) {
+    init(appDelegate: AppDelegate, languageManager: LanguageManager) {
+        self.languageManager = languageManager
         windowManager = WindowManager(appDelegate: appDelegate)
         // disabling View animations
         UIView.setAnimationsEnabled(false)
@@ -655,7 +658,7 @@ class MockScreen: Identifiable {
                                                                                                   analytics: ServiceLocator.shared.analytics,
                                                                                                   userIndicatorController: UserIndicatorControllerMock(),
                                                                                                   notificationManager: NotificationManagerMock(),
-                                                                                                  stateMachineFactory: StateMachineFactory()))
+                                                                                                  stateMachineFactory: StateMachineFactory()), languageManager: LanguageManager())
 
             flowCoordinator.start()
 

@@ -19,6 +19,8 @@ struct SettingsScreen: View {
             !context.viewState.showLinkNewDeviceButton
     }
     
+    @Environment(LanguageManager.self) var languageManager
+    
     var body: some View {
         Form {
             userSection
@@ -87,6 +89,13 @@ struct SettingsScreen: View {
                     })
                     .accessibilityIdentifier(A11yIdentifiers.settingsScreen.notifications)
             
+            ListRow(label: .default(title: L10n.languageTitle,
+                                    icon: Image(systemName: "globe")),
+                    kind: .navigationLink {
+                        context.send(viewAction: .languageViewAction)
+                    })
+                    .accessibilityIdentifier(A11yIdentifiers.settingsScreen.language)
+                        
             ListRow(label: .default(title: L10n.commonScreenLock,
                                     icon: \.lock),
                     kind: .navigationLink {

@@ -109,6 +109,8 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
                     presentLegalInformationScreen()
                 case .blockedUsers:
                     presentBlockedUsersScreen()
+                case .language:
+                    presenetLanguageSettings()
                 case .notifications:
                     presentNotificationSettings()
                 case .advancedSettings:
@@ -236,6 +238,11 @@ class SettingsFlowCoordinator: FlowCoordinatorProtocol {
         let coordinator = BlockedUsersScreenCoordinator(parameters: .init(hideProfiles: flowParameters.appSettings.hideIgnoredUserProfiles,
                                                                           userSession: flowParameters.userSession,
                                                                           userIndicatorController: flowParameters.userIndicatorController))
+        navigationStackCoordinator.push(coordinator)
+    }
+    
+    private func presenetLanguageSettings() {
+        let coordinator = LanguageScreenCoordinator()
         navigationStackCoordinator.push(coordinator)
     }
         

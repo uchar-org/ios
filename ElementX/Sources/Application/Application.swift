@@ -21,13 +21,13 @@ struct Application: App {
 
     init() {
         if ProcessInfo.isRunningUITests {
-            appCoordinator = UITestsAppCoordinator(appDelegate: appDelegate)
+            appCoordinator = UITestsAppCoordinator(appDelegate: appDelegate, languageManager: languageManager)
         } else if ProcessInfo.isRunningUnitTests {
             appCoordinator = UnitTestsAppCoordinator(appDelegate: appDelegate)
         } else if ProcessInfo.isRunningAccessibilityTests {
             appCoordinator = AccessibilityTestsAppCoordinator(appDelegate: appDelegate)
         } else {
-            appCoordinator = AppCoordinator(appDelegate: appDelegate)
+            appCoordinator = AppCoordinator(appDelegate: appDelegate, languageManager: languageManager)
         }
 
         SceneDelegate.windowManager = appCoordinator.windowManager
