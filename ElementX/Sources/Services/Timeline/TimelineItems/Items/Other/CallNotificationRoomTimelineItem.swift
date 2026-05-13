@@ -13,8 +13,11 @@ struct CallNotificationRoomTimelineItem: RoomTimelineItemProtocol, Equatable {
     let timestamp: Date
     let isEditable: Bool
     let canBeRepliedTo: Bool
-
-    let sender: TimelineItemSender
-
+    
+    let isDM: Bool
+    let isDeclinedByMe: Bool
+    let isDeclined: Bool
+    let isVoiceCall: Bool
+    
     var properties = RoomTimelineItemProperties()
 }

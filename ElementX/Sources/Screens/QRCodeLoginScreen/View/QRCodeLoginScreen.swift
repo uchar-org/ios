@@ -7,15 +7,14 @@
 //
 
 import Compound
-import MatrixRustSDKMocks
 import SwiftUI
 
 struct QRCodeLoginScreen: View {
     @ObservedObject var context: QRCodeLoginScreenViewModel.Context
-
+    
     @State private var qrFrame = CGRect.zero
     @FocusState private var checkCodeInputFocus
-
+    
     var backgroundStyle: Color {
         if case .error = context.viewState.state {
             .compound.bgCanvasDefault
@@ -23,7 +22,7 @@ struct QRCodeLoginScreen: View {
             .compound.bgSubtleSecondary
         }
     }
-
+    
     var body: some View {
         mainContent
             .toolbar { toolbar }
@@ -33,7 +32,7 @@ struct QRCodeLoginScreen: View {
             .interactiveDismissDisabled()
             .navigationBarBackButtonHidden(!context.viewState.shouldDisplayBackButton)
     }
-
+    
     @ViewBuilder
     var mainContent: some View {
         switch context.viewState.state {
@@ -55,7 +54,7 @@ struct QRCodeLoginScreen: View {
             }
         }
     }
-
+    
     private var loginInstructionsContent: some View {
         FullscreenDialog(topPadding: 24, horizontalPadding: 24) {
             VStack(alignment: .leading, spacing: 40) {
@@ -63,7 +62,7 @@ struct QRCodeLoginScreen: View {
                              subtitle: L10n.screenQrCodeLoginInitialStateSubtitle,
                              icon: \.computer,
                              iconStyle: .default)
-
+                
                 SFNumberedListView(items: context.viewState.instructions.loginItems)
             }
         } bottomContent: {
@@ -73,14 +72,14 @@ struct QRCodeLoginScreen: View {
             .buttonStyle(.compound(.primary))
         }
     }
-
+    
     private var linkDesktopInstructionsContent: some View {
         FullscreenDialog(topPadding: 24, horizontalPadding: 24) {
             VStack(alignment: .leading, spacing: 40) {
                 TitleAndIcon(title: L10n.screenLinkNewDeviceDesktopTitle(InfoPlistReader.main.productionAppName),
                              icon: \.computer,
                              iconStyle: .default)
-
+                
                 SFNumberedListView(items: context.viewState.instructions.linkDesktopItems)
             }
         } bottomContent: {
@@ -90,25 +89,25 @@ struct QRCodeLoginScreen: View {
             .buttonStyle(.compound(.primary))
         }
     }
-
+    
     @ViewBuilder
     private var displayCodeContent: some View {
-        if case .displayCode(let displayCodeState) = context.viewState.state {
+        if case let .displayCode(displayCodeState) = context.viewState.state {
             FullscreenDialog(topPadding: 24) {
                 VStack(spacing: 32) {
                     VStack(spacing: 24) {
                         displayCodeHeader(state: displayCodeState)
                             .padding(.horizontal, 8)
-
+                        
                         PINTextField(pinCode: .constant(displayCodeState.code),
                                      maxLength: displayCodeState.code.count,
                                      size: .small)
                             .disabled(true)
                     }
-
+                    
                     VStack(spacing: 4) {
                         ProgressView()
-
+                        
                         Text(L10n.screenQrCodeLoginVerifyCodeLoading)
                             .foregroundColor(.compound.textSecondary)
                             .font(.compound.bodySM)
@@ -123,7 +122,7 @@ struct QRCodeLoginScreen: View {
             }
         }
     }
-
+    
     private func displayCodeHeader(state: QRCodeLoginState.DisplayCodeState) -> some View {
         switch state {
         case .deviceCode:
@@ -138,24 +137,24 @@ struct QRCodeLoginScreen: View {
                          iconStyle: .default)
         }
     }
-
+    
     private var qrScannerContent: some View {
         FullscreenDialog(topPadding: 24) {
             VStack(spacing: 40) {
                 TitleAndIcon(title: L10n.screenQrCodeLoginScanningStateTitle,
                              icon: \.takePhotoSolid,
                              iconStyle: .default)
-
+                
                 qrScanner
             }
         } bottomContent: {
             qrScannerFooter
         }
     }
-
+    
     @ViewBuilder
     private var qrScannerFooter: some View {
-        if case .scan(let scanState) = context.viewState.state {
+        if case let .scan(scanState) = context.viewState.state {
             switch scanState {
             case .connecting:
                 VStack(spacing: 4) {
@@ -176,7 +175,7 @@ struct QRCodeLoginScreen: View {
                         context.send(viewAction: .startScan)
                     }
                     .buttonStyle(.compound(.primary))
-
+                    
                     VStack(spacing: 4) {
                         Label(error.title,
                               icon: \.errorSolid,
@@ -185,7 +184,7 @@ struct QRCodeLoginScreen: View {
                             .labelStyle(.custom(spacing: 10))
                             .font(.compound.bodyMDSemibold)
                             .foregroundColor(.compound.textCriticalPrimary)
-
+                        
                         Text(error.description)
                             .foregroundColor(.compound.textSecondary)
                             .font(.compound.bodySM)
@@ -196,7 +195,7 @@ struct QRCodeLoginScreen: View {
             }
         }
     }
-
+    
     private var qrScanner: some View {
         QRCodeScannerView(result: $context.qrResult, isScanning: context.viewState.state.isScanning)
             .aspectRatio(1.0, contentMode: .fill)
@@ -205,49 +204,56 @@ struct QRCodeLoginScreen: View {
             .background(.compound.bgCanvasDefault)
             .overlay(QRScannerViewOverlay(length: qrFrame.height))
     }
-
+    
     @ViewBuilder
     private var displayQRContent: some View {
-        if case .displayQR(let image) = context.viewState.state {
+        if case let .displayQR(qrState) = context.viewState.state {
             FullscreenDialog(topPadding: 24, horizontalPadding: 24) {
                 VStack(spacing: 32) {
                     TitleAndIcon(title: L10n.screenLinkNewDeviceMobileTitle(InfoPlistReader.main.productionAppName),
                                  icon: \.takePhotoSolid,
                                  iconStyle: .default)
-
-                    Image(uiImage: image)
-                        .interpolation(.none) // to stop it getting blurred
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .accessibilityLabel(L10n.a11yQrCode)
-
+                    
+                    switch qrState {
+                    case .active(let image):
+                        Image(uiImage: image)
+                            .interpolation(.none) // to stop it getting blurred
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 200)
+                            .accessibilityLabel(L10n.a11yQrCode)
+                    case .expired:
+                        ProgressView()
+                            .controlSize(.large)
+                            .frame(width: 200, height: 200)
+                    }
+                    
                     SFNumberedListView(items: context.viewState.instructions.linkMobileItems)
                 }
             } bottomContent: { }
         }
     }
-
+    
     @ViewBuilder
     private var confirmCodeContent: some View {
-        if case .confirmCode(let confirmCode) = context.viewState.state {
+        if case let .confirmCode(confirmCode) = context.viewState.state {
             FullscreenDialog(topPadding: 24, horizontalPadding: 24) {
                 VStack(spacing: 24) {
                     TitleAndIcon(title: L10n.screenLinkNewDeviceEnterNumberTitle,
                                  subtitle: L10n.screenLinkNewDeviceEnterNumberSubtitle,
                                  icon: \.computer,
                                  iconStyle: .default)
-
+                    
                     VStack(spacing: 10) {
                         Text(L10n.screenLinkNewDeviceEnterNumberNotice)
                             .font(.compound.bodyMDSemibold)
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.compound.textSecondary)
-
+                        
                         PINTextField(pinCode: $context.checkCodeInput, maxLength: 2, size: .medium)
                             .focused($checkCodeInputFocus)
                             .disabled(confirmCode.isSending)
-
+                        
                         if case .confirmCode(.invalidCode) = context.viewState.state {
                             Label(L10n.screenLinkNewDeviceEnterNumberErrorNumbersDoNotMatch,
                                   icon: \.errorSolid,
@@ -277,7 +283,7 @@ struct QRCodeLoginScreen: View {
             .onAppear { checkCodeInputFocus = true }
         }
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
@@ -292,73 +298,72 @@ struct QRCodeLoginScreen: View {
 
 private struct QRScannerViewOverlay: View {
     let length: CGFloat
-
+    
     private let dashRatio: CGFloat = 80.0 / 312.0
     private let emptyRatio: CGFloat = 232.0 / 312.0
     private let dashPhaseRatio: CGFloat = 40.0 / 312.0
-
+    
     private var dashLength: CGFloat {
         length * dashRatio
     }
-
+    
     private var emptyLength: CGFloat {
         length * emptyRatio
     }
-
+    
     private var dashPhase: CGFloat {
         length * dashPhaseRatio
     }
-
+    
     var body: some View {
         Rectangle()
-            .stroke(.compound.textPrimary,
-                    style: StrokeStyle(lineWidth: 6.0, lineCap: .square, dash: [dashLength, emptyLength], dashPhase: dashPhase))
+            .stroke(.compound.textPrimary, style: StrokeStyle(lineWidth: 6.0, lineCap: .square, dash: [dashLength, emptyLength], dashPhase: dashPhase))
     }
 }
 
 // MARK: - Previews
 
+import MatrixRustSDKMocks
+
 struct QRCodeLoginScreen_Previews: PreviewProvider, TestablePreview {
-    /// Instructions
+    // Instructions
     static let loginInstructionsStateViewModel = QRCodeLoginScreenViewModel.mock(state: .loginInstructions)
     static let linkInstructionsStateViewModel = QRCodeLoginScreenViewModel.mock(state: .linkDesktopInstructions)
-
+    
     /// Scanning
     static let scanningStateViewModel = QRCodeLoginScreenViewModel.mock(state: .scan(.scanning))
-
+    
     static let connectingStateViewModel = QRCodeLoginScreenViewModel.mock(state: .scan(.connecting))
-
+    
     static let invalidStateViewModel = QRCodeLoginScreenViewModel.mock(state: .scan(.scanFailed(.invalid)))
-
+    
     static let notAllowedStateViewModel = QRCodeLoginScreenViewModel.mock(state: .scan(.scanFailed(.notAllowed(scannedProvider: "evil.com",
-                                                                                                               allowedProviders: [
-                                                                                                                   "example.com",
-                                                                                                                   "server.net"
-                                                                                                               ]))))
-
+                                                                                                               allowedProviders: ["example.com",
+                                                                                                                                  "server.net"]))))
+    
     static let deviceNotSignedInStateViewModel = QRCodeLoginScreenViewModel.mock(state: .scan(.scanFailed(.deviceNotSignedIn)))
-
+    
     /// Showing
-    static let showingStateViewModel = QRCodeLoginScreenViewModel.mock(state: .displayQR(LinkNewDeviceServiceMock.mockQRCodeImage))
-
-    /// Displaying codes
+    static let showingStateViewModel = QRCodeLoginScreenViewModel.mock(state: .displayQR(.active(LinkNewDeviceServiceMock.mockQRCodeImage)))
+    static let showingExpiredStateViewModel = QRCodeLoginScreenViewModel.mock(state: .displayQR(.expired))
+    
+    // Displaying codes
     static let deviceCodeStateViewModel = QRCodeLoginScreenViewModel.mock(state: .displayCode(.deviceCode("12")))
     static let verificationCodeStateViewModel = QRCodeLoginScreenViewModel.mock(state: .displayCode(.verificationCode("123456")))
-
+    
     static let confirmCodeStateViewModel = QRCodeLoginScreenViewModel.mock(state: .confirmCode(.inputCode(CheckCodeSenderProxy(underlyingSender: CheckCodeSenderSDKMock()))))
-    static let confirmCodeEnteredStateViewModel = QRCodeLoginScreenViewModel.mock(state: .confirmCode(.inputCode(CheckCodeSenderProxy(underlyingSender: CheckCodeSenderSDKMock()))),
-                                                                                  checkCodeInput: "12")
+    static let confirmCodeEnteredStateViewModel = QRCodeLoginScreenViewModel.mock(state: .confirmCode(.inputCode(CheckCodeSenderProxy(underlyingSender: CheckCodeSenderSDKMock()))), checkCodeInput: "12")
     static let confirmCodeInvalidStateViewModel = QRCodeLoginScreenViewModel.mock(state: .confirmCode(.invalidCode))
-
+    
     /// Errors (no need to test them all QRCodeErrorView covers that).
     static let errorStateViewModel = QRCodeLoginScreenViewModel.mock(state: .error(.declined))
-
+    
     static var previews: some View {
         ElementNavigationStack { QRCodeLoginScreen(context: loginInstructionsStateViewModel.context) }
             .previewDisplayName("Login instructions")
         ElementNavigationStack { QRCodeLoginScreen(context: linkInstructionsStateViewModel.context) }
             .previewDisplayName("Link instructions")
-
+        
         ElementNavigationStack { QRCodeLoginScreen(context: scanningStateViewModel.context) }
             .previewDisplayName("Scanning")
         ElementNavigationStack { QRCodeLoginScreen(context: connectingStateViewModel.context) }
@@ -369,22 +374,24 @@ struct QRCodeLoginScreen_Previews: PreviewProvider, TestablePreview {
             .previewDisplayName("Not allowed")
         ElementNavigationStack { QRCodeLoginScreen(context: deviceNotSignedInStateViewModel.context) }
             .previewDisplayName("Device not signed in")
-
+        
         ElementNavigationStack { QRCodeLoginScreen(context: showingStateViewModel.context) }
             .previewDisplayName("Showing")
-
+        ElementNavigationStack { QRCodeLoginScreen(context: showingExpiredStateViewModel.context) }
+            .previewDisplayName("Showing expired")
+        
         ElementNavigationStack { QRCodeLoginScreen(context: deviceCodeStateViewModel.context) }
             .previewDisplayName("Device code")
         ElementNavigationStack { QRCodeLoginScreen(context: verificationCodeStateViewModel.context) }
             .previewDisplayName("Verification code")
-
+        
         ElementNavigationStack { QRCodeLoginScreen(context: confirmCodeStateViewModel.context) }
             .previewDisplayName("Confirm code")
         ElementNavigationStack { QRCodeLoginScreen(context: confirmCodeEnteredStateViewModel.context) }
             .previewDisplayName("Confirm code entered")
         ElementNavigationStack { QRCodeLoginScreen(context: confirmCodeInvalidStateViewModel.context) }
             .previewDisplayName("Confirm code invalid")
-
+        
         ElementNavigationStack { QRCodeLoginScreen(context: errorStateViewModel.context) }
             .previewDisplayName("Error")
     }

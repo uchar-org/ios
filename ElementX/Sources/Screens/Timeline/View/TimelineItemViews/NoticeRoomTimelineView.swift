@@ -11,18 +11,18 @@ import SwiftUI
 
 struct NoticeRoomTimelineView: View, TextBasedRoomTimelineViewProtocol {
     let timelineItem: NoticeRoomTimelineItem
-
+    
     var body: some View {
         TimelineStyler(timelineItem: timelineItem) {
             // Spacing: 6 = label spacing - formatted text padding
-
+            
             Label {
                 if let attributedString = timelineItem.content.formattedBody {
                     FormattedBodyText(attributedString: attributedString,
-                                      additionalWhitespacesCount: timelineItem.additionalWhitespaces())
+                                      trailingReservedSize: timelineItem.trailingReservedSize)
                 } else {
                     FormattedBodyText(text: timelineItem.content.body,
-                                      additionalWhitespacesCount: timelineItem.additionalWhitespaces())
+                                      trailingReservedSize: timelineItem.trailingReservedSize)
                 }
             } icon: {
                 CompoundIcon(\.info, size: .small, relativeTo: .compound.bodyLG)
@@ -36,26 +36,24 @@ struct NoticeRoomTimelineView: View, TextBasedRoomTimelineViewProtocol {
 
 struct NoticeRoomTimelineView_Previews: PreviewProvider, TestablePreview {
     static let viewModel = TimelineViewModel.mock
-
+    
     static var previews: some View {
         body.environmentObject(viewModel.context)
     }
-
+    
     static var body: some View {
         VStack(alignment: .leading, spacing: 20.0) {
-            NoticeRoomTimelineView(timelineItem: itemWith(text:
-                "Short loin ground round tongue hamburger, fatback salami shoulder. Beef turkey sausage kielbasa strip steak. Alcatra capicola pig tail pancetta chislic.",
-                timestamp: .mock,
-                senderId: "Bob"))
-
+            NoticeRoomTimelineView(timelineItem: itemWith(text: "Short loin ground round tongue hamburger, fatback salami shoulder. Beef turkey sausage kielbasa strip steak. Alcatra capicola pig tail pancetta chislic.",
+                                                          timestamp: .mock,
+                                                          senderId: "Bob"))
+            
             NoticeRoomTimelineView(timelineItem: itemWith(text: "Some other text",
                                                           timestamp: .mock,
                                                           senderId: "Anne"))
         }
     }
-
-    private static func itemWith(text: String, timestamp: Date, senderId: String)
-        -> NoticeRoomTimelineItem {
+    
+    private static func itemWith(text: String, timestamp: Date, senderId: String) -> NoticeRoomTimelineItem {
         NoticeRoomTimelineItem(id: .randomEvent,
                                timestamp: timestamp,
                                isOutgoing: false,

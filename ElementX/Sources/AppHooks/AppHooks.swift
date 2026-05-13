@@ -13,50 +13,53 @@ class AppHooks: AppHooksProtocol {
     func configure(with userSession: UserSessionProtocol?) async {
         await roomScreenHook.configure(with: userSession)
     }
-
+    
     private(set) var appSettingsHook: AppSettingsHookProtocol = DefaultAppSettingsHook()
     func registerAppSettingsHook(_ hook: AppSettingsHookProtocol) {
         appSettingsHook = hook
     }
-
+    
     private(set) var compoundHook: CompoundHookProtocol = DefaultCompoundHook()
     func registerCompoundHook(_ hook: CompoundHookProtocol) {
         compoundHook = hook
     }
-
+    
     private(set) var bugReportHook: BugReportHookProtocol = DefaultBugReportHook()
     func registerBugReportHook(_ hook: BugReportHookProtocol) {
         bugReportHook = hook
     }
-
-    private(set) var certificateValidatorHook: CertificateValidatorHookProtocol =
-        DefaultCertificateValidator()
+    
+    private(set) var certificateValidatorHook: CertificateValidatorHookProtocol = DefaultCertificateValidator()
     func registerCertificateValidatorHook(_ hook: CertificateValidatorHookProtocol) {
         certificateValidatorHook = hook
     }
-
+    
+    private(set) var oAuthPresenterHook: OAuthPresenterHookProtocol = DefaultOAuthPresenterHook()
+    func registerOAuthPresenterHook(_ hook: OAuthPresenterHookProtocol) {
+        oAuthPresenterHook = hook
+    }
+    
     private(set) var roomScreenHook: RoomScreenHookProtocol = DefaultRoomScreenHook()
     func registerRoomScreenHook(_ hook: RoomScreenHookProtocol) {
         roomScreenHook = hook
     }
-
-    private(set) var developerOptionsScreenHook: DeveloperOptionsScreenHookProtocol =
-        DefaultDeveloperOptionsScreenHook()
+    
+    private(set) var developerOptionsScreenHook: DeveloperOptionsScreenHookProtocol = DefaultDeveloperOptionsScreenHook()
     func registerDeveloperOptionsScreenHook(_ hook: DeveloperOptionsScreenHookProtocol) {
         developerOptionsScreenHook = hook
     }
     #endif
-
+    
     private(set) var tracingHook: TracingHookProtocol = DefaultTracingHook()
     func registerTracingHook(_ hook: TracingHookProtocol) {
         tracingHook = hook
     }
-
+    
     private(set) var clientBuilderHook: ClientBuilderHookProtocol = DefaultClientBuilderHook()
     func registerClientBuilderHook(_ hook: ClientBuilderHookProtocol) {
         clientBuilderHook = hook
     }
-
+    
     private(set) var remoteSettingsHook: RemoteSettingsHookProtocol = DefaultRemoteSettingsHook()
     func registerRemoteSettingsHook(_ hook: RemoteSettingsHookProtocol) {
         remoteSettingsHook = hook

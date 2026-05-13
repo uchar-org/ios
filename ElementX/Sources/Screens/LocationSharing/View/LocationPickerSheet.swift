@@ -12,6 +12,13 @@ struct LocationPickerSheet: View {
     @Bindable var context: LocationSharingScreenViewModel.Context
     @State private var height: CGFloat = .zero
 
+    /// Fixes an iOS 26 sheet issue
+    /// if the content doesn't meet a certain size
+    /// additional insets are added.
+    private var additionalHeight: CGFloat {
+        context.viewState.interactionMode.shouldShowLiveLocationOption ? 0 : 28
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Text(L10n.screenSharingLocationOptionSheetTitle)
@@ -19,7 +26,7 @@ struct LocationPickerSheet: View {
                 .font(.compound.bodyLGSemibold)
                 .padding(.top, 29)
                 .padding(.bottom, 25)
-
+            
             Button {
                 context.send(viewAction: .selectLocation)
             } label: {
@@ -33,13 +40,15 @@ struct LocationPickerSheet: View {
                                         iconColor: .compound.iconSecondary)
                 }
             }
-
-            Button {
-                context.send(viewAction: .startLiveLocation)
-            } label: {
-                LocationPickerLabel(text: L10n.actionShareLiveLocation,
-                                    icon: \.locationPinSolid,
-                                    iconColor: .compound.iconAccentPrimary)
+            
+            if context.viewState.interactionMode.shouldShowLiveLocationOption {
+                Button {
+                    context.send(viewAction: .startLiveLocation)
+                } label: {
+                    LocationPickerLabel(text: L10n.actionShareLiveLocation,
+                                        icon: \.locationPinSolid,
+                                        iconColor: .compound.iconAccentPrimary)
+                }
             }
         }
         .readHeight($height)
@@ -47,7 +56,7 @@ struct LocationPickerSheet: View {
         .presentationBackground(.compound.bgCanvasDefault)
         .presentationBackgroundInteraction(.enabled)
         .presentationDragIndicator(.hidden)
-        .presentationDetents([.height(height)])
+        .presentationDetents([.height(height + additionalHeight)])
     }
 }
 
@@ -55,7 +64,7 @@ private struct LocationPickerLabel: View {
     let text: String
     let icon: KeyPath<CompoundIcons, Image>
     let iconColor: Color
-
+    
     var body: some View {
         Label {
             Text(text)
@@ -76,7 +85,7 @@ private struct LocationPickerLabel: View {
 
 struct LocationPickerSheet_Previews: PreviewProvider, TestablePreview {
     static let viewModel = LocationSharingScreenViewModel.mock(type: .picker)
-
+    
     static var previews: some View {
         LocationPickerSheet(context: viewModel.context)
     }

@@ -9,18 +9,20 @@
 import Combine
 import Compound
 import GameController
+import Mantis
 import QuickLook
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct MediaUploadPreviewScreen: View {
     @Environment(\.colorScheme) private var colorScheme
-
+    
     @Bindable var context: MediaUploadPreviewScreenViewModel.Context
-
+    
     @State private var captionWarningFrame: CGRect = .zero
     @State private var currentIndex = 0
     @FocusState private var isComposerFocussed
-
+    
     private var title: String {
         ProcessInfo.processInfo.isiOSAppOnMac ? context.viewState.title ?? "" : ""
     }
@@ -28,7 +30,7 @@ struct MediaUploadPreviewScreen: View {
     private var colorSchemeOverride: ColorScheme {
         ProcessInfo.processInfo.isiOSAppOnMac ? colorScheme : .dark
     }
-
+    
     var body: some View {
         mainContent
             .id(context.viewState.mediaURLs)
@@ -59,8 +61,19 @@ struct MediaUploadPreviewScreen: View {
             .preferredColorScheme(colorSchemeOverride)
             .onAppear(perform: focusComposerIfHardwareKeyboardConnected)
             .alert(item: $context.alertInfo)
+            .sheet(isPresented: $context.isPresentingMediaEditor) {
+                ImageEditorView(imageURL: context.viewState.mediaURLs[currentIndex]) { croppedImage in
+                    context.send(viewAction: .editedMedia(image: croppedImage, index: currentIndex))
+                    context.isPresentingMediaEditor = false
+                } onCancel: {
+                    context.isPresentingMediaEditor = false
+                }
+                .ignoresSafeArea()
+                // Make sure out of bound error alerts are shown even if the sheet is presented
+                .alert(item: $context.alertInfo)
+            }
     }
-
+    
     @ViewBuilder
     private var mainContent: some View {
         if ProcessInfo.processInfo.isiOSAppOnMac {
@@ -71,10 +84,11 @@ struct MediaUploadPreviewScreen: View {
         } else {
             PreviewView(mediaURLs: context.viewState.mediaURLs,
                         title: context.viewState.title,
+                        mediaEditVersion: context.viewState.mediaEditVersion,
                         currentIndex: $currentIndex)
         }
     }
-
+    
     private var composer: some View {
         HStack(spacing: 12) {
             HStack(spacing: 6) {
@@ -85,19 +99,19 @@ struct MediaUploadPreviewScreen: View {
                                          maxHeight: ComposerConstant.maxHeight,
                                          keyHandler: handleKeyPress) { _ in }
                     .focused($isComposerFocussed)
-
+                
                 if context.viewState.shouldShowCaptionWarning {
                     captionWarningButton
                 }
             }
             .messageComposerStyle()
-
+            
             SendButton {
                 context.send(viewAction: .send)
             }
         }
     }
-
+    
     private var captionWarningButton: some View {
         Button {
             context.isPresentingMediaCaptionWarning = true
@@ -114,12 +128,12 @@ struct MediaUploadPreviewScreen: View {
                 .preferredColorScheme(colorSchemeOverride)
         }
     }
-
+    
     var captionWarningContent: some View {
         VStack(spacing: 0) {
             VStack(spacing: 16) {
                 BigIcon(icon: \.infoSolid, style: .alertSolid)
-
+                
                 Text(L10n.screenMediaUploadPreviewCaptionWarning)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textPrimary)
@@ -128,7 +142,7 @@ struct MediaUploadPreviewScreen: View {
             }
             .padding(24)
             .padding(.bottom, 8)
-
+            
             Button(L10n.actionOk) {
                 context.isPresentingMediaCaptionWarning = false
             }
@@ -138,19 +152,42 @@ struct MediaUploadPreviewScreen: View {
         }
         .readFrame($captionWarningFrame)
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button {
-                context.send(viewAction: .cancel)
-            } label: {
+            Button { context.send(viewAction: .cancel) } label: {
                 Text(L10n.actionCancel)
             }
             // Fix a bug with the preferredColorScheme on iOS 18 where the button doesn't
             // follow the dark colour scheme on devices running with dark mode disabled.
             .tint(.compound.textActionPrimary)
         }
+        
+        if isCurrentMediaImage {
+            ToolbarItem(placement: .primaryAction) {
+                Button { context.isPresentingMediaEditor = true } label: {
+                    CompoundIcon(\.editSolid)
+                }
+                // Fix a bug with the preferredColorScheme on iOS 18 where the button doesn't
+                // follow the dark colour scheme on devices running with dark mode disabled.
+                .tint(.compound.textActionPrimary)
+            }
+        }
+    }
+    
+    private var isCurrentMediaImage: Bool {
+        guard context.viewState.mediaURLs.indices.contains(currentIndex) else {
+            return false
+        }
+        
+        let url = context.viewState.mediaURLs[currentIndex]
+        
+        guard let type = UTType(filenameExtension: url.pathExtension) else {
+            return false
+        }
+        
+        return type.conforms(to: .image)
     }
 
     private func handleKeyPress(_ key: UIKeyboardHIDUsage) {
@@ -163,7 +200,7 @@ struct MediaUploadPreviewScreen: View {
             break
         }
     }
-
+    
     private func focusComposerIfHardwareKeyboardConnected() {
         // The simulator always detects the hardware keyboard as connected
         #if !targetEnvironment(simulator)
@@ -178,13 +215,14 @@ struct MediaUploadPreviewScreen: View {
 private struct PreviewView: UIViewControllerRepresentable {
     let mediaURLs: [URL]
     let title: String?
+    let mediaEditVersion: Int
     @Binding var currentIndex: Int
 
     func makeUIViewController(context: Context) -> UIViewController {
         let previewController = PreviewViewController(currentIndex: $currentIndex)
         previewController.dataSource = context.coordinator
         previewController.delegate = context.coordinator
-
+        
         if ProcessInfo.processInfo.isiOSAppOnMac {
             return previewController
         } else {
@@ -192,32 +230,43 @@ private struct PreviewView: UIViewControllerRepresentable {
         }
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) { }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        guard context.coordinator.mediaEditVersion != mediaEditVersion else {
+            return
+        }
+        
+        context.coordinator.mediaEditVersion = mediaEditVersion
+        
+        let previewController = (uiViewController as? UINavigationController)?.viewControllers.first as? QLPreviewController
+            ?? uiViewController as? QLPreviewController
+        previewController?.reloadData()
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(view: self)
     }
-
+    
     class Coordinator: NSObject, QLPreviewControllerDataSource, QLPreviewControllerDelegate {
         let view: PreviewView
+        var mediaEditVersion: Int
 
         init(view: PreviewView) {
             self.view = view
+            mediaEditVersion = view.mediaEditVersion
         }
-
+        
         // MARK: - QLPreviewControllerDataSource
-
+        
         func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
             view.mediaURLs.count
         }
 
-        func previewController(_ controller: QLPreviewController, previewItemAt index: Int)
-            -> QLPreviewItem {
+        func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
             PreviewItem(previewItemURL: view.mediaURLs[index], previewItemTitle: view.title)
         }
-
+        
         // MARK: - QLPreviewControllerDelegate
-
+        
         func previewController(_ controller: QLPreviewController, editingModeFor previewItem: QLPreviewItem) -> QLPreviewItemEditingMode {
             .disabled
         }
@@ -236,10 +285,10 @@ private class PreviewItem: NSObject, QLPreviewItem {
 
 private class PreviewViewController: QLPreviewController {
     private var cancellables: Set<AnyCancellable> = []
-
+    
     init(currentIndex: Binding<Int>) {
         super.init(nibName: nil, bundle: nil)
-
+        
         // Observation of currentPreviewItem doesn't work, so use the index instead.
         publisher(for: \.currentPreviewItemIndex)
             .sink { index in
@@ -256,15 +305,58 @@ private class PreviewViewController: QLPreviewController {
     required init?(coder: NSCoder) {
         fatalError()
     }
-
+    
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-
+        
         // Remove top file details bar
         navigationController?.navigationBar.isHidden = true
-
+                
         // Hide toolbar share button
         toolbarItems?.first?.isHidden = true
+    }
+}
+
+// MARK: - ImageCropView
+
+private struct ImageEditorView: UIViewControllerRepresentable {
+    let imageURL: URL
+    var onCrop: (UIImage) -> Void
+    var onCancel: () -> Void
+
+    func makeUIViewController(context: Context) -> CropViewController {
+        let image = UIImage(contentsOfFile: imageURL.path) ?? UIImage()
+        
+        let cropViewController = Mantis.cropViewController(image: image)
+        cropViewController.delegate = context.coordinator
+        return cropViewController
+    }
+
+    func updateUIViewController(_ uiViewController: CropViewController, context: Context) { }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onCrop: onCrop, onCancel: onCancel)
+    }
+
+    class Coordinator: NSObject, CropViewControllerDelegate {
+        var onCrop: (UIImage) -> Void
+        var onCancel: () -> Void
+
+        init(onCrop: @escaping (UIImage) -> Void, onCancel: @escaping () -> Void) {
+            self.onCrop = onCrop
+            self.onCancel = onCancel
+        }
+
+        func cropViewControllerDidCrop(_ cropViewController: CropViewController,
+                                       cropped: UIImage,
+                                       transformation: Transformation,
+                                       cropInfo: CropInfo) {
+            onCrop(cropped)
+        }
+
+        func cropViewControllerDidCancel(_ cropViewController: CropViewController, original: UIImage) {
+            onCancel()
+        }
     }
 }
 
@@ -273,7 +365,7 @@ private class PreviewViewController: QLPreviewController {
 struct MediaUploadPreviewScreen_Previews: PreviewProvider, TestablePreview {
     static let snapshotURL = URL.picturesDirectory
     static let testURL = Bundle.main.url(forResource: "AppIcon60x60@2x", withExtension: "png")
-
+    
     static let viewModel = MediaUploadPreviewScreenViewModel(mediaURLs: [snapshotURL],
                                                              title: "App Icon.png",
                                                              isRoomEncrypted: true,
@@ -286,7 +378,7 @@ struct MediaUploadPreviewScreen_Previews: PreviewProvider, TestablePreview {
         ElementNavigationStack {
             MediaUploadPreviewScreen(context: viewModel.context)
         }
-
+        
         MediaUploadPreviewScreen(context: viewModel.context)
             .captionWarningContent
             .previewDisplayName("Caption warning")

@@ -21,42 +21,23 @@ extension String {
         for index in characterView.indices where characterView[index] == character {
             string[index..<characterView.index(after: index)].foregroundColor = color
         }
-
+        
         return string
     }
-
+    
     var isASCII: Bool {
         allSatisfy(\.isASCII)
     }
-
+    
     func asciified() -> String? {
         guard !isASCII else {
             return self
         }
         let mutableString = NSMutableString(string: self)
-        guard
-            CFStringTransform(mutableString, nil, "Any-Latin; Latin-ASCII; [:^ASCII:] Remove" as CFString, false)
-        else {
+        guard CFStringTransform(mutableString, nil, "Any-Latin; Latin-ASCII; [:^ASCII:] Remove" as CFString, false) else {
             return nil
         }
         return mutableString.trimmingCharacters(in: .whitespaces)
-    }
-}
-
-extension String {
-    static func generateBreakableWhitespaceEnd(whitespaceCount: Int, layoutDirection: LayoutDirection)
-        -> String {
-        guard whitespaceCount > 0 else {
-            return ""
-        }
-
-        var whiteSpaces = layoutDirection.isolateLayoutUnicodeString
-
-        // fixed size whitespace of size 1/3 em per character
-        whiteSpaces += String(repeating: "\u{2004}", count: whitespaceCount)
-
-        // braille whitespace, which is non breakable but makes previous whitespaces breakable
-        return whiteSpaces + "\u{2800}"
     }
 }
 
@@ -73,23 +54,22 @@ extension String {
     func replacingHtmlBreaksOccurrences() -> String {
         var result = self
         let pattern = #"</p>(\n+)<p>"#
-
+        
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
             return result
         }
         let matches = regex.matches(in: self, options: [], range: NSRange(location: 0, length: utf16.count))
-
+        
         for match in matches.reversed() {
             guard let range = Range(match.range, in: self),
-                  let innerMatchRange = Range(match.range(at: 1), in: self)
-            else {
+                  let innerMatchRange = Range(match.range(at: 1), in: self) else {
                 continue
             }
             let numberOfBreaks = (self[innerMatchRange].components(separatedBy: "\n").count - 1)
             let replacement = "<br>" + String(repeating: "<br>", count: numberOfBreaks)
             result.replaceSubrange(range, with: replacement)
         }
-
+        
         return result
     }
 }
@@ -104,8 +84,7 @@ extension String {
 extension String {
     static func makeCanonicalAlias(aliasLocalPart: Self?, serverName: Self?) -> Self? {
         guard let aliasLocalPart, !aliasLocalPart.isEmpty,
-              let serverName, !serverName.isEmpty
-        else {
+              let serverName, !serverName.isEmpty else {
             return nil
         }
         return "#\(aliasLocalPart):\(serverName)"
@@ -123,22 +102,40 @@ extension String {
 }
 
 extension String {
+    /// Whether the first character with a strong BiDi direction is right-to-left.
+    /// Mirrors the Unicode BiDi "first strong" rule used by TextKit to resolve
+    /// paragraph direction when `baseWritingDirection` is `.natural`.
+    var firstStrongCharacterIsRTL: Bool {
+        for scalar in unicodeScalars {
+            let value = scalar.value
+            // Strong RTL: Hebrew, Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic,
+            // Arabic Extended, and their presentation forms.
+            let isStrongRTL = (0x0590...0x08FF).contains(value) ||
+                (0xFB1D...0xFDFF).contains(value) ||
+                (0xFE70...0xFEFF).contains(value)
+            if isStrongRTL { return true }
+            if scalar.properties.isAlphabetic { return false }
+        }
+        return false
+    }
+}
+
+extension String {
     /// To be used if the string is actually a URL
     var asSanitizedLink: String {
         var link = self
         if !link.contains("://") {
             link.insert(contentsOf: "https://", at: link.startIndex)
         }
-
+        
         // Don't include punctuation characters at the end of links but keep
         // closing brackets as per https://github.com/element-hq/element-x-ios/issues/4946
         // e.g `https://element.io/blog:` which is a valid link but the wrong place
         while !link.isEmpty,
-              link.rangeOfCharacter(from: .punctuationWithoutClosingBracketCharacters, options: .backwards)?
-              .upperBound == link.endIndex {
+              link.rangeOfCharacter(from: .punctuationWithoutClosingBracketCharacters, options: .backwards)?.upperBound == link.endIndex {
             link = String(link.dropLast())
         }
-
+        
         return link
     }
 }

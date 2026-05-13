@@ -14,7 +14,7 @@ struct StringTests {
     func emptyIsAscii() {
         #expect("".isASCII)
     }
-
+    
     @Test
     func spaceIsAscii() {
         #expect("".isASCII)
@@ -24,17 +24,17 @@ struct StringTests {
     func johnnyIsAscii() {
         #expect("johnny".isASCII)
     }
-
+    
     @Test
     func jöhnnyIsNotAscii() {
         #expect(!"jöhnny".isASCII)
     }
-
+    
     @Test
     func jEmojiHnnyIsNotAscii() {
         #expect(!"j🅾️hnny".isASCII)
     }
-
+    
     @Test
     func asciifiedMethod() {
         // ASCII strings return themselves unchanged
@@ -43,7 +43,7 @@ struct StringTests {
         #expect("abc123".asciified() == "abc123")
         #expect("".asciified() == "")
         #expect(" ".asciified() == " ")
-
+        
         // Non-ASCII strings get converted or stripped
         #expect("jöhnny".asciified() == "johnny", "ö should become o")
         #expect("jåhnny".asciified() == "jahnny", "å should become a")
@@ -56,43 +56,15 @@ struct StringTests {
     }
 
     @Test
-    func generateBreakableWhitespaceEnd() {
-        var count = 5
-        var result = "\u{2066}" + String(repeating: "\u{2004}", count: count) + "\u{2800}"
-        #expect(String.generateBreakableWhitespaceEnd(whitespaceCount: count, layoutDirection: .leftToRight)
-            == result)
-
-        count = 3
-        result = "\u{2066}" + String(repeating: "\u{2004}", count: count) + "\u{2800}"
-        #expect(String.generateBreakableWhitespaceEnd(whitespaceCount: count, layoutDirection: .leftToRight)
-            == result)
-
-        count = 0
-        result = ""
-        #expect(String.generateBreakableWhitespaceEnd(whitespaceCount: count, layoutDirection: .leftToRight)
-            == result)
-
-        count = 4
-        result = "\u{2067}" + String(repeating: "\u{2004}", count: count) + "\u{2800}"
-        #expect(String.generateBreakableWhitespaceEnd(whitespaceCount: count, layoutDirection: .rightToLeft)
-            == result)
-
-        count = 0
-        result = ""
-        #expect(String.generateBreakableWhitespaceEnd(whitespaceCount: count, layoutDirection: .rightToLeft)
-            == result)
-    }
-
-    @Test
     func ellipsizeWorks() {
         #expect("ellipsize".ellipsize(length: 5) == "ellip…")
     }
-
+    
     @Test
     func ellipsizeNotNeeded() {
         #expect("ellipsize".ellipsize(length: 15) == "ellipsize")
     }
-
+    
     @Test
     func replaceBreakOccurrences() {
         let input0 = "</p><p>"
@@ -101,14 +73,14 @@ struct StringTests {
         let input3 = "</p>\n\n\n\n<p>"
         let input4 = "<p>a</p>\n<p>b</p>"
         let input5 = "empty"
-
+        
         let expectedOutput0 = input0
         let expectedOutput1 = "<br><br>"
         let expectedOutput2 = "<br><br><br>"
         let expectedOutput3 = "<br><br><br><br><br>"
         let expectedOutput4 = "<p>a<br><br>b</p>"
         let expectedOutput5 = input5
-
+        
         #expect(input0.replacingHtmlBreaksOccurrences() == expectedOutput0)
         #expect(input1.replacingHtmlBreaksOccurrences() == expectedOutput1)
         #expect(input2.replacingHtmlBreaksOccurrences() == expectedOutput2)

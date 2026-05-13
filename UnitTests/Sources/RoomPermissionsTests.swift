@@ -24,11 +24,13 @@ struct RoomPermissionsTests {
                                                 roomName: 0,
                                                 roomAvatar: 0,
                                                 roomTopic: 0,
-                                                spaceChild: 100)
-
+                                                spaceChild: 100,
+                                                beacon: 0,
+                                                beaconInfo: 50)
+        
         // When creating room permissions from them.
         let permissions = RoomPermissions(powerLevels: powerLevels)
-
+        
         // Then the permissions should be created with values mapped to the correct role.
         #expect(permissions.ban == RoomRole.administrator.powerLevelValue)
         #expect(permissions.invite == RoomRole.administrator.powerLevelValue)
@@ -41,5 +43,6 @@ struct RoomPermissionsTests {
         #expect(permissions.roomAvatar == RoomRole.user.powerLevelValue)
         #expect(permissions.roomTopic == RoomRole.user.powerLevelValue)
         #expect(permissions.spaceChild == RoomRole.administrator.powerLevelValue)
+        #expect(permissions.liveLocation == RoomRole.moderator.powerLevelValue)
     }
 }

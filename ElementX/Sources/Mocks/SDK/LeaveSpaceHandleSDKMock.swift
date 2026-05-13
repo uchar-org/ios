@@ -171,6 +171,7 @@ private extension SpaceRoom {
                   childrenCount: childrenCount,
                   state: membership,
                   heroes: heroes,
-                  via: via)
+                  via: via,
+                  isDm: false)
     }
 }

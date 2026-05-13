@@ -13,10 +13,10 @@ import UniformTypeIdentifiers
 struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
     private let attributedStringBuilder: AttributedStringBuilderProtocol
     private let stateEventStringBuilder: RoomStateEventStringBuilder
-
+    
     /// The Matrix ID of the current user.
     private let userID: String
-
+    
     init(userID: String,
          attributedStringBuilder: AttributedStringBuilderProtocol,
          stateEventStringBuilder: RoomStateEventStringBuilder) {
@@ -24,11 +24,10 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         self.attributedStringBuilder = attributedStringBuilder
         self.stateEventStringBuilder = stateEventStringBuilder
     }
-
-    func buildTimelineItem(for eventItemProxy: EventTimelineItemProxy, isDM: Bool)
-        -> RoomTimelineItemProtocol? {
+    
+    func buildTimelineItem(for eventItemProxy: EventTimelineItemProxy, isDM: Bool) -> RoomTimelineItemProtocol? {
         let isOutgoing = eventItemProxy.isOwn
-
+        
         switch eventItemProxy.content {
         case .msgLike(let messageLikeContent):
             switch messageLikeContent.kind {
@@ -36,9 +35,8 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                 return buildMessageTimelineItem(eventItemProxy, messageLikeContent, messageContent, isOutgoing)
             case .sticker(let body, let imageInfo, let mediaSource):
                 return buildStickerTimelineItem(eventItemProxy, messageLikeContent, body, imageInfo, mediaSource, isOutgoing)
-            case .poll(let question, let kind, let maxSelections, let answers, let votes, let endTime, let edited):
-                return buildPollTimelineItem(eventItemProxy, messageLikeContent, question, kind, maxSelections, answers, votes,
-                                             endTime, isOutgoing, edited)
+            case .poll(question: let question, kind: let kind, maxSelections: let maxSelections, answers: let answers, votes: let votes, endTime: let endTime, let edited):
+                return buildPollTimelineItem(eventItemProxy, messageLikeContent, question, kind, maxSelections, answers, votes, endTime, isOutgoing, edited)
             case .redacted:
                 return buildRedactedTimelineItem(eventItemProxy, messageLikeContent, isOutgoing)
             case .unableToDecrypt(let encryptedMessage):
@@ -57,12 +55,11 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                 return nil
             }
             return buildStateTimelineItem(for: eventItemProxy, state: content, isOutgoing: isOutgoing)
-        case .roomMembership(userId: let userID, let displayName, let change, let reason):
+        case .roomMembership(userId: let userID, let displayName, change: let change, let reason):
             if isDM, change == .joined, userID == self.userID {
                 return nil
             }
-            return buildStateMembershipChangeTimelineItem(for: eventItemProxy, memberUserID: userID, memberDisplayName: displayName,
-                                                          membershipChange: change, reason: reason, isOutgoing: isOutgoing)
+            return buildStateMembershipChangeTimelineItem(for: eventItemProxy, memberUserID: userID, memberDisplayName: displayName, membershipChange: change, reason: reason, isOutgoing: isOutgoing)
         case .profileChange(let displayName, let prevDisplayName, let avatarUrl, let prevAvatarUrl):
             return buildStateProfileChangeTimelineItem(for: eventItemProxy,
                                                        displayName: displayName,
@@ -72,13 +69,13 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                        isOutgoing: isOutgoing)
         case .callInvite:
             return buildCallInviteTimelineItem(for: eventItemProxy)
-        case .rtcNotification:
-            return buildCallNotificationTimelineItem(for: eventItemProxy)
+        case .rtcNotification(let callIntent, let declinedBy):
+            return buildCallNotificationTimelineItem(for: eventItemProxy, isDM: isDM, callIntent: callIntent, declinedBy: declinedBy)
         }
     }
-
+    
     // MARK: - MsgLike Events
-
+    
     private func buildMessageTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                           _ messageLikeContent: MsgLikeContent,
                                           _ messageContent: MessageContent,
@@ -110,7 +107,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             return nil
         }
     }
-
+    
     private func buildTextTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                        _ messageLikeContent: MsgLikeContent,
                                        _ messageContent: MessageContent,
@@ -134,7 +131,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildImageTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         _ messageLikeContent: MsgLikeContent,
                                         _ messageContent: MessageContent,
@@ -158,7 +155,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                 encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                 encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildVideoTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         _ messageLikeContent: MsgLikeContent,
                                         _ messageContent: MessageContent,
@@ -182,7 +179,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                 encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                 encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildAudioTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         _ messageLikeContent: MsgLikeContent,
                                         _ messageContent: MessageContent,
@@ -206,7 +203,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                 encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                 encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildVoiceTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         _ messageLikeContent: MsgLikeContent,
                                         _ messageContent: MessageContent,
@@ -229,7 +226,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                        encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                        encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildFileTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                        _ messageLikeContent: MsgLikeContent,
                                        _ messageContent: MessageContent,
@@ -253,7 +250,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildNoticeTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                          _ messageLikeContent: MsgLikeContent,
                                          _ messageContent: MessageContent,
@@ -276,7 +273,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                  encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                  encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildEmoteTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         _ messageLikeContent: MsgLikeContent,
                                         _ messageContent: MessageContent,
@@ -288,8 +285,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                               isEditable: eventItemProxy.isEditable,
                               canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                               sender: eventItemProxy.sender,
-                              content: buildEmoteTimelineItemContent(senderDisplayName: eventItemProxy.sender.displayName, senderID: eventItemProxy.sender.id,
-                                                                     messageContent: emoteMessageContent),
+                              content: buildEmoteTimelineItemContent(senderDisplayName: eventItemProxy.sender.displayName, senderID: eventItemProxy.sender.id, messageContent: emoteMessageContent),
                               properties: .init(replyDetails: buildTimelineItemReplyDetails(messageLikeContent.inReplyTo),
                                                 isThreaded: messageLikeContent.threadRoot != nil,
                                                 threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary),
@@ -300,7 +296,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                 encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                 encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildLocationTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                            _ messageLikeContent: MsgLikeContent,
                                            _ messageContent: MessageContent,
@@ -323,7 +319,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                    encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                    encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildGalleryTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                           _ messageLikeContent: MsgLikeContent,
                                           _ messageContent: MessageContent,
@@ -347,16 +343,15 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildStickerTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                           _ messageLikeContent: MsgLikeContent,
                                           _ body: String,
                                           _ info: MatrixRustSDK.ImageInfo,
                                           _ mediaSource: MediaSource,
                                           _ isOutgoing: Bool) -> RoomTimelineItemProtocol {
-        let imageInfo = ImageInfoProxy(source: mediaSource, width: info.width, height: info.height, mimeType: info.mimetype,
-                                       fileSize: info.size.map(UInt.init))
-
+        let imageInfo = ImageInfoProxy(source: mediaSource, width: info.width, height: info.height, mimeType: info.mimetype, fileSize: info.size.map(UInt.init))
+        
         return StickerRoomTimelineItem(id: eventItemProxy.id,
                                        body: body,
                                        timestamp: eventItemProxy.timestamp,
@@ -375,7 +370,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                          encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                          encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildPollTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                        _ messageLikeContent: MsgLikeContent,
                                        _ question: String,
@@ -394,7 +389,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
 
         let options = answers.map { answer in
             let optionVotesCount = votes[answer.id]?.count
-
+            
             return Poll.Option(id: answer.id,
                                text: answer.text,
                                votes: optionVotesCount ?? 0,
@@ -402,14 +397,13 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                isSelected: votes[answer.id]?.contains(userID) ?? false,
                                isWinning: optionVotesCount.map { $0 == maxOptionVotes } ?? false)
         }
-
-        let pollKind: Poll.Kind =
-            switch pollKind {
-            case .disclosed:
-                .disclosed
-            case .undisclosed:
-                .undisclosed
-            }
+        
+        let pollKind: Poll.Kind = switch pollKind {
+        case .disclosed:
+            .disclosed
+        case .undisclosed:
+            .undisclosed
+        }
 
         let poll = Poll(question: question,
                         kind: pollKind,
@@ -437,7 +431,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                       encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                       encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildLiveLocationTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                                _ messageLikeContent: MsgLikeContent,
                                                _ liveLocationContent: LiveLocationContent,
@@ -446,7 +440,8 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                      timestamp: eventItemProxy.timestamp,
                                      isOutgoing: isOutgoing,
                                      isEditable: eventItemProxy.isEditable,
-                                     canBeRepliedTo: eventItemProxy.canBeRepliedTo,
+                                     // Workaround until https://github.com/matrix-org/matrix-rust-sdk/pull/6563 is merged.
+                                     canBeRepliedTo: false,
                                      sender: eventItemProxy.sender,
                                      content: .init(from: liveLocationContent, timestamp: eventItemProxy.timestamp),
                                      properties: .init(replyDetails: buildTimelineItemReplyDetails(messageLikeContent.inReplyTo),
@@ -458,7 +453,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                        encryptionAuthenticity: buildEncryptionAuthenticity(eventItemProxy.shieldState),
                                                        encryptionForwarder: eventItemProxy.forwarder))
     }
-
+    
     private func buildRedactedTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                            _ messageLikeContent: MsgLikeContent,
                                            _ isOutgoing: Bool) -> RoomTimelineItemProtocol {
@@ -473,7 +468,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                    isThreaded: messageLikeContent.threadRoot != nil,
                                                    threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary)))
     }
-
+    
     private func buildEncryptedTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                             _ messageLikeContent: MsgLikeContent,
                                             _ encryptedMessage: EncryptedMessage,
@@ -513,7 +508,7 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         case .unknown:
             break
         }
-
+        
         return EncryptedRoomTimelineItem(id: eventItemProxy.id,
                                          body: errorLabel,
                                          encryptionType: encryptionType,
@@ -526,29 +521,20 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                                            isThreaded: messageLikeContent.threadRoot != nil,
                                                            threadSummary: buildTimelineItemThreadSummary(messageLikeContent.threadSummary)))
     }
-
+    
     // MARK: - Message events content
-
-    private func buildTextTimelineItemContent(_ messageContent: TextMessageContent)
-        -> TextRoomTimelineItemContent {
+    
+    private func buildTextTimelineItemContent(_ messageContent: TextMessageContent) -> TextRoomTimelineItemContent {
         let htmlBody = messageContent.formatted?.format == .html ? messageContent.formatted?.body : nil
-        let formattedBody =
-            (htmlBody != nil
-                ? attributedStringBuilder.fromHTML(htmlBody)
-                : attributedStringBuilder.fromPlain(messageContent.body))
-
+        let formattedBody = (htmlBody != nil ? attributedStringBuilder.fromHTML(htmlBody) : attributedStringBuilder.fromPlain(messageContent.body))
+        
         return .init(body: messageContent.body, formattedBody: formattedBody, formattedBodyHTMLString: htmlBody)
     }
-
-    private func buildAudioTimelineItemContent(_ messageContent: AudioMessageContent)
-        -> AudioRoomTimelineItemContent {
-        let htmlCaption =
-            messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
-        let formattedCaption =
-            htmlCaption != nil
-                ? attributedStringBuilder.fromHTML(htmlCaption)
-                : attributedStringBuilder.fromPlain(messageContent.caption)
-
+    
+    private func buildAudioTimelineItemContent(_ messageContent: AudioMessageContent) -> AudioRoomTimelineItemContent {
+        let htmlCaption = messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
+        let formattedCaption = htmlCaption != nil ? attributedStringBuilder.fromHTML(htmlCaption) : attributedStringBuilder.fromPlain(messageContent.caption)
+        
         var waveform: EstimatedWaveform?
         if let audioWaveform = messageContent.audio?.waveform {
             waveform = EstimatedWaveform(data: audioWaveform)
@@ -564,28 +550,23 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                             fileSize: messageContent.info?.size.map(UInt.init),
                                             contentType: UTType(mimeType: messageContent.info?.mimetype, fallbackFilename: messageContent.filename))
     }
-
-    private func buildImageTimelineItemContent(_ messageContent: ImageMessageContent)
-        -> ImageRoomTimelineItemContent {
-        let htmlCaption =
-            messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
-        let formattedCaption =
-            htmlCaption != nil
-                ? attributedStringBuilder.fromHTML(htmlCaption)
-                : attributedStringBuilder.fromPlain(messageContent.caption)
-
+    
+    private func buildImageTimelineItemContent(_ messageContent: ImageMessageContent) -> ImageRoomTimelineItemContent {
+        let htmlCaption = messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
+        let formattedCaption = htmlCaption != nil ? attributedStringBuilder.fromHTML(htmlCaption) : attributedStringBuilder.fromPlain(messageContent.caption)
+        
         let thumbnailInfo = ImageInfoProxy(source: messageContent.info?.thumbnailSource,
                                            width: messageContent.info?.thumbnailInfo?.width,
                                            height: messageContent.info?.thumbnailInfo?.height,
                                            mimeType: messageContent.info?.thumbnailInfo?.mimetype,
                                            fileSize: messageContent.info?.size.map(UInt.init))
-
+        
         let imageInfo = ImageInfoProxy(source: messageContent.source,
                                        width: messageContent.info?.width,
                                        height: messageContent.info?.height,
                                        mimeType: messageContent.info?.mimetype,
                                        fileSize: messageContent.info?.size.map(UInt.init))
-
+        
         return .init(filename: messageContent.filename,
                      caption: messageContent.caption,
                      formattedCaption: formattedCaption,
@@ -595,29 +576,24 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                      blurhash: messageContent.info?.blurhash,
                      contentType: UTType(mimeType: messageContent.info?.mimetype, fallbackFilename: messageContent.filename))
     }
-
-    private func buildVideoTimelineItemContent(_ messageContent: VideoMessageContent)
-        -> VideoRoomTimelineItemContent {
-        let htmlCaption =
-            messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
-        let formattedCaption =
-            htmlCaption != nil
-                ? attributedStringBuilder.fromHTML(htmlCaption)
-                : attributedStringBuilder.fromPlain(messageContent.caption)
-
+    
+    private func buildVideoTimelineItemContent(_ messageContent: VideoMessageContent) -> VideoRoomTimelineItemContent {
+        let htmlCaption = messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
+        let formattedCaption = htmlCaption != nil ? attributedStringBuilder.fromHTML(htmlCaption) : attributedStringBuilder.fromPlain(messageContent.caption)
+        
         let thumbnailInfo = ImageInfoProxy(source: messageContent.info?.thumbnailSource,
                                            width: messageContent.info?.thumbnailInfo?.width,
                                            height: messageContent.info?.thumbnailInfo?.height,
                                            mimeType: messageContent.info?.thumbnailInfo?.mimetype,
                                            fileSize: messageContent.info?.size.map(UInt.init))
-
+        
         let videoInfo = VideoInfoProxy(source: messageContent.source,
                                        duration: messageContent.info?.duration ?? 0,
                                        width: messageContent.info?.width,
                                        height: messageContent.info?.height,
                                        mimeType: messageContent.info?.mimetype,
                                        fileSize: messageContent.info?.size.map(UInt.init))
-
+        
         return .init(filename: messageContent.filename,
                      caption: messageContent.caption,
                      formattedCaption: formattedCaption,
@@ -628,26 +604,18 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                      contentType: UTType(mimeType: messageContent.info?.mimetype, fallbackFilename: messageContent.filename))
     }
 
-    private func buildLocationTimelineItemContent(_ locationContent: LocationContent)
-        -> LocationRoomTimelineItemContent {
+    private func buildLocationTimelineItemContent(_ locationContent: LocationContent) -> LocationRoomTimelineItemContent {
         LocationRoomTimelineItemContent(body: locationContent.body,
                                         geoURI: .init(string: locationContent.geoUri),
                                         kind: .init(from: locationContent.asset))
     }
 
-    private func buildFileTimelineItemContent(_ messageContent: FileMessageContent)
-        -> FileRoomTimelineItemContent {
-        let htmlCaption =
-            messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
-        let formattedCaption =
-            htmlCaption != nil
-                ? attributedStringBuilder.fromHTML(htmlCaption)
-                : attributedStringBuilder.fromPlain(messageContent.caption)
-
-        let thumbnailSource = messageContent.info?.thumbnailSource.map {
-            MediaSourceProxy(source: $0, mimeType: messageContent.info?.thumbnailInfo?.mimetype)
-        }
-
+    private func buildFileTimelineItemContent(_ messageContent: FileMessageContent) -> FileRoomTimelineItemContent {
+        let htmlCaption = messageContent.formattedCaption?.format == .html ? messageContent.formattedCaption?.body : nil
+        let formattedCaption = htmlCaption != nil ? attributedStringBuilder.fromHTML(htmlCaption) : attributedStringBuilder.fromPlain(messageContent.caption)
+        
+        let thumbnailSource = messageContent.info?.thumbnailSource.map { MediaSourceProxy(source: $0, mimeType: messageContent.info?.thumbnailInfo?.mimetype) }
+        
         return .init(filename: messageContent.filename,
                      caption: messageContent.caption,
                      formattedCaption: formattedCaption,
@@ -657,21 +625,17 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                      thumbnailSource: thumbnailSource,
                      contentType: UTType(mimeType: messageContent.info?.mimetype, fallbackFilename: messageContent.filename))
     }
-
-    private func buildNoticeTimelineItemContent(_ messageContent: NoticeMessageContent)
-        -> NoticeRoomTimelineItemContent {
+    
+    private func buildNoticeTimelineItemContent(_ messageContent: NoticeMessageContent) -> NoticeRoomTimelineItemContent {
         let htmlBody = messageContent.formatted?.format == .html ? messageContent.formatted?.body : nil
-        let formattedBody =
-            (htmlBody != nil
-                ? attributedStringBuilder.fromHTML(htmlBody)
-                : attributedStringBuilder.fromPlain(messageContent.body))
-
+        let formattedBody = (htmlBody != nil ? attributedStringBuilder.fromHTML(htmlBody) : attributedStringBuilder.fromPlain(messageContent.body))
+        
         return .init(body: messageContent.body, formattedBody: formattedBody)
     }
-
+    
     private func buildEmoteTimelineItemContent(senderDisplayName: String?, senderID: String, messageContent: EmoteMessageContent) -> EmoteRoomTimelineItemContent {
         let name = senderDisplayName ?? senderID
-
+        
         let htmlBody = messageContent.formatted?.format == .html ? messageContent.formatted?.body : nil
 
         var formattedBody: AttributedString?
@@ -680,10 +644,10 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         } else {
             formattedBody = attributedStringBuilder.fromPlain(L10n.commonEmote(name, messageContent.body))
         }
-
+        
         return .init(body: messageContent.body, formattedBody: formattedBody, formattedBodyHTMLString: htmlBody)
     }
-
+    
     /// This fixes the issue of the name not belonging to the first <p> defined paragraph
     private func buildEmoteFormattedBodyFromHTML(html: String, name: String) -> AttributedString? {
         let htmlBodyPlaceholder = "{htmlBodyPlaceholder}"
@@ -694,15 +658,14 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
         finalString.replace(htmlBodyPlaceholder, with: htmlBodyString)
         return finalString
     }
-
+    
     // MARK: - EventBasedTimelineItem Properties
-
+    
     private func buildAggregatedReactions(_ reactions: [Reaction]) -> [AggregatedReaction] {
         reactions.map { reaction in
             let senders = reaction.senders
                 .map { senderData in
-                    ReactionSender(id: senderData.senderId,
-                                   timestamp: Date(timeIntervalSince1970: TimeInterval(senderData.timestamp / 1000)))
+                    ReactionSender(id: senderData.senderId, timestamp: Date(timeIntervalSince1970: TimeInterval(senderData.timestamp / 1000)))
                 }
                 .sorted { a, b in
                     // Sort reactions within an aggregation by timestamp descending.
@@ -737,15 +700,14 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                 ReadReceipt(userID: key, formattedTimestamp: receipt.dateTimestamp?.formattedMinimal())
             }
     }
-
+    
     private func buildEncryptionAuthenticity(_ shieldState: ShieldState?) -> EncryptionAuthenticity? {
         shieldState.flatMap(EncryptionAuthenticity.init)
     }
-
-    private func buildTimelineItemThreadSummary(_ threadSummary: MatrixRustSDK.ThreadSummary?)
-        -> TimelineItemThreadSummary? {
+    
+    private func buildTimelineItemThreadSummary(_ threadSummary: MatrixRustSDK.ThreadSummary?) -> TimelineItemThreadSummary? {
         guard let threadSummary else { return nil }
-
+        
         switch threadSummary.latestEvent() {
         case .unavailable:
             return .notLoaded
@@ -753,40 +715,39 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             return .loading
         case .ready(let content, let senderID, let senderProfile, _, _):
             let sender = TimelineItemSender(senderID: senderID, senderProfile: senderProfile)
-
-            let latestEventContent: TimelineEventContent =
-                switch content {
-                case .msgLike(let messageLikeContent):
-                    switch messageLikeContent.kind {
-                    case .message(let messageContent):
-                        .message(buildMessageTimelineItemContent(messageType: messageContent.msgType,
-                                                                 senderID: senderID,
-                                                                 senderDisplayName: sender.displayName))
-                    case .poll(let question, _, _, _, _, _, _):
-                        .poll(question: question)
-                    case .sticker(let body, _, _):
-                        .message(.text(.init(body: body)))
-                    case .redacted:
-                        .redacted
-                    default:
-                        .message(.text(.init(body: L10n.commonUnsupportedEvent)))
-                    }
+            
+            let latestEventContent: TimelineEventContent = switch content {
+            case .msgLike(let messageLikeContent):
+                switch messageLikeContent.kind {
+                case .message(let messageContent):
+                    .message(buildMessageTimelineItemContent(messageType: messageContent.msgType,
+                                                             senderID: senderID,
+                                                             senderDisplayName: sender.displayName))
+                case .poll(let question, _, _, _, _, _, _):
+                    .poll(question: question)
+                case .sticker(let body, _, _):
+                    .message(.text(.init(body: body)))
+                case .redacted:
+                    .redacted
                 default:
                     .message(.text(.init(body: L10n.commonUnsupportedEvent)))
                 }
-
+            default:
+                .message(.text(.init(body: L10n.commonUnsupportedEvent)))
+            }
+            
             return .loaded(senderID: senderID,
                            sender: sender,
                            latestEventContent: latestEventContent,
                            numberOfReplies: Int(threadSummary.numReplies()))
-
+            
         case .error(let message):
             return .error(message: message)
         }
     }
-
+    
     // MARK: - Other Events
-
+    
     private func buildUnsupportedTimelineItem(_ eventItemProxy: EventTimelineItemProxy,
                                               _ eventType: String,
                                               _ error: String,
@@ -802,73 +763,73 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                                     sender: eventItemProxy.sender,
                                     properties: .init())
     }
-
-    private func buildCallInviteTimelineItem(for eventItemProxy: EventTimelineItemProxy)
-        -> RoomTimelineItemProtocol {
+    
+    private func buildCallInviteTimelineItem(for eventItemProxy: EventTimelineItemProxy) -> RoomTimelineItemProtocol {
         CallInviteRoomTimelineItem(id: eventItemProxy.id,
                                    timestamp: eventItemProxy.timestamp,
                                    isEditable: eventItemProxy.isEditable,
                                    canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                                    sender: eventItemProxy.sender)
     }
-
-    private func buildCallNotificationTimelineItem(for eventItemProxy: EventTimelineItemProxy)
-        -> RoomTimelineItemProtocol {
-        CallNotificationRoomTimelineItem(id: eventItemProxy.id,
-                                         timestamp: eventItemProxy.timestamp,
-                                         isEditable: eventItemProxy.isEditable,
-                                         canBeRepliedTo: eventItemProxy.canBeRepliedTo,
-                                         sender: eventItemProxy.sender)
+    
+    private func buildCallNotificationTimelineItem(for eventItemProxy: EventTimelineItemProxy,
+                                                   isDM: Bool,
+                                                   callIntent: String?,
+                                                   declinedBy: [String]) -> RoomTimelineItemProtocol {
+        let isVoiceCall = callIntent == CallIntent.audio.rawValue
+        return CallNotificationRoomTimelineItem(id: eventItemProxy.id,
+                                                timestamp: eventItemProxy.timestamp,
+                                                isEditable: eventItemProxy.isEditable,
+                                                canBeRepliedTo: eventItemProxy.canBeRepliedTo,
+                                                isDM: isDM,
+                                                isDeclinedByMe: declinedBy.contains(userID),
+                                                isDeclined: declinedBy.count > 0,
+                                                isVoiceCall: isVoiceCall,
+                                                properties: .init())
     }
-
+    
     // MARK: - State Events
-
+    
     private func buildStateTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                         state: OtherState,
                                         isOutgoing: Bool) -> RoomTimelineItemProtocol? {
-        guard
-            let text = stateEventStringBuilder.buildString(for: state, sender: eventItemProxy.sender, isOutgoing: isOutgoing)
-        else { return nil }
+        guard let text = stateEventStringBuilder.buildString(for: state, sender: eventItemProxy.sender, isOutgoing: isOutgoing) else { return nil }
         return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
     }
-
+    
     private func buildStateMembershipChangeTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                                         memberUserID: String,
                                                         memberDisplayName: String?,
                                                         membershipChange: MembershipChange?,
                                                         reason: String?,
                                                         isOutgoing: Bool) -> RoomTimelineItemProtocol? {
-        guard
-            let text = stateEventStringBuilder.buildString(for: membershipChange,
-                                                           reason: reason,
-                                                           memberUserID: memberUserID,
-                                                           memberDisplayName: memberDisplayName,
-                                                           sender: eventItemProxy.sender,
-                                                           isOutgoing: isOutgoing)
-        else {
+        guard let text = stateEventStringBuilder.buildString(for: membershipChange,
+                                                             reason: reason,
+                                                             memberUserID: memberUserID,
+                                                             memberDisplayName: memberDisplayName,
+                                                             sender: eventItemProxy.sender,
+                                                             isOutgoing: isOutgoing) else {
             return nil
         }
-
+        
         return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
     }
-
+    
     private func buildStateProfileChangeTimelineItem(for eventItemProxy: EventTimelineItemProxy,
                                                      displayName: String?,
                                                      previousDisplayName: String?,
                                                      avatarURLString: String?,
                                                      previousAvatarURLString: String?,
                                                      isOutgoing: Bool) -> RoomTimelineItemProtocol? {
-        guard
-            let text = stateEventStringBuilder.buildProfileChangeString(displayName: displayName,
-                                                                        previousDisplayName: previousDisplayName,
-                                                                        avatarURLString: avatarURLString,
-                                                                        previousAvatarURLString: previousAvatarURLString,
-                                                                        member: eventItemProxy.sender.id,
-                                                                        memberIsYou: isOutgoing)
-        else { return nil }
+        guard let text = stateEventStringBuilder.buildProfileChangeString(displayName: displayName,
+                                                                          previousDisplayName: previousDisplayName,
+                                                                          avatarURLString: avatarURLString,
+                                                                          previousAvatarURLString: previousAvatarURLString,
+                                                                          member: eventItemProxy.sender.id,
+                                                                          memberIsYou: isOutgoing) else { return nil }
         return buildStateTimelineItem(for: eventItemProxy, text: text, isOutgoing: isOutgoing)
     }
-
+    
     private func buildStateTimelineItem(for eventItemProxy: EventTimelineItemProxy, text: String, isOutgoing: Bool) -> RoomTimelineItemProtocol {
         StateRoomTimelineItem(id: eventItemProxy.id,
                               body: text,
@@ -878,18 +839,17 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
                               canBeRepliedTo: eventItemProxy.canBeRepliedTo,
                               sender: eventItemProxy.sender)
     }
-
+    
     // MARK: - Reply details
-
-    private func buildTimelineItemReplyDetails(_ details: MatrixRustSDK.InReplyToDetails?)
-        -> TimelineItemReplyDetails? {
+    
+    private func buildTimelineItemReplyDetails(_ details: MatrixRustSDK.InReplyToDetails?) -> TimelineItemReplyDetails? {
         guard let details else {
             return nil
         }
-
+        
         return buildTimelineItemReply(details).details
     }
-
+    
     func buildTimelineItemReply(_ details: MatrixRustSDK.InReplyToDetails) -> TimelineItemReply {
         let isThreaded = details.event().isThreaded
         switch details.event() {
@@ -897,11 +857,11 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             return .init(details: .notLoaded(eventID: details.eventId()), isThreaded: isThreaded)
         case .pending:
             return .init(details: .loading(eventID: details.eventId()), isThreaded: isThreaded)
-        case .ready(let timelineItem, let senderID, let senderProfile, _, _):
+        case let .ready(timelineItem, senderID, senderProfile, _, _):
             let sender = TimelineItemSender(senderID: senderID, senderProfile: senderProfile)
-
+            
             let replyContent: TimelineEventContent
-
+            
             switch timelineItem {
             case .msgLike(let messageLikeContent):
                 switch messageLikeContent.kind {
@@ -927,16 +887,15 @@ struct RoomTimelineItemFactory: RoomTimelineItemFactoryProtocol {
             default:
                 replyContent = .message(.text(.init(body: L10n.commonUnsupportedEvent)))
             }
-
-            return .init(details: .loaded(sender: sender, eventID: details.eventId(), eventContent: replyContent),
-                         isThreaded: isThreaded)
-        case .error(let message):
+            
+            return .init(details: .loaded(sender: sender, eventID: details.eventId(), eventContent: replyContent), isThreaded: isThreaded)
+        case let .error(message):
             return .init(details: .error(eventID: details.eventId(), message: message), isThreaded: isThreaded)
         }
     }
-
+    
     // MARK: - Helpers
-
+    
     private func buildMessageTimelineItemContent(messageType: MessageType?, senderID: String, senderDisplayName: String?) -> EventBasedMessageTimelineItemContentType {
         switch messageType {
         case .audio(let content):

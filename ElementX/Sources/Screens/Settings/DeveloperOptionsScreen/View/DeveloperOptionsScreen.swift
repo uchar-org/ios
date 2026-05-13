@@ -10,17 +10,17 @@ import SwiftUI
 
 struct DeveloperOptionsScreen: View {
     @Environment(\.dismiss) private var dismiss
-
+    
     @Bindable var context: DeveloperOptionsScreenViewModel.Context
-
+    
     @State private var showConfetti = false
     @State private var elementCallURLOverrideString: String
-
+    
     init(context: DeveloperOptionsScreenViewModel.Context) {
         self.context = context
         elementCallURLOverrideString = context.elementCallBaseURLOverride?.absoluteString ?? ""
     }
-
+    
     var body: some View {
         Form {
             if let storeSizes = context.viewState.storeSizes {
@@ -30,10 +30,10 @@ struct DeveloperOptionsScreen: View {
                     }
                 }
             }
-
+            
             Section("Logging") {
                 LogLevelConfigurationView(logLevel: $context.logLevel)
-
+                
                 DisclosureGroup("SDK trace packs") {
                     ForEach(TraceLogPack.allCases, id: \.self) { pack in
                         Toggle(isOn: $context.traceLogPacks[pack]) {
@@ -42,61 +42,57 @@ struct DeveloperOptionsScreen: View {
                     }
                 }
             }
-
+            
             Section("General") {
                 Toggle(isOn: $context.linkNewDeviceEnabled) {
                     Text("Link new device with QR code")
                 }
-
+                
                 context.viewState.appHooks
                     .developerOptionsScreenHook
                     .generalSectionRows()
             }
-
+            
             Section("Room List") {
-                Toggle(isOn: $context.publicSearchEnabled) {
-                    Text("Public search")
-                }
-
                 Picker("Room list activity visibility", selection: $context.roomListActivityVisibility) {
                     ForEach(RoomListActivityVisibility.allCases, id: \.self) { visibility in
                         Text(visibility.rawValue.capitalized)
                             .tag(visibility)
                     }
                 }
-
+                
                 Toggle(isOn: $context.fuzzyRoomListSearchEnabled) {
                     Text("Fuzzy searching")
                 }
-
+                
                 Toggle(isOn: $context.lowPriorityFilterEnabled) {
                     Text("Low priority filter")
                 }
-
+                
                 Toggle(isOn: $context.automaticBackPaginationEnabled) {
                     Text("Automatic back pagination")
                     Text("Requires app reboot")
                 }
             }
-
+            
             Section("Room") {
                 Toggle(isOn: $context.roomThreadListEnabled) {
                     Text("Room thread list")
                 }
-
+                
                 Toggle(isOn: $context.linkPreviewsEnabled) {
                     Text("Link previews")
                     Text("Follows the timeline media visibility settings.")
                     Text("Can leak the device IP address when loading link metadata.")
                         .foregroundStyle(.compound.textCriticalPrimary)
                 }
-
+                
                 Toggle(isOn: $context.knockingEnabled) {
                     Text("Knocking")
                     Text("Ask to join rooms")
                 }
             }
-
+            
             Section {
                 Toggle(isOn: $context.enableOnlySignedDeviceIsolationMode) {
                     Text("Exclude insecure devices when sending/receiving messages")
@@ -122,18 +118,18 @@ struct DeveloperOptionsScreen: View {
                         }
                     }
             }
-
+            
             Section("Notifications") {
                 Toggle(isOn: $context.hideQuietNotificationAlerts) {
                     Text("Hide quiet alerts")
                     Text("The badge count will still be updated")
                 }
-
+                
                 Toggle(isOn: $context.focusEventOnNotificationTap) {
                     Text("Focus event on notification tap")
                 }
             }
-
+            
             Section {
                 Button {
                     showConfetti = true
@@ -143,7 +139,7 @@ struct DeveloperOptionsScreen: View {
                         .alignmentGuide(.listRowSeparatorLeading) { _ in 0 } // Fix separator alignment
                 }
             }
-
+            
             if context.viewState.shouldShowClearCache {
                 Section {
                     Button(role: .destructive) {
@@ -175,7 +171,7 @@ struct DeveloperOptionsScreen: View {
         try? await Task.sleep(for: .seconds(4))
         showConfetti = false
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         if context.viewState.isPresentedModally {
@@ -192,7 +188,7 @@ struct DeveloperOptionsScreen: View {
 
 private struct LogLevelConfigurationView: View {
     @Binding var logLevel: LogLevel
-
+    
     var body: some View {
         Picker(selection: $logLevel) {
             ForEach(logLevels, id: \.self) { logLevel in
@@ -203,7 +199,7 @@ private struct LogLevelConfigurationView: View {
             Text("Requires app reboot")
         }
     }
-
+    
     /// Allows the picker to work with associated values
     private var logLevels: [LogLevel] {
         [.error, .warn, .info, .debug, .trace]

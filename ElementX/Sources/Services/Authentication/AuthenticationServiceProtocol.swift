@@ -112,6 +112,7 @@ enum QRCodeLoginError: Error, Equatable {
     case providerNotAllowed(scannedProvider: String, allowedProviders: [String])
     case cancelled
     case connectionInsecure
+    case invalidCheckCode
     case declined
     case linkingNotSupported
     case expired

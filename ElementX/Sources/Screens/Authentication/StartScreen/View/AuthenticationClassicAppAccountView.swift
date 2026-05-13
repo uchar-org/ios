@@ -10,22 +10,21 @@ import SwiftUI
 
 struct AuthenticationClassicAppAccountView: View {
     @Bindable var context: AuthenticationStartScreenViewModel.Context
-
+    
     let classicAppAccount: ClassicAppAccount
-
+    
     var isLoadingAccount: Bool {
-        classicAppAccount.state.isServerSupported == nil
-            || classicAppAccount.state.availableSecrets == nil
+        classicAppAccount.state.isServerSupported == nil || classicAppAccount.state.availableSecrets == nil
     }
-
+    
     var body: some View {
         FullscreenDialog(topPadding: 25, background: .gradient) {
             VStack(spacing: 38) {
                 header
                     .padding(.bottom, 20)
-
+                
                 profile
-
+                
                 buttons
             }
         } bottomContent: {
@@ -42,18 +41,18 @@ struct AuthenticationClassicAppAccountView: View {
             context.send(viewAction: .updateWindow(window))
         }
     }
-
+    
     var header: some View {
         VStack(spacing: 8) {
             AuthenticationStartLogo(size: 54, hideBrandChrome: false, isOnGradient: false)
-
+            
             Text(L10n.screenOnboardingWelcomeTitle)
                 .font(.compound.headingMDBold)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     var profile: some View {
         VStack(spacing: 16) {
             LoadableAvatarImage(url: classicAppAccount.avatarURL,
@@ -61,26 +60,27 @@ struct AuthenticationClassicAppAccountView: View {
                                 contentID: classicAppAccount.userID,
                                 avatarSize: .user(on: .classicAppAccount),
                                 mediaProvider: context.mediaProvider)
-
+                .accessibilityHidden(true)
+            
             VStack(spacing: 0) {
                 Text(L10n.screenOnboardingWelcomeBack)
                     .font(.compound.bodyMD)
                     .foregroundStyle(.compound.textSecondary)
                     .multilineTextAlignment(.center)
-
+                
                 Text(classicAppAccount.displayableName)
                     .font(.compound.headingLGBold)
                     .foregroundStyle(.compound.textPrimary)
                     .multilineTextAlignment(.center)
             }
-
+            
             Text(classicAppAccount.userID)
                 .font(.compound.bodyLGSemibold)
                 .foregroundStyle(.compound.textPrimary)
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     var buttons: some View {
         VStack(spacing: 16) {
             if isLoadingAccount {
@@ -101,7 +101,7 @@ struct AuthenticationClassicAppAccountView: View {
                     context.send(viewAction: .continueWithClassic(classicAppAccount))
                 }
                 .buttonStyle(.compound(.primary))
-
+                
                 Button(L10n.commonOtherOptions) {
                     context.send(viewAction: .otherOptions(classicAppAccount))
                 }
@@ -133,19 +133,19 @@ struct AuthenticationClassicAppAccountView_Previews: PreviewProvider { // Not Te
         account.state.availableSecrets = .complete
         return account
     }()
-
+    
     static var previews: some View {
         ElementNavigationStack {
             AuthenticationClassicAppAccountView(context: viewModel.context, classicAppAccount: classicAppAccount)
         }
         .previewDisplayName("Ready")
-
+        
         ElementNavigationStack {
             AuthenticationClassicAppAccountView(context: viewModel.context, classicAppAccount: .mockDan)
         }
         .previewDisplayName("Loading")
     }
-
+    
     static func makeViewModel() -> AuthenticationStartScreenViewModel {
         AuthenticationStartScreenViewModel(authenticationService: AuthenticationService.mock,
                                            provisioningParameters: nil,

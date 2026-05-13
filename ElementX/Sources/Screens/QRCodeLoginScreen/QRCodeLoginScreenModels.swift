@@ -20,7 +20,7 @@ enum QRCodeLoginScreenViewModelAction: CustomStringConvertible {
     case linkedDevice
     /// Cancel the flow (dismiss the modal).
     case cancel
-
+    
     var description: String {
         switch self {
         case .startOver: "startOver"
@@ -39,7 +39,7 @@ enum QRCodeLoginScreenMode {
     /// Configures the screen to link another device by scanning a QR code.
     case linkDesktop(LinkNewDeviceServiceProtocol)
     /// Configures the screen to link another device by showing it a QR code.
-    case linkMobile(LinkNewDeviceService.LinkMobileProgressPublisher)
+    case linkMobile(LinkNewDeviceService.LinkMobileProgressPublisher, ClientProxyProtocol)
 }
 
 struct QRCodeLoginScreenViewState: BindableState {
@@ -48,10 +48,10 @@ struct QRCodeLoginScreenViewState: BindableState {
     /// Whether or not it is possible for the screen to start the manual sign in flow. This was added to avoid
     /// having to handle server configuration when ``AppSettings.allowOtherAccountProviders`` is false.
     let canSignInManually: Bool
-
+    
     let instructions = QRCodeLoginScreenInstructions()
     var bindings = QRCodeLoginScreenViewStateBindings()
-
+    
     var shouldDisplayCancelButton: Bool {
         switch mode {
         case .login:
@@ -100,20 +100,20 @@ enum QRCodeLoginState: Equatable {
     case loginInstructions
     /// Initial state where the user is informed how to link another device by scanning it's QR code.
     case linkDesktopInstructions
-
+    
     /// The camera is scanning a QR code.
     case scan(ScanningState)
     /// Codes are being shown.
     case displayCode(DisplayCodeState)
-
+    
     /// Initial state where the user can link another device using the shown QR code.
-    case displayQR(UIImage)
+    case displayQR(DisplayQRState)
     /// The user needs to enter the two digit code to confirm the channel is secure
     case confirmCode(CheckCodeState)
-
+    
     /// Any full screen error state
     case error(ErrorState)
-
+    
     enum ErrorState: Equatable, CaseIterable {
         /// The account provider doesn't support the use of QR codes.
         case notSupported
@@ -130,7 +130,7 @@ enum QRCodeLoginState: Equatable {
         case deviceAlreadySignedIn
         case unknown
     }
-
+    
     enum ScanningState: Equatable {
         /// The QR code is scanning.
         case scanning
@@ -138,7 +138,7 @@ enum QRCodeLoginState: Equatable {
         case connecting
         /// The QR code was scanned, but an error occurred.
         case scanFailed(Error)
-
+        
         enum Error: Equatable {
             /// The QR code has been processed and is invalid.
             case invalid
@@ -146,7 +146,7 @@ enum QRCodeLoginState: Equatable {
             case notAllowed(scannedProvider: String, allowedProviders: [String])
             /// The QR code has been processed but it belongs to a device not signed in.
             case deviceNotSignedIn
-
+            
             var title: String {
                 switch self {
                 case .invalid:
@@ -157,7 +157,7 @@ enum QRCodeLoginState: Equatable {
                     L10n.screenQrCodeLoginDeviceNotSignedInScanStateSubtitle
                 }
             }
-
+            
             var description: String {
                 switch self {
                 case .invalid:
@@ -170,11 +170,18 @@ enum QRCodeLoginState: Equatable {
             }
         }
     }
-
+    
+    enum DisplayQRState: Equatable {
+        /// The QR code is available and is being shown.
+        case active(UIImage)
+        /// The QR code being shown has expired. We will need to generate a new one.
+        case expired
+    }
+    
     enum DisplayCodeState: Equatable {
         case deviceCode(String)
         case verificationCode(String)
-
+        
         var code: String {
             switch self {
             case .deviceCode(let code): code
@@ -182,7 +189,7 @@ enum QRCodeLoginState: Equatable {
             }
         }
     }
-
+    
     enum CheckCodeState: Equatable {
         /// The user needs to input the confirmation code.
         case inputCode(CheckCodeSenderProxy)
@@ -190,7 +197,7 @@ enum QRCodeLoginState: Equatable {
         case invalidCode
         /// The code is being sent.
         case sendingCode
-
+        
         var isSending: Bool {
             switch self {
             case .sendingCode: true
@@ -198,21 +205,21 @@ enum QRCodeLoginState: Equatable {
             }
         }
     }
-
+    
     var isScanning: Bool {
         switch self {
         case .scan(.scanning): true
         default: false
         }
     }
-
+    
     var isDisplayQR: Bool {
         switch self {
         case .displayQR: true
         default: false
         }
     }
-
+    
     var isError: Bool {
         switch self {
         case .error, .scan(.scanFailed): true
@@ -230,14 +237,14 @@ struct QRCodeLoginScreenInstructions {
         finalString.replace(boldPlaceholder, with: boldString)
         return finalString
     }()
-
+    
     let loginItems = [
         AttributedString(L10n.screenQrCodeLoginInitialStateItem1(InfoPlistReader.main.productionAppName)), // "Open Element on another device"
         AttributedString(L10n.screenQrCodeLoginInitialStateItem2), // "Click or tap on your avatar"
         loginItem3,
         AttributedString(L10n.screenQrCodeLoginInitialStateItem4)
     ]
-
+    
     private static let linkDesktopItem2 = {
         let boldPlaceholder = "{bold}"
         var finalString = AttributedString(L10n.screenLinkNewDeviceMobileStep2(boldPlaceholder))
@@ -246,13 +253,13 @@ struct QRCodeLoginScreenInstructions {
         finalString.replace(boldPlaceholder, with: boldString)
         return finalString
     }()
-
+    
     let linkDesktopItems = [
         AttributedString(L10n.screenLinkNewDeviceDesktopStep1(InfoPlistReader.main.productionAppName)),
         linkDesktopItem2,
         AttributedString(L10n.screenLinkNewDeviceDesktopStep3)
     ]
-
+    
     private static let linkMobile = {
         let boldPlaceholder = "{bold}"
         var finalString = AttributedString(L10n.screenLinkNewDeviceMobileStep2(boldPlaceholder))
@@ -261,7 +268,7 @@ struct QRCodeLoginScreenInstructions {
         finalString.replace(boldPlaceholder, with: boldString)
         return finalString
     }()
-
+    
     let linkMobileItems = [
         AttributedString(L10n.screenLinkNewDeviceMobileStep1(InfoPlistReader.main.productionAppName)),
         linkMobile,

@@ -18,14 +18,14 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let userDiscoveryService: UserDiscoveryServiceProtocol
     private let appSettings: AppSettings
-
+    
     private var suggestedUsers = [UserProfileProxy]()
-
+    
     private let actionsSubject: PassthroughSubject<StartChatScreenViewModelAction, Never> = .init()
     var actions: AnyPublisher<StartChatScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(userSession: UserSessionProtocol,
          analytics: AnalyticsService,
          userIndicatorController: UserIndicatorControllerProtocol,
@@ -36,23 +36,22 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
         self.userIndicatorController = userIndicatorController
         self.userDiscoveryService = userDiscoveryService
         self.appSettings = appSettings
-
-        super.init(initialViewState: StartChatScreenViewState(userID: userSession.clientProxy.userID),
-                   mediaProvider: userSession.mediaProvider)
-
+        
+        super.init(initialViewState: StartChatScreenViewState(userID: userSession.clientProxy.userID), mediaProvider: userSession.mediaProvider)
+        
         setupBindings()
-
+        
         Task {
             suggestedUsers = await userSession.clientProxy.recentConversationCounterparts()
-
+            
             if state.usersSection.type == .suggestions {
                 state.usersSection = .init(type: .suggestions, users: suggestedUsers)
             }
         }
     }
-
+    
     // MARK: - Public
-
+    
     override func process(viewAction: StartChatScreenViewAction) {
         switch viewAction {
         case .close:
@@ -61,7 +60,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             actionsSubject.send(.createRoom)
         case .selectUser(let user):
             showLoadingIndicator(delay: .milliseconds(200))
-
+            
             let currentDirectRoom = userSession.clientProxy.directRoomForUserID(user.userID)
             switch currentDirectRoom {
             case .success(.some(let roomId)):
@@ -70,12 +69,11 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             case .success:
                 Task {
                     // If an error occured while fetching the identity, assume they are unknown.
-                    let isUnknown =
-                        if case .success(let identity) = await self.userSession.clientProxy.userIdentity(for: user.userID, fallBackToServer: false) {
-                            identity == nil
-                        } else {
-                            true
-                        }
+                    let isUnknown = if case .success(let identity) = await self.userSession.clientProxy.userIdentity(for: user.userID, fallBackToServer: false) {
+                        identity == nil
+                    } else {
+                        true
+                    }
                     self.state.bindings.selectedUserToInvite = UserToInvite(user: user, isUnknown: isUnknown)
                     hideLoadingIndicator()
                 }
@@ -91,18 +89,14 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             actionsSubject.send(.openRoomDirectorySearch)
         }
     }
-
+    
     // MARK: - Private
-
+    
     // periphery:ignore - auto cancels when reassigned
     @CancellableTask private var resolveAliasTask: Task<Void, Never>?
     private var internalRoomAddressState: JoinByAddressState = .example
-
+    
     private func setupBindings() {
-        appSettings.$publicSearchEnabled
-            .weakAssign(to: \.state.isRoomDirectoryEnabled, on: self)
-            .store(in: &cancellables)
-
         context.$viewState
             .map(\.bindings.searchQuery)
             .debounceTextQueriesAndRemoveDuplicates()
@@ -110,7 +104,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
                 self?.fetchUsers()
             }
             .store(in: &cancellables)
-
+        
         context.$viewState
             .map(\.bindings.roomAddress)
             .removeDuplicates()
@@ -123,7 +117,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
                 internalRoomAddressState = .example
             }
             .store(in: &cancellables)
-
+        
         context.$viewState
             .map(\.bindings.roomAddress)
             .debounceTextQueriesAndRemoveDuplicates()
@@ -135,25 +129,22 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             }
             .store(in: &cancellables)
     }
-
+    
     private func resolveRoomAddress(_ roomAddress: String) {
         guard !roomAddress.isEmpty,
-              isRoomAliasFormatValid(alias: roomAddress)
-        else {
+              isRoomAliasFormatValid(alias: roomAddress) else {
             internalRoomAddressState = .invalidAddress
             resolveAliasTask = nil
             return
         }
-
+        
         resolveAliasTask = Task { [weak self] in
             guard let self else {
                 return
             }
             defer { resolveAliasTask = nil }
-
-            guard
-                case .success(let resolved) = await userSession.clientProxy.resolveRoomAlias(roomAddress)
-            else {
+            
+            guard case let .success(resolved) = await userSession.clientProxy.resolveRoomAlias(roomAddress) else {
                 if Task.isCancelled {
                     return
                 }
@@ -164,28 +155,28 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             guard !Task.isCancelled else {
                 return
             }
-
+            
             let result = JoinByAddressState.addressFound(address: roomAddress, roomID: resolved.roomId)
             internalRoomAddressState = result
             state.joinByAddressState = result
         }
     }
-
+    
     // periphery:ignore - auto cancels when reassigned
     @CancellableTask
     private var fetchUsersTask: Task<Void, Never>?
-
+    
     private func fetchUsers() {
         guard context.searchQuery.count >= 3 else {
             state.usersSection = .init(type: .suggestions, users: suggestedUsers)
             return
         }
-
+        
         fetchUsersTask = Task {
             let result = await userDiscoveryService.searchProfiles(with: context.searchQuery)
-
+            
             guard !Task.isCancelled else { return }
-
+            
             switch result {
             case .success(let users):
                 state.usersSection = .init(type: .searchResult, users: users)
@@ -194,7 +185,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             }
         }
     }
-
+        
     private func createDirectRoom(user: UserProfileProxy) async {
         defer {
             hideLoadingIndicator()
@@ -208,15 +199,15 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             displayError()
         }
     }
-
+    
     private func displayError() {
         state.bindings.alertInfo = AlertInfo(id: .failedCreatingRoom,
                                              title: L10n.commonError,
                                              message: L10n.screenStartChatErrorStartingChat)
     }
-
+    
     private func joinRoomByAddress() {
-        if case .addressFound(let lastTestedAddress, let roomID) = internalRoomAddressState,
+        if case let .addressFound(lastTestedAddress, roomID) = internalRoomAddressState,
            lastTestedAddress == state.bindings.roomAddress {
             actionsSubject.send(.showRoom(roomID: roomID))
         } else if let resolveAliasTask {
@@ -236,11 +227,11 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
             state.joinByAddressState = internalRoomAddressState
         }
     }
-
+        
     // MARK: Loading indicator
-
+    
     private static let loadingIndicatorIdentifier = "\(StartChatScreenViewModel.self)-Loading"
-
+    
     private func showLoadingIndicator(delay: Duration? = nil) {
         userIndicatorController.submitIndicator(UserIndicator(id: Self.loadingIndicatorIdentifier,
                                                               type: .modal(progress: .indeterminate, interactiveDismissDisabled: true, allowsInteraction: false),
@@ -248,7 +239,7 @@ class StartChatScreenViewModel: StartChatScreenViewModelType, StartChatScreenVie
                                                               persistent: true),
                                                 delay: delay)
     }
-
+    
     private func hideLoadingIndicator() {
         userIndicatorController.retractIndicatorWithId(Self.loadingIndicatorIdentifier)
     }
