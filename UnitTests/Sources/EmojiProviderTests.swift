@@ -15,12 +15,12 @@ struct EmojiProviderTests {
     func emojisLoadedCategoriesAreLoadedFromLoader() async {
         let item = EmojiItem(label: "test", unicode: "test", keywords: ["1", "2"], shortcodes: ["1", "2"])
         let category = EmojiCategory(id: "test", emojis: [item])
-
+        
         let emojiLoaderMock = EmojiLoaderMock()
         emojiLoaderMock.categories = [category]
-
-        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: ServiceLocator.shared.settings)
-
+        
+        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: AppSettings())
+        
         let categories = await emojiProvider.categories()
         #expect(emojiLoaderMock.categories == categories)
     }
@@ -29,12 +29,12 @@ struct EmojiProviderTests {
     func emojisLoadedAndSearchStringEmptyAllCategoriesReturned() async {
         let item = EmojiItem(label: "test", unicode: "test", keywords: ["1", "2"], shortcodes: ["1", "2"])
         let category = EmojiCategory(id: "test", emojis: [item])
-
+        
         let emojiLoaderMock = EmojiLoaderMock()
         emojiLoaderMock.categories = [category]
-
-        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: ServiceLocator.shared.settings)
-
+        
+        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: AppSettings())
+        
         let categories = await emojiProvider.categories(searchString: "")
         #expect(emojiLoaderMock.categories == categories)
     }
@@ -43,59 +43,47 @@ struct EmojiProviderTests {
     func emojisLoadedSecondTimeCachedValuesAreUsed() async {
         let item = EmojiItem(label: "test", unicode: "test", keywords: ["1", "2"], shortcodes: ["1", "2"])
         let item2 = EmojiItem(label: "test2", unicode: "test2", keywords: ["3", "4"], shortcodes: ["3", "4"])
-        let categoriesForFirstLoad = [
-            EmojiCategory(id: "test",
-                          emojis: [item])
-        ]
-        let categoriesForSecondLoad = [
-            EmojiCategory(id: "test2",
-                          emojis: [item2])
-        ]
-
+        let categoriesForFirstLoad = [EmojiCategory(id: "test",
+                                                    emojis: [item])]
+        let categoriesForSecondLoad = [EmojiCategory(id: "test2",
+                                                     emojis: [item2])]
+        
         let emojiLoaderMock = EmojiLoaderMock()
         emojiLoaderMock.categories = categoriesForFirstLoad
-
-        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: ServiceLocator.shared.settings)
-
+        
+        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: AppSettings())
+        
         _ = await emojiProvider.categories()
         emojiLoaderMock.categories = categoriesForSecondLoad
-
+        
         let categories = await emojiProvider.categories()
         #expect(categories == categoriesForFirstLoad)
     }
-
+    
     @Test @MainActor
     func emojisSearchedCorrectNumberOfCategoriesReturned() async {
         let searchString = "smile"
         var categories = [EmojiCategory]()
-        let item0WithSearchString = EmojiItem(label: "emoji0", unicode: "\(searchString)_123", keywords: ["key1", "key1"],
-                                              shortcodes: ["key1", "key1"])
-        let item1WithSearchString = EmojiItem(label: searchString, unicode: "emoji1", keywords: ["key1", "key1"],
-                                              shortcodes: ["key1", "key1"])
-        let item2WithSearchString = EmojiItem(label: "emoji_2", unicode: "emoji_2", keywords: ["key1", "\(searchString)_123"],
-                                              shortcodes: ["key1", "key2"])
-        let item3WithSearchString = EmojiItem(label: "emoji_2", unicode: "emoji_2", keywords: ["key1", "key1"],
-                                              shortcodes: ["key1", "\(searchString)_123"])
-        let item4WithoutSearchString = EmojiItem(label: "emoji_3", unicode: "emoji_3", keywords: ["key1", "key1"],
-                                                 shortcodes: ["key1", "key1"])
-        let item5WithSearchString = EmojiItem(label: "emoji0", unicode: "\(searchString)_123", keywords: ["key1", "key1"],
-                                              shortcodes: ["key1", "key1"])
+        let item0WithSearchString = EmojiItem(label: "emoji0", unicode: "\(searchString)_123", keywords: ["key1", "key1"], shortcodes: ["key1", "key1"])
+        let item1WithSearchString = EmojiItem(label: searchString, unicode: "emoji1", keywords: ["key1", "key1"], shortcodes: ["key1", "key1"])
+        let item2WithSearchString = EmojiItem(label: "emoji_2", unicode: "emoji_2", keywords: ["key1", "\(searchString)_123"], shortcodes: ["key1", "key2"])
+        let item3WithSearchString = EmojiItem(label: "emoji_2", unicode: "emoji_2", keywords: ["key1", "key1"], shortcodes: ["key1", "\(searchString)_123"])
+        let item4WithoutSearchString = EmojiItem(label: "emoji_3", unicode: "emoji_3", keywords: ["key1", "key1"], shortcodes: ["key1", "key1"])
+        let item5WithSearchString = EmojiItem(label: "emoji0", unicode: "\(searchString)_123", keywords: ["key1", "key1"], shortcodes: ["key1", "key1"])
         categories.append(EmojiCategory(id: "test",
-                                        emojis: [
-                                            item0WithSearchString,
-                                            item1WithSearchString,
-                                            item2WithSearchString,
-                                            item3WithSearchString,
-                                            item4WithoutSearchString
-                                        ]))
+                                        emojis: [item0WithSearchString,
+                                                 item1WithSearchString,
+                                                 item2WithSearchString,
+                                                 item3WithSearchString,
+                                                 item4WithoutSearchString]))
         categories.append(EmojiCategory(id: "test",
                                         emojis: [item5WithSearchString]))
-
+        
         let emojiLoaderMock = EmojiLoaderMock()
         emojiLoaderMock.categories = categories
-
-        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: ServiceLocator.shared.settings)
-
+        
+        let emojiProvider = EmojiProvider(loader: emojiLoaderMock, appSettings: AppSettings())
+        
         _ = await emojiProvider.categories()
         let result = await emojiProvider.categories(searchString: searchString)
         #expect(result.count == 2)

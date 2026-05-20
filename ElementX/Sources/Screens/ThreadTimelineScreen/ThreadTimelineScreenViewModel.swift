@@ -11,57 +11,55 @@ import SwiftUI
 
 typealias ThreadTimelineScreenViewModelType = StateStoreViewModel<ThreadTimelineScreenViewState, ThreadTimelineScreenViewAction>
 
-class ThreadTimelineScreenViewModel: ThreadTimelineScreenViewModelType,
-    ThreadTimelineScreenViewModelProtocol {
+class ThreadTimelineScreenViewModel: ThreadTimelineScreenViewModelType, ThreadTimelineScreenViewModelProtocol {
     private let roomProxy: JoinedRoomProxyProtocol
     private let userSession: UserSessionProtocol
-
-    private let actionsSubject: PassthroughSubject<ThreadTimelineScreenViewModelAction, Never> =
-        .init()
+    
+    private let actionsSubject: PassthroughSubject<ThreadTimelineScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<ThreadTimelineScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(roomProxy: JoinedRoomProxyProtocol,
          userSession: UserSessionProtocol) {
         self.roomProxy = roomProxy
         self.userSession = userSession
-
+        
         super.init(initialViewState: ThreadTimelineScreenViewState(roomTitle: roomProxy.infoPublisher.value.displayName ?? roomProxy.id,
                                                                    roomAvatar: roomProxy.infoPublisher.value.avatar), mediaProvider: userSession.mediaProvider)
-
+        
         roomProxy.infoPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] roomInfo in
                 self?.updateRoomInfo(roomInfo)
             }
             .store(in: &cancellables)
-
+        
         let identityStatusChangesPublisher = roomProxy.identityStatusChangesPublisher.receive(on: DispatchQueue.main)
         Task { [weak self] in
             for await _ in identityStatusChangesPublisher.values {
                 guard !Task.isCancelled else {
                     return
                 }
-
+                
                 await self?.updateVerificationBadge()
             }
         }
         .store(in: &cancellables)
-
+        
         updateRoomInfo(roomProxy.infoPublisher.value)
         Task { await updateVerificationBadge() }
     }
-
+    
     // MARK: - Public
-
+    
     override func process(viewAction: ThreadTimelineScreenViewAction) { }
-
+    
     func stop() {
         // Work around QLPreviewController dismissal issues, see the InteractiveQuickLookModifier.
         state.bindings.mediaPreviewViewModel = nil
     }
-
+    
     func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel) {
         mediaPreviewViewModel.actions.sink { [weak self] action in
             guard let self else { return }
@@ -79,32 +77,29 @@ class ThreadTimelineScreenViewModel: ThreadTimelineScreenViewModelType,
             }
         }
         .store(in: &cancellables)
-
+        
         state.bindings.mediaPreviewViewModel = mediaPreviewViewModel
     }
-
+    
     // MARK: - Private
-
+    
     private func updateVerificationBadge() async {
-        guard roomProxy.isDirectOneToOneRoom,
-              let dmRecipient = roomProxy.membersPublisher.value.first(where: {
-                  $0.userID != roomProxy.ownUserID
-              }),
-              case .success(let userIdentity) = await userSession.clientProxy.userIdentity(for: dmRecipient.userID, fallBackToServer: true)
-        else {
+        guard roomProxy.infoPublisher.value.isDM,
+              let dmRecipient = roomProxy.membersPublisher.value.first(where: { $0.userID != roomProxy.ownUserID }),
+              case let .success(userIdentity) = await userSession.clientProxy.userIdentity(for: dmRecipient.userID, fallBackToServer: true) else {
             state.dmRecipientVerificationState = .notVerified
             return
         }
-
+        
         guard let userIdentity else {
             MXLog.failure("User identity should be known at this point")
             state.dmRecipientVerificationState = .notVerified
             return
         }
-
+        
         state.dmRecipientVerificationState = userIdentity.verificationState
     }
-
+    
     private func updateRoomInfo(_ roomInfo: RoomInfoProxyProtocol) {
         state.roomTitle = roomInfo.displayName ?? roomProxy.id
         state.roomAvatar = roomInfo.avatar

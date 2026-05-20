@@ -11,25 +11,24 @@ import SwiftUI
 
 typealias AnalyticsSettingsScreenViewModelType = StateStoreViewModelV2<AnalyticsSettingsScreenViewState, AnalyticsSettingsScreenViewAction>
 
-class AnalyticsSettingsScreenViewModel: AnalyticsSettingsScreenViewModelType,
-    AnalyticsSettingsScreenViewModelProtocol {
-    private let analytics: AnalyticsService
-
-    init(appSettings: AppSettings, analytics: AnalyticsService) {
+class AnalyticsSettingsScreenViewModel: AnalyticsSettingsScreenViewModelType, AnalyticsSettingsScreenViewModelProtocol {
+    private let analytics: AnalyticsServiceProtocol
+    
+    init(appSettings: AppSettings, analytics: AnalyticsServiceProtocol) {
         self.analytics = analytics
-
+        
         let strings = AnalyticsSettingsScreenStrings(termsURL: appSettings.analyticsTermsURL)
         let bindings = AnalyticsSettingsScreenViewStateBindings(enableAnalytics: analytics.isEnabled)
         let state = AnalyticsSettingsScreenViewState(strings: strings, bindings: bindings)
-
+        
         super.init(initialViewState: state)
-
+        
         appSettings.$analyticsConsentState
             .map { $0 == .optedIn }
             .weakAssign(to: \.state.bindings.enableAnalytics, on: self)
             .store(in: &cancellables)
     }
-
+    
     override func process(viewAction: AnalyticsSettingsScreenViewAction) {
         switch viewAction {
         case .toggleAnalytics:

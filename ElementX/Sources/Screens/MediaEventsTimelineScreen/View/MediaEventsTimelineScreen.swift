@@ -12,7 +12,7 @@ import SwiftUI
 struct MediaEventsTimelineScreen: View {
     @Bindable var context: MediaEventsTimelineScreenViewModel.Context
     @State private var sheetHeight = CGFloat.zero
-
+    
     var body: some View {
         mainContent
             .navigationBarTitleDisplayMode(.inline)
@@ -27,7 +27,7 @@ struct MediaEventsTimelineScreen: View {
             }
             .timelineMediaPreview(viewModel: $context.mediaPreviewViewModel)
             .sheet(item: $context.mediaPreviewSheetViewModel) { sheet in
-                if case .media(let media) = sheet.state.currentItem {
+                if case let .media(media) = sheet.state.currentItem {
                     TimelineMediaPreviewDetailsView(item: media,
                                                     context: sheet.context,
                                                     preferredColorScheme: nil,
@@ -36,7 +36,7 @@ struct MediaEventsTimelineScreen: View {
                 }
             }
     }
-
+    
     /// The scale effects do the following:
     /// * flip the scrollView vertically to keep the items
     /// at the bottom and have pagination working properly
@@ -55,7 +55,7 @@ struct MediaEventsTimelineScreen: View {
                 .backportScrollEdgeEffectHidden()
         }
     }
-
+    
     private var scrollView: some View {
         ScrollView {
             Group {
@@ -65,13 +65,13 @@ struct MediaEventsTimelineScreen: View {
                 case .files:
                     filesContent
                 }
-
+                
                 header
             }
         }
         .scaleEffect(.init(width: 1, height: -1))
     }
-
+    
     @ViewBuilder
     private var mediaContent: some View {
         let columns = [GridItem(.adaptive(minimum: 80, maximum: 150), spacing: 1)]
@@ -98,7 +98,7 @@ struct MediaEventsTimelineScreen: View {
         }
         .scaleEffect(.init(width: -1, height: 1))
     }
-
+    
     private var filesContent: some View {
         LazyVStack(alignment: .center, spacing: 16) {
             ForEach(context.viewState.groups) { group in
@@ -107,7 +107,7 @@ struct MediaEventsTimelineScreen: View {
                         VStack(spacing: 20) {
                             Divider()
                                 .accessibilityHidden(true)
-
+                            
                             Button {
                                 tappedItem(item)
                             } label: {
@@ -132,7 +132,7 @@ struct MediaEventsTimelineScreen: View {
             }
         }
     }
-
+    
     private var header: some View {
         // Needs to be wrapped in a LazyStack otherwise appearance calls don't trigger
         LazyVStack(spacing: 0) {
@@ -140,7 +140,7 @@ struct MediaEventsTimelineScreen: View {
                 .padding()
                 .opacity(context.viewState.isBackPaginating ? 1 : 0)
                 .scaleEffect(.init(width: 1, height: -1)) // Make sure it spins the right way around 🙃
-
+            
             Rectangle()
                 .frame(height: 1)
                 .foregroundStyle(.compound.bgCanvasDefault)
@@ -152,7 +152,7 @@ struct MediaEventsTimelineScreen: View {
                 }
         }
     }
-
+    
     @ViewBuilder
     private func viewForTimelineItem(_ item: RoomTimelineItemViewState) -> some View {
         switch item.type {
@@ -166,15 +166,13 @@ struct MediaEventsTimelineScreen: View {
             AudioMediaEventsTimelineView(timelineItem: timelineItem)
         case .voice(let timelineItem):
             let defaultPlayerState = AudioPlayerState(id: .timelineItemIdentifier(timelineItem.id), title: L10n.commonVoiceMessage, duration: 0)
-            let playerState =
-                context.viewState.activeTimelineContext.viewState.audioPlayerStateProvider?(timelineItem.id)
-                    ?? defaultPlayerState
+            let playerState = context.viewState.activeTimelineContext.viewState.audioPlayerStateProvider?(timelineItem.id) ?? defaultPlayerState
             VoiceMessageMediaEventsTimelineView(timelineItem: timelineItem, playerState: playerState)
         default:
             EmptyView()
         }
     }
-
+    
     private var emptyState: some View {
         FullscreenDialog(topPadding: UIConstants.iconTopPaddingToNavigationBar, background: .gradient) {
             VStack(spacing: 16) {
@@ -186,43 +184,41 @@ struct MediaEventsTimelineScreen: View {
                 }
             }
             .padding(16)
-        } bottomContent: {
-            EmptyView()
-        }
+        } bottomContent: { EmptyView() }
     }
-
+    
     private var emptyMedia: some View {
         Group {
             BigIcon(icon: \.image)
-
+            
             Text(L10n.screenMediaBrowserMediaEmptyStateTitle)
                 .foregroundColor(.compound.textPrimary)
                 .font(.compound.headingMDBold)
                 .multilineTextAlignment(.center)
-
+            
             Text(L10n.screenMediaBrowserMediaEmptyStateSubtitle)
                 .foregroundColor(.compound.textSecondary)
                 .font(.compound.bodyMD)
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     private var emptyFiles: some View {
         Group {
             BigIcon(icon: \.document)
-
+            
             Text(L10n.screenMediaBrowserFilesEmptyStateTitle)
                 .foregroundColor(.compound.textPrimary)
                 .font(.compound.headingMDBold)
                 .multilineTextAlignment(.center)
-
+            
             Text(L10n.screenMediaBrowserFilesEmptyStateSubtitle)
                 .foregroundColor(.compound.textSecondary)
                 .font(.compound.bodyMD)
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .principal) {
@@ -233,7 +229,7 @@ struct MediaEventsTimelineScreen: View {
                     .frame(idealWidth: .greatestFiniteMagnitude)
             }
         }
-
+        
         if #available(iOS 26, *) {
             ToolbarSpacer()
         } else {
@@ -243,7 +239,7 @@ struct MediaEventsTimelineScreen: View {
             }
         }
     }
-
+    
     private var screenModePicker: some View {
         Picker("", selection: $context.screenMode) {
             Text(L10n.screenMediaBrowserListModeMedia)
@@ -255,7 +251,7 @@ struct MediaEventsTimelineScreen: View {
         }
         .pickerStyle(.segmented)
     }
-
+    
     func tappedItem(_ item: RoomTimelineItemViewState) {
         context.send(viewAction: .tappedItem(item: item))
     }
@@ -274,29 +270,29 @@ struct MediaEventsTimelineScreen_Previews: PreviewProvider, TestablePreview {
     static let filesViewModel = makeViewModel(screenMode: .files)
     static let emptyMediaViewModel = makeViewModel(empty: true, screenMode: .media)
     static let emptyFilesViewModel = makeViewModel(empty: true, screenMode: .files)
-
+    
     static var previews: some View {
         ElementNavigationStack {
             MediaEventsTimelineScreen(context: mediaViewModel.context)
         }
         .previewDisplayName("Media")
-
+        
         ElementNavigationStack {
             MediaEventsTimelineScreen(context: filesViewModel.context)
         }
         .previewDisplayName("Files")
-
+        
         ElementNavigationStack {
             MediaEventsTimelineScreen(context: emptyMediaViewModel.context)
         }
         .previewDisplayName("Empty Media")
-
+        
         ElementNavigationStack {
             MediaEventsTimelineScreen(context: emptyFilesViewModel.context)
         }
         .previewDisplayName("Empty Files")
     }
-
+    
     private static func makeViewModel(empty: Bool = false,
                                       screenMode: MediaEventsTimelineScreenMode) -> MediaEventsTimelineScreenViewModel {
         MediaEventsTimelineScreenViewModel(mediaTimelineViewModel: makeTimelineViewModel(empty: empty),
@@ -306,24 +302,24 @@ struct MediaEventsTimelineScreen_Previews: PreviewProvider, TestablePreview {
                                            userIndicatorController: UserIndicatorControllerMock(),
                                            appMediator: AppMediatorMock())
     }
-
+    
     private static func makeTimelineViewModel(empty: Bool) -> TimelineViewModel {
-        let timelineController =
-            if empty {
-                MockTimelineController.emptyMediaGallery
-            } else {
-                MockTimelineController.mediaGallery
-            }
+        let timelineController = if empty {
+            MockTimelineController.emptyMediaGallery
+        } else {
+            MockTimelineController.mediaGallery
+        }
 
+        let appSettings = AppSettings()
         return TimelineViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Preview room")),
                                  timelineController: timelineController,
                                  userSession: UserSessionMock(.init()),
                                  mediaPlayerProvider: MediaPlayerProviderMock(),
                                  userIndicatorController: UserIndicatorControllerMock(),
                                  appMediator: AppMediatorMock.default,
-                                 appSettings: ServiceLocator.shared.settings,
-                                 analyticsService: ServiceLocator.shared.analytics,
-                                 emojiProvider: EmojiProvider(appSettings: ServiceLocator.shared.settings),
+                                 appSettings: appSettings,
+                                 analyticsService: AnalyticsServiceMock.default(),
+                                 emojiProvider: EmojiProvider(appSettings: appSettings),
                                  linkMetadataProvider: LinkMetadataProvider(),
                                  timelineControllerFactory: TimelineControllerFactoryMock(.init()))
     }

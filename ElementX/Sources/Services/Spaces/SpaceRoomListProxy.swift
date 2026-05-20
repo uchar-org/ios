@@ -13,47 +13,49 @@ class SpaceRoomListProxy: SpaceRoomListProxyProtocol {
     var id: String {
         spaceServiceRoomPublisher.value.id
     }
-
+    
     private let spaceRoomList: SpaceRoomListProtocol
-
+    
     private var spaceServiceRoomHandle: TaskHandle?
     private let spaceServiceRoomSubject: CurrentValueSubject<SpaceServiceRoom, Never>
     var spaceServiceRoomPublisher: CurrentValuePublisher<SpaceServiceRoom, Never> {
         spaceServiceRoomSubject.asCurrentValuePublisher()
     }
-
+    
     private var spaceRoomsHandle: TaskHandle?
     private let spaceRoomsSubject = CurrentValueSubject<[SpaceServiceRoom], Never>([])
     var spaceRoomsPublisher: CurrentValuePublisher<[SpaceServiceRoom], Never> {
         spaceRoomsSubject.asCurrentValuePublisher()
     }
-
+    
     private let paginationStateHandle: TaskHandle
     let paginationStatePublisher: CurrentValuePublisher<SpaceRoomListPaginationState, Never>
-
+    
     init(_ spaceRoomList: SpaceRoomListProtocol) throws {
         guard let spaceRoom = spaceRoomList.space() else { throw SpaceRoomListProxyError.missingSpace }
-
+        
         self.spaceRoomList = spaceRoomList
         spaceServiceRoomSubject = .init(SpaceServiceRoom(spaceRoom: spaceRoom))
-
+        
         let paginationStateSubject = CurrentValueSubject<SpaceRoomListPaginationState, Never>(spaceRoomList.paginationState())
         paginationStatePublisher = paginationStateSubject.asCurrentValuePublisher()
-
+        
         paginationStateHandle = spaceRoomList.subscribeToPaginationStateUpdates(listener: SDKListener { paginationState in
             paginationStateSubject.send(paginationState)
         })
-
-        spaceRoomsHandle = spaceRoomList.subscribeToRoomUpdate(listener: SDKListener { [weak self] updates in
-            self?.handleUpdates(updates)
-        })
-
+        
         spaceServiceRoomHandle = spaceRoomList.subscribeToSpaceUpdates(listener: SDKListener { [weak self] spaceRoom in
             guard let spaceRoom else { return }
             self?.spaceServiceRoomSubject.send(SpaceServiceRoom(spaceRoom: spaceRoom))
         })
+        
+        Task {
+            spaceRoomsHandle = await spaceRoomList.subscribeToRoomUpdate(listener: SDKListener { [weak self] updates in
+                self?.handleUpdates(updates)
+            })
+        }
     }
-
+    
     func paginate() async {
         do {
             try await spaceRoomList.paginate()
@@ -61,16 +63,16 @@ class SpaceRoomListProxy: SpaceRoomListProxyProtocol {
             MXLog.error("Pagination failure: \(error)")
         }
     }
-
+    
     func reset() async {
         await spaceRoomList.reset()
     }
-
+    
     // MARK: - Private
-
+    
     private func handleUpdates(_ updates: [SpaceListUpdate]) {
         var rooms = spaceRoomsSubject.value
-
+        
         for update in updates {
             switch update {
             case .append(let spaceRooms):
@@ -97,7 +99,7 @@ class SpaceRoomListProxy: SpaceRoomListProxyProtocol {
                 rooms = spaceRooms.map(SpaceServiceRoom.init)
             }
         }
-
+        
         spaceRoomsSubject.send(rooms)
     }
 }

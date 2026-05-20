@@ -258,10 +258,10 @@ struct HomeScreenRoomCell_Previews: PreviewProvider, TestablePreview {
 
         return HomeScreenViewModel(userSession: userSession,
                                    selectedRoomPublisher: CurrentValueSubject<String?, Never>(nil).asCurrentValuePublisher(),
-                                   appSettings: ServiceLocator.shared.settings,
-                                   analyticsService: ServiceLocator.shared.analytics,
+                                   appSettings: AppSettings(),
+                                   analyticsService: AnalyticsServiceMock.default(),
                                    notificationManager: NotificationManagerMock(),
-                                   userIndicatorController: ServiceLocator.shared.userIndicatorController)
+                                   userIndicatorController: UserIndicatorControllerMock.default)
     }
 
     static func makeRoom(lastMessageState: RoomSummary.LastMessageState) -> HomeScreenRoom {

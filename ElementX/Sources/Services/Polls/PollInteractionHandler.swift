@@ -9,21 +9,21 @@
 import Foundation
 
 class PollInteractionHandler: PollInteractionHandlerProtocol {
-    let analyticsService: AnalyticsService
+    let analyticsService: AnalyticsServiceProtocol
     let timelineController: TimelineControllerProtocol
-
-    init(analyticsService: AnalyticsService, timelineController: TimelineControllerProtocol) {
+    
+    init(analyticsService: AnalyticsServiceProtocol, timelineController: TimelineControllerProtocol) {
         self.analyticsService = analyticsService
         self.timelineController = timelineController
     }
-
+    
     func sendPollResponse(pollStartID: String, optionID: String) async -> Result<Void, Error> {
         let sendPollResponseResult = await timelineController.sendPollResponse(pollStartID: pollStartID, answers: [optionID])
         analyticsService.trackPollVote()
-
+        
         return sendPollResponseResult.mapError { $0 }
     }
-
+    
     func endPoll(pollStartID: String) async -> Result<Void, Error> {
         let endPollResult = await timelineController.endPoll(pollStartID: pollStartID,
                                                              text: "The poll with event id: \(pollStartID) has ended")

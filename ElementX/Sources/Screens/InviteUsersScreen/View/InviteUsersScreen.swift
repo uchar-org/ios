@@ -11,13 +11,13 @@ import SwiftUI
 
 struct InviteUsersScreen: View {
     @ObservedObject var context: InviteUsersScreenViewModel.Context
-
+    
     @State private var formWidth = CGFloat.zero
-
+    
     var showTopSection: Bool {
         !context.viewState.selectedUsers.isEmpty || context.viewState.isSearching
     }
-
+    
     var body: some View {
         mainContent
             .compoundList()
@@ -37,9 +37,9 @@ struct InviteUsersScreen: View {
             .alert(item: $context.alertInfo)
             .navigationBarBackButtonHidden(context.viewState.isSkippable)
     }
-
+    
     // MARK: - Private
-
+    
     private var mainContent: some View {
         Form {
             if showTopSection {
@@ -51,7 +51,7 @@ struct InviteUsersScreen: View {
                         selectedUsersSection
                             .textCase(.none)
                             .frame(width: formWidth)
-
+                        
                         if context.viewState.isSearching {
                             ProgressView()
                                 .frame(maxWidth: .infinity, alignment: .center)
@@ -60,7 +60,7 @@ struct InviteUsersScreen: View {
                     }
                 }
             }
-
+            
             if context.viewState.hasEmptySearchResults {
                 noResultsContent
             } else {
@@ -69,7 +69,7 @@ struct InviteUsersScreen: View {
         }
         .readWidth($formWidth)
     }
-
+    
     private var noResultsContent: some View {
         Text(L10n.commonNoResults)
             .font(.compound.bodyLG)
@@ -78,7 +78,7 @@ struct InviteUsersScreen: View {
             .listRowBackground(Color.clear)
             .accessibilityIdentifier(A11yIdentifiers.startChatScreen.searchNoResults)
     }
-
+    
     @ViewBuilder
     private var usersSection: some View {
         if !context.viewState.usersSection.users.isEmpty {
@@ -103,14 +103,16 @@ struct InviteUsersScreen: View {
             Section.empty
         }
     }
-
+    
     @ScaledMetric private var selectedUserCellWidth: CGFloat = 80
 
     private var selectedUsersSection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(context.viewState.selectedUsers, id: \.userID) { user in
-                    InviteUsersScreenSelectedItem(user: user, mediaProvider: context.mediaProvider) {
+                    InviteUsersScreenSelectedItem(user: user,
+                                                  mediaProvider: context.mediaProvider,
+                                                  isLocked: context.viewState.isInviteeMandatory(user)) {
                         deselect(user)
                     }
                     .frame(width: selectedUserCellWidth)
@@ -121,7 +123,7 @@ struct InviteUsersScreen: View {
         }
         .scrollPosition(id: $context.selectedUsersPosition, anchor: .trailing)
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         if !context.viewState.isSkippable {
@@ -131,16 +133,23 @@ struct InviteUsersScreen: View {
                 }
             }
         }
-
+        
         ToolbarItem(placement: .confirmationAction) {
-            Button(context.viewState.actionText) {
-                context.send(viewAction: .proceed)
+            if context.viewState.isSkippable, context.viewState.selectedUsers.isEmpty {
+                Button(L10n.actionSkip) {
+                    context.send(viewAction: .proceed)
+                }
+                .accessibilityIdentifier(A11yIdentifiers.inviteUsersScreen.proceed)
+            } else {
+                ToolbarButton(role: .confirm(title: L10n.actionInvite)) {
+                    context.send(viewAction: .proceed)
+                }
+                .accessibilityIdentifier(A11yIdentifiers.inviteUsersScreen.proceed)
+                .disabled(!context.viewState.hasInvitableSelectedUsers)
             }
-            .accessibilityIdentifier(A11yIdentifiers.inviteUsersScreen.proceed)
-            .disabled(context.viewState.isActionDisabled)
         }
     }
-
+    
     private func deselect(_ user: UserProfileProxy) {
         context.send(viewAction: .toggleUser(user))
     }
@@ -153,14 +162,15 @@ struct InviteUsersScreen_Previews: PreviewProvider, TestablePreview {
     static let searchingViewModel = makeViewModel(searchQuery: "Alice")
     static let selectedViewModel = makeViewModel(hasSelection: true)
     static let confirmSelectedViewModel = makeViewModel(shouldConfirm: true)
-
+    static let draftViewModel = makeViewModel(roomType: .draft(mandatoryInvitees: [.mockAlice]), isSkippable: false)
+    
     static var previews: some View {
         ElementNavigationStack {
             InviteUsersScreen(context: viewModel.context)
         }
         .previewDisplayName("Suggestions")
         .snapshotPreferences(expect: viewModel.context.$viewState.map { !$0.usersSection.users.isEmpty })
-
+        
         ElementNavigationStack {
             InviteUsersScreen(context: searchingViewModel.context)
         }
@@ -168,51 +178,56 @@ struct InviteUsersScreen_Previews: PreviewProvider, TestablePreview {
         .snapshotPreferences(expect: searchingViewModel.context.$viewState.map {
             $0.usersSection.type == .searchResult && !$0.usersSection.users.isEmpty
         })
-
+        
         ElementNavigationStack {
             InviteUsersScreen(context: selectedViewModel.context)
         }
         .previewDisplayName("Selected")
         .snapshotPreferences(expect: selectedViewModel.context.$viewState.map { !$0.selectedUsers.isEmpty })
-
+        
         ElementNavigationStack {
             InviteUsersScreen(context: confirmSelectedViewModel.context)
         }
         .previewDisplayName("Confirm Selected")
+        
+        ElementNavigationStack {
+            InviteUsersScreen(context: draftViewModel.context)
+        }
+        .previewDisplayName("Draft (locked invitee)")
+        .snapshotPreferences(expect: draftViewModel.context.$viewState.map { !$0.mandatoryInvitees.isEmpty })
     }
-
-    static func makeViewModel(searchQuery: String? = nil, hasSelection: Bool = false, shouldConfirm: Bool = false) -> InviteUsersScreenViewModel {
+    
+    static func makeViewModel(searchQuery: String? = nil,
+                              hasSelection: Bool = false,
+                              shouldConfirm: Bool = false,
+                              roomType: InviteUsersScreenRoomType? = nil,
+                              isSkippable: Bool = true) -> InviteUsersScreenViewModel {
         let clientProxy = ClientProxyMock(.init())
-        clientProxy.recentConversationCounterpartsReturnValue = [
-            .mockAlice, .mockBob, .mockCharlie, .mockDan, .mockVerbose
-        ]
+        clientProxy.recentConversationCounterpartsReturnValue = [.mockAlice, .mockBob, .mockCharlie, .mockDan, .mockVerbose]
 
         let userDiscoveryService = UserDiscoveryServiceMock()
         userDiscoveryService.searchProfilesWithReturnValue = .success([.mockAlice])
 
         let viewModel = InviteUsersScreenViewModel(userSession: UserSessionMock(.init(clientProxy: clientProxy)),
-                                                   roomProxy: JoinedRoomProxyMock(.init(members: [])),
-                                                   isSkippable: true,
+                                                   roomType: roomType ?? .existingRoom(roomProxy: JoinedRoomProxyMock(.init(members: []))),
+                                                   isSkippable: isSkippable,
                                                    userDiscoveryService: userDiscoveryService,
                                                    userIndicatorController: UserIndicatorControllerMock(),
-                                                   appSettings: ServiceLocator.shared.settings)
-
+                                                   appSettings: AppSettings())
+        
         if let searchQuery {
             viewModel.context.searchQuery = searchQuery
         }
-
+        
         if hasSelection {
             viewModel.state.selectedUsers = [.mockAlice]
         }
-
+        
         if shouldConfirm {
-            viewModel.state.usersToConfirm = [
-                .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice,
-                .mockAlice, .mockAlice
-            ]
+            viewModel.state.usersToConfirm = [.mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice, .mockAlice]
             viewModel.state.bindings.presentConfirmationDialog = true
         }
-
+        
         return viewModel
     }
 }

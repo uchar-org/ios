@@ -12,7 +12,7 @@ struct TimelineReadReceiptsView: View {
     let displayNumber = 3
     let timelineItem: EventBasedTimelineItemProtocol
     @EnvironmentObject private var context: TimelineViewModel.Context
-
+    
     var avatars: [StackedAvatarInfo] {
         timelineItem.properties.orderedReadReceipts.prefix(displayNumber).map { receipt in
             StackedAvatarInfo(url: context.viewState.members[receipt.userID]?.avatarURL,
@@ -41,11 +41,11 @@ struct TimelineReadReceiptsView: View {
         .accessibilityLabel(accessibilityLabel)
         .accessibilityHint(L10n.a11yReadReceiptsTapToShowAll)
     }
-
+    
     private var remaining: Int {
         timelineItem.properties.orderedReadReceipts.count - displayNumber
     }
-
+    
     private var accessibilityLabel: String {
         if timelineItem.properties.orderedReadReceipts.count == 1 {
             return L10n.a11yReadReceiptsSingle(displayName(at: 0))
@@ -56,14 +56,14 @@ struct TimelineReadReceiptsView: View {
             return L10n.a11yReadReceiptsMultiple(list, last)
         } else if timelineItem.properties.orderedReadReceipts.count > displayNumber {
             let list = (0..<displayNumber).map { displayName(at: $0) }.formatted(.list(type: .and, width: .narrow))
-
+            
             // Plurals with string arguments aren't generated correctly so we need to use this
             // https://github.com/SwiftGen/SwiftGen/issues/1089
             return L10n.tr("Localizable", "a11y_read_receipts_multiple_with_others", list, remaining)
         }
         return ""
     }
-
+    
     private func displayName(at index: Int) -> String {
         let userID = timelineItem.properties.orderedReadReceipts[index].userID
         return context.viewState.members[userID]?.displayName ?? userID
@@ -79,36 +79,31 @@ struct TimelineReadReceiptsView_Previews: PreviewProvider, TestablePreview {
         .mockMe
     ]
 
-    static let viewModel = TimelineViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Test", members: members)),
-                                             timelineController: MockTimelineController(),
-                                             userSession: UserSessionMock(.init()),
-                                             mediaPlayerProvider: MediaPlayerProviderMock(),
-                                             userIndicatorController: ServiceLocator.shared.userIndicatorController,
-                                             appMediator: AppMediatorMock.default,
-                                             appSettings: ServiceLocator.shared.settings,
-                                             analyticsService: ServiceLocator.shared.analytics,
-                                             emojiProvider: EmojiProvider(appSettings: ServiceLocator.shared.settings),
-                                             linkMetadataProvider: LinkMetadataProvider(),
-                                             timelineControllerFactory: TimelineControllerFactoryMock(.init()))
+    static let viewModel = {
+        let appSettings = AppSettings()
+        return TimelineViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Test", members: members)),
+                                 timelineController: MockTimelineController(),
+                                 userSession: UserSessionMock(.init()),
+                                 mediaPlayerProvider: MediaPlayerProviderMock(),
+                                 userIndicatorController: UserIndicatorControllerMock.default,
+                                 appMediator: AppMediatorMock.default,
+                                 appSettings: appSettings,
+                                 analyticsService: AnalyticsServiceMock.default(),
+                                 emojiProvider: EmojiProvider(appSettings: appSettings),
+                                 linkMetadataProvider: LinkMetadataProvider(),
+                                 timelineControllerFactory: TimelineControllerFactoryMock(.init()))
+    }()
 
-    static let singleReceipt = [
-        ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now")
-    ]
-    static let doubleReceipt = [
-        ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now"),
-        ReadReceipt(userID: RoomMemberProxyMock.mockBob.userID, formattedTimestamp: "Before")
-    ]
-    static let tripleReceipt = [
-        ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now"),
-        ReadReceipt(userID: RoomMemberProxyMock.mockBob.userID, formattedTimestamp: "Before"),
-        ReadReceipt(userID: RoomMemberProxyMock.mockCharlie.userID, formattedTimestamp: "Way before")
-    ]
-    static let quadrupleReceipt = [
-        ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now"),
-        ReadReceipt(userID: RoomMemberProxyMock.mockBob.userID, formattedTimestamp: "Before"),
-        ReadReceipt(userID: RoomMemberProxyMock.mockCharlie.userID, formattedTimestamp: "Way before"),
-        ReadReceipt(userID: RoomMemberProxyMock.mockDan.userID, formattedTimestamp: "Way, way before")
-    ]
+    static let singleReceipt = [ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now")]
+    static let doubleReceipt = [ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now"),
+                                ReadReceipt(userID: RoomMemberProxyMock.mockBob.userID, formattedTimestamp: "Before")]
+    static let tripleReceipt = [ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now"),
+                                ReadReceipt(userID: RoomMemberProxyMock.mockBob.userID, formattedTimestamp: "Before"),
+                                ReadReceipt(userID: RoomMemberProxyMock.mockCharlie.userID, formattedTimestamp: "Way before")]
+    static let quadrupleReceipt = [ReadReceipt(userID: RoomMemberProxyMock.mockAlice.userID, formattedTimestamp: "Now"),
+                                   ReadReceipt(userID: RoomMemberProxyMock.mockBob.userID, formattedTimestamp: "Before"),
+                                   ReadReceipt(userID: RoomMemberProxyMock.mockCharlie.userID, formattedTimestamp: "Way before"),
+                                   ReadReceipt(userID: RoomMemberProxyMock.mockDan.userID, formattedTimestamp: "Way, way before")]
 
     static func mockTimelineItem(with receipts: [ReadReceipt]) -> TextRoomTimelineItem {
         TextRoomTimelineItem(id: .randomEvent,

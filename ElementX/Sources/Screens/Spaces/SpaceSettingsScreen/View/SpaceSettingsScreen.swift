@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SpaceSettingsScreen: View {
     @Bindable var context: RoomDetailsScreenViewModel.Context
-
+    
     var body: some View {
         Form {
             editSection
@@ -26,14 +26,14 @@ struct SpaceSettingsScreen: View {
             LeaveSpaceView(context: viewModel.context)
         }
     }
-
+    
     private var editSection: some View {
         Section {
             ListRow(kind: .custom { editRow })
                 .accessibilityIdentifier(A11yIdentifiers.spaceSettingsScreen.editBaseInfo)
         }
     }
-
+    
     @ViewBuilder
     private var editRow: some View {
         if context.viewState.canEditBaseInfo {
@@ -46,14 +46,14 @@ struct SpaceSettingsScreen: View {
             editRowContent
         }
     }
-
+    
     private var editRowContent: some View {
         HStack(spacing: 12) {
             RoomAvatarImage(avatar: context.viewState.details.avatar,
                             avatarSize: .room(on: .spaceSettings),
                             mediaProvider: context.mediaProvider)
                 .accessibilityHidden(true)
-
+            
             VStack(alignment: .leading, spacing: 2) {
                 Text(context.viewState.details.name ?? context.viewState.details.id)
                     .lineLimit(1)
@@ -67,7 +67,7 @@ struct SpaceSettingsScreen: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             if context.viewState.canEditBaseInfo {
                 ListRowAccessory.navigationLink
             }
@@ -75,7 +75,7 @@ struct SpaceSettingsScreen: View {
         .padding(.horizontal, ListRowPadding.horizontal)
         .padding(.vertical, 16)
     }
-
+    
     private var securitySection: some View {
         Section {
             ListRow(label: .default(title: L10n.screenSpaceSettingsSecurityAndPrivacy, icon: \.lock),
@@ -84,7 +84,7 @@ struct SpaceSettingsScreen: View {
                     })
         }
     }
-
+    
     private var peopleSection: some View {
         Section {
             if context.viewState.hasMemberIdentityVerificationStateViolations {
@@ -100,7 +100,7 @@ struct SpaceSettingsScreen: View {
                             context.send(viewAction: .processTapPeople)
                         })
             }
-
+            
             if context.viewState.canEditRolesOrPermissions {
                 ListRow(label: .default(title: L10n.screenSpaceSettingsRolesAndPermissions, icon: \.admin),
                         kind: .navigationLink {
@@ -109,7 +109,7 @@ struct SpaceSettingsScreen: View {
             }
         }
     }
-
+    
     private var leaveSpaceSection: some View {
         ListRow(label: .action(title: L10n.screenSpaceSettingsLeaveSpace,
                                icon: \.leave,
@@ -121,36 +121,30 @@ struct SpaceSettingsScreen: View {
 // MARK: - Previews
 
 struct SpaceSettingsScreen_Previews: PreviewProvider, TestablePreview {
-    static let ownerViewModel = RoomDetailsScreenViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Space",
-                                                                                                avatarURL: .mockMXCAvatar,
-                                                                                                isSpace: true,
-                                                                                                canonicalAlias: "#space:matrix.org",
-                                                                                                members: .allMembersAsCreator)),
-                                                           userSession: UserSessionMock(.init()),
-                                                           analyticsService: ServiceLocator.shared.analytics,
-                                                           userIndicatorController: ServiceLocator.shared.userIndicatorController,
-                                                           notificationSettingsProxy: NotificationSettingsProxyMock(with: NotificationSettingsProxyMockConfiguration()),
-                                                           attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
-                                                           appSettings: ServiceLocator.shared.settings)
-
-    static let userViewModel = RoomDetailsScreenViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Space",
-                                                                                               avatarURL: .mockMXCAvatar,
-                                                                                               isSpace: true,
-                                                                                               canonicalAlias: "#space:matrix.org",
-                                                                                               members: .allMembers)),
-                                                          userSession: UserSessionMock(.init()),
-                                                          analyticsService: ServiceLocator.shared.analytics,
-                                                          userIndicatorController: ServiceLocator.shared.userIndicatorController,
-                                                          notificationSettingsProxy: NotificationSettingsProxyMock(with: NotificationSettingsProxyMockConfiguration()),
-                                                          attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
-                                                          appSettings: ServiceLocator.shared.settings)
+    static let ownerViewModel = makeViewModel(members: .allMembersAsCreator)
+    
+    static let userViewModel = makeViewModel(members: .allMembers)
+    
+    static func makeViewModel(members: [RoomMemberProxyMock]) -> RoomDetailsScreenViewModel {
+        RoomDetailsScreenViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Space",
+                                                                        avatarURL: .mockMXCAvatar,
+                                                                        isSpace: true,
+                                                                        canonicalAlias: "#space:matrix.org",
+                                                                        members: members)),
+                                   userSession: UserSessionMock(.init()),
+                                   analyticsService: AnalyticsServiceMock.default(),
+                                   userIndicatorController: UserIndicatorControllerMock.default,
+                                   notificationSettingsProxy: NotificationSettingsProxyMock(with: NotificationSettingsProxyMockConfiguration()),
+                                   attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
+                                   appSettings: AppSettings())
+    }
 
     static var previews: some View {
         ElementNavigationStack {
             SpaceSettingsScreen(context: ownerViewModel.context)
         }
         .previewDisplayName("Owner")
-
+        
         ElementNavigationStack {
             SpaceSettingsScreen(context: userViewModel.context)
         }

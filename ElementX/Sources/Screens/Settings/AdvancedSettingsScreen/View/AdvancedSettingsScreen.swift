@@ -151,11 +151,11 @@ private extension AppAppearance {
     var name: String {
         switch self {
         case .system:
-            return L10n.commonSystem
+            L10n.themeSystem
         case .light:
-            return L10n.commonLight
+            L10n.themeLight
         case .dark:
-            return L10n.commonDark
+            L10n.themeDark
         }
     }
 }
@@ -165,10 +165,11 @@ private extension AppAppearance {
 struct AdvancedSettingsScreen_Previews: PreviewProvider, TestablePreview {
     static let viewModel = {
         AppSettings.resetAllSettings()
-        return AdvancedSettingsScreenViewModel(advancedSettings: AppSettings(),
-                                               analytics: ServiceLocator.shared.analytics,
+        let appSettings = AppSettings()
+        return AdvancedSettingsScreenViewModel(advancedSettings: appSettings,
+                                               analytics: AnalyticsServiceMock.default(),
                                                clientProxy: ClientProxyMock(.init()),
-                                               userIndicatorController: UserIndicatorControllerMock())
+                                               userIndicatorController: UserIndicatorControllerMock.default)
     }()
 
     static var previews: some View {

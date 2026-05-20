@@ -14,28 +14,27 @@ enum AnalyticsPromptScreenCoordinatorAction {
 }
 
 final class AnalyticsPromptScreenCoordinator: CoordinatorProtocol {
-    private let analytics: AnalyticsService
+    private let analytics: AnalyticsServiceProtocol
     private var viewModel: AnalyticsPromptScreenViewModelProtocol
-    private let actionsSubject: PassthroughSubject<AnalyticsPromptScreenCoordinatorAction, Never> =
-        .init()
+    private let actionsSubject: PassthroughSubject<AnalyticsPromptScreenCoordinatorAction, Never> = .init()
     private var cancellables = Set<AnyCancellable>()
-
+    
     var actions: AnyPublisher<AnalyticsPromptScreenCoordinatorAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
-    init(analytics: AnalyticsService, termsURL: URL?) {
+    
+    init(analytics: AnalyticsServiceProtocol, termsURL: URL?) {
         self.analytics = analytics
         viewModel = AnalyticsPromptScreenViewModel(termsURL: termsURL)
     }
-
+    
     // MARK: - Public
-
+    
     func start() {
         viewModel.actions
             .sink { [weak self] action in
                 guard let self else { return }
-
+                
                 switch action {
                 case .enable:
                     MXLog.info("Enable Analytics")
@@ -49,7 +48,7 @@ final class AnalyticsPromptScreenCoordinator: CoordinatorProtocol {
             }
             .store(in: &cancellables)
     }
-
+    
     func toPresentable() -> AnyView {
         AnyView(AnalyticsPromptScreen(context: viewModel.context))
     }

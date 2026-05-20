@@ -147,8 +147,8 @@ struct UserProfileScreen_Previews: PreviewProvider, TestablePreview {
         return UserProfileScreenViewModel(userID: userID,
                                           isPresentedModally: false,
                                           userSession: UserSessionMock(.init(clientProxy: clientProxyMock)),
-                                          userIndicatorController: ServiceLocator.shared.userIndicatorController,
-                                          analytics: ServiceLocator.shared.analytics,
-                                          appSettings: ServiceLocator.shared.settings)
+                                          userIndicatorController: UserIndicatorControllerMock.default,
+                                          analytics: AnalyticsServiceMock.default(),
+                                          appSettings: AppSettings())
     }
 }

@@ -17,7 +17,7 @@ class ClientProxy: ClientProxyProtocol {
     private let client: ClientProtocol
     private let networkMonitor: NetworkMonitorProtocol
     private let appSettings: AppSettings
-    private let analyticsService: AnalyticsService
+    private let analyticsService: AnalyticsServiceProtocol
     
     let mediaLoader: MediaLoaderProtocol
     private let clientQueue: DispatchQueue
@@ -202,7 +202,7 @@ class ClientProxy: ClientProxyProtocol {
     init(client: ClientProtocol,
          networkMonitor: NetworkMonitorProtocol,
          appSettings: AppSettings,
-         analyticsService: AnalyticsService) async throws {
+         analyticsService: AnalyticsServiceProtocol) async throws {
         self.client = client
         self.networkMonitor = networkMonitor
         self.appSettings = appSettings
@@ -403,6 +403,14 @@ class ClientProxy: ClientProxyProtocol {
         MXLog.info("Starting sync")
         
         Task {
+            if appSettings.clientPausingAndResumingEnabled {
+                do {
+                    try await client.resume()
+                } catch {
+                    MXLog.error("Failed resuming client with error: \(error)")
+                }
+            }
+            
             await syncService.start()
             
             // If we are using OAuth we want to cache the account management URL in volatile memory on the SDK side.
@@ -454,6 +462,15 @@ class ClientProxy: ClientProxyProtocol {
             }
             
             await syncService.stop()
+            
+            if appSettings.clientPausingAndResumingEnabled {
+                do {
+                    try await client.pause()
+                } catch {
+                    MXLog.error("Failed pausing client with error: \(error)")
+                }
+            }
+            
             MXLog.info("Sync stopped")
         }
     }
@@ -499,7 +516,7 @@ class ClientProxy: ClientProxyProtocol {
         }
     }
     
-    func createRoom(name: String,
+    func createRoom(name: String?,
                     topic: String?,
                     accessType: CreateRoomAccessType,
                     isSpace: Bool,
@@ -854,6 +871,15 @@ class ClientProxy: ClientProxyProtocol {
             return try await .success(client.optimizeStores())
         } catch {
             MXLog.error("Failed optimizing client stores with error: \(error)")
+            return .failure(.sdkError(error))
+        }
+    }
+
+    func markAllRoomsAsRead() async -> Result<Void, ClientProxyError> {
+        do {
+            return try await .success(client.markAllRoomsAsRead())
+        } catch {
+            MXLog.error("Failed marking all rooms as read with error: \(error)")
             return .failure(.sdkError(error))
         }
     }

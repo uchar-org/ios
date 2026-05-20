@@ -11,7 +11,7 @@ import SwiftUI
 struct CreateRoomSpaceSelectionSheet: View {
     @ObservedObject var context: CreateRoomScreenViewModel.Context
     @Environment(\.dismiss) private var dismiss
-
+    
     private var dragIndicatorVisibilty: Visibility {
         if #available(iOS 26, *) {
             .hidden
@@ -19,7 +19,7 @@ struct CreateRoomSpaceSelectionSheet: View {
             .automatic
         }
     }
-
+    
     var body: some View {
         ElementNavigationStack {
             List {
@@ -67,15 +67,16 @@ struct CreateRoomSpaceSelectionSheet_Previews: PreviewProvider, TestablePreview 
         clientProxy.spaceService = SpaceServiceProxyMock(.init(editableSpaces: .mockJoinedSpaces2))
         let userSession = UserSessionMock(.init(clientProxy: clientProxy))
 
+        let appSettings = AppSettings()
         return CreateRoomScreenViewModel(isSpace: false,
                                          spaceSelectionMode: .editableSpacesList(preSelectedSpace: nil),
                                          shouldShowCancelButton: false,
                                          userSession: userSession,
-                                         analytics: ServiceLocator.shared.analytics,
-                                         userIndicatorController: UserIndicatorControllerMock(),
-                                         appSettings: ServiceLocator.shared.settings)
+                                         analytics: AnalyticsServiceMock.default(),
+                                         userIndicatorController: UserIndicatorControllerMock.default,
+                                         appSettings: appSettings)
     }()
-
+    
     static var previews: some View {
         CreateRoomSpaceSelectionSheet(context: viewModel.context)
             .snapshotPreferences(expect: viewModel.context.$viewState.map { $0.editableSpaces.count > 0 })

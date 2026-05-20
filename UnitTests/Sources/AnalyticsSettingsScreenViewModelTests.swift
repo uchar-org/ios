@@ -11,23 +11,24 @@ import Testing
 
 @MainActor
 final class AnalyticsSettingsScreenViewModelTests {
-    private var appSettings: AppSettings!
+    private let appSettings: AppSettings
+    private let analytics: AnalyticsService
+
     private var viewModel: AnalyticsSettingsScreenViewModelProtocol!
     private var context: AnalyticsSettingsScreenViewModelType.Context!
-
+    
     init() {
         AppSettings.resetAllSettings()
         appSettings = AppSettings()
-        let analyticsClient = AnalyticsClientMock()
-        analyticsClient.isRunning = false
-        ServiceLocator.shared.register(analytics: AnalyticsService(client: analyticsClient,
-                                                                   appSettings: appSettings))
+        let client = AnalyticsClientMock()
+        client.isRunning = false
+        analytics = AnalyticsService(client: client, appSettings: appSettings)
 
         viewModel = AnalyticsSettingsScreenViewModel(appSettings: appSettings,
-                                                     analytics: ServiceLocator.shared.analytics)
+                                                     analytics: analytics)
         context = viewModel.context
     }
-
+    
     deinit {
         AppSettings.resetAllSettings()
     }
@@ -43,7 +44,7 @@ final class AnalyticsSettingsScreenViewModelTests {
         context.send(viewAction: .toggleAnalytics)
         #expect(context.enableAnalytics)
     }
-
+    
     @Test
     func optOut() {
         appSettings.analyticsConsentState = .optedIn

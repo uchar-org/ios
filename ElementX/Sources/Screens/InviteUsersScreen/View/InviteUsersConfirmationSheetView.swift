@@ -10,21 +10,17 @@ import SwiftUI
 
 struct InviteUsersConfirmationSheetView: View {
     @ObservedObject var context: InviteUsersScreenViewModel.Context
-
+    
     /// The users whose identities we wish the user to confirm.
     var users: [UserProfileProxy]
-
+    
     var body: some View {
         FullscreenDialog(topPadding: 24, horizontalPadding: 24) {
             VStack(spacing: 32) {
-                TitleAndIcon(title: users.count == 1
-                    ? L10n.screenInviteUsersConfirmDialogTitleOneUser
-                    : L10n.screenInviteUsersConfirmDialogTitleMutipleUsers,
-                    subtitle: users.count == 1
-                        ? L10n.screenInviteUsersConfirmDialogSubtitleOneUser
-                        : L10n.screenInviteUsersConfirmDialogSubtitleMultipleUsers,
-                    icon: \.userAddSolid,
-                    iconStyle: .defaultSolid)
+                TitleAndIcon(title: users.count == 1 ? L10n.screenInviteUsersConfirmDialogTitleOneUser : L10n.screenInviteUsersConfirmDialogTitleMutipleUsers,
+                             subtitle: users.count == 1 ? L10n.screenInviteUsersConfirmDialogSubtitleOneUser : L10n.screenInviteUsersConfirmDialogSubtitleMultipleUsers,
+                             icon: \.userAddSolid,
+                             iconStyle: .defaultSolid)
                 VStack(spacing: 0) {
                     ForEach(users, id: \.userID) { user in
                         UserProfileListRow(user: user,
@@ -42,7 +38,7 @@ struct InviteUsersConfirmationSheetView: View {
                     context.send(viewAction: .removeUnknownUsers)
                 }
                 .buttonStyle(.compound(.secondary))
-
+                
                 Button(L10n.actionInvite) {
                     context.send(viewAction: .confirmUnknownUsers)
                 }
@@ -57,22 +53,22 @@ struct InviteUsersConfirmationSheetView: View {
 
 struct InviteUsersConfirmationSheetView_Previews: PreviewProvider, TestablePreview {
     static var viewModel = makeViewModel()
-
+    
     static var previews: some View {
         InviteUsersConfirmationSheetView(context: viewModel.context, users: [.mockAlice, .mockCharlie, .mockBob, .mockDan])
             .previewDisplayName("Default")
     }
-
+    
     static func makeViewModel() -> InviteUsersScreenViewModel {
         let viewModel = InviteUsersScreenViewModel(userSession: UserSessionMock(.init(clientProxy: ClientProxyMock(.init()))),
-                                                   roomProxy: JoinedRoomProxyMock(.init(members: [])),
+                                                   roomType: .existingRoom(roomProxy: JoinedRoomProxyMock(.init(members: []))),
                                                    isSkippable: true,
                                                    userDiscoveryService: UserDiscoveryServiceMock(),
                                                    userIndicatorController: UserIndicatorControllerMock(),
-                                                   appSettings: ServiceLocator.shared.settings)
-
+                                                   appSettings: AppSettings())
+        
         viewModel.state.usersToConfirm = [.mockAlice, .mockCharlie, .mockBob, .mockDan]
-
+        
         return viewModel
     }
 }

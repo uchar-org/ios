@@ -10,6 +10,7 @@ import SwiftUI
 
 struct DeveloperOptionsScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var showMarkAllRoomsAsReadAlert = false
     
     @Bindable var context: DeveloperOptionsScreenViewModel.Context
     
@@ -132,6 +133,26 @@ struct DeveloperOptionsScreen: View {
             
             Section {
                 Button {
+                    showMarkAllRoomsAsReadAlert = true
+                } label: {
+                    Text("Mark all rooms as read")
+                }.alert("Are you sure you want to mark all the rooms as read?", isPresented: $showMarkAllRoomsAsReadAlert) {
+                    Button("Cancel", role: .cancel) { }
+                    
+                    Button("Yes") {
+                        context.send(viewAction: .markAllRoomsAsRead)
+                    }
+                }
+            } footer: {
+                Text("""
+                This will send a private read receipt and a read marker in every room you are part of. \ 
+                It's a long running operation that might get rate limited. \
+                It will run in the background but the app must be alive for it to finish.
+                """)
+            }
+            
+            Section {
+                Button {
                     showConfetti = true
                 } label: {
                     Text("🥳")
@@ -223,10 +244,11 @@ private extension Set<TraceLogPack> {
 // MARK: - Previews
 
 struct DeveloperOptionsScreen_Previews: PreviewProvider {
-    static let viewModel = DeveloperOptionsScreenViewModel(developerOptions: ServiceLocator.shared.settings,
-                                                           elementCallBaseURL: ServiceLocator.shared.settings.elementCallBaseURL,
+    static let viewModel = DeveloperOptionsScreenViewModel(developerOptions: AppSettings(),
+                                                           elementCallBaseURL: AppSettings().elementCallBaseURL,
                                                            appHooks: AppHooks(),
                                                            clientProxy: ClientProxyMock(.init()))
+    
     static var previews: some View {
         ElementNavigationStack {
             DeveloperOptionsScreen(context: viewModel.context)

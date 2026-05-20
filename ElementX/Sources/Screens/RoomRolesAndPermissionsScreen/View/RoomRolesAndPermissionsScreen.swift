@@ -11,12 +11,12 @@ import SwiftUI
 
 struct RoomRolesAndPermissionsScreen: View {
     @Bindable var context: RoomRolesAndPermissionsScreenViewModel.Context
-
+    
     var body: some View {
         Form {
             rolesSection
             permissionsSection
-
+            
             resetSection
         }
         .compoundList()
@@ -24,7 +24,7 @@ struct RoomRolesAndPermissionsScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .alert(item: $context.alertInfo)
     }
-
+    
     private var rolesSection: some View {
         Section {
             if context.viewState.ownPowerLevel.role == .creator {
@@ -44,7 +44,7 @@ struct RoomRolesAndPermissionsScreen: View {
                         })
                         .accessibilityIdentifier(A11yIdentifiers.roomRolesAndPermissionsScreen.administrators)
             }
-
+            
             ListRow(label: .default(title: L10n.screenRoomRolesAndPermissionsModerators,
                                     icon: \.chatProblem),
                     details: moderatorDetails,
@@ -52,7 +52,7 @@ struct RoomRolesAndPermissionsScreen: View {
                         context.send(viewAction: .editRoles(.moderators))
                     })
                     .accessibilityIdentifier(A11yIdentifiers.roomRolesAndPermissionsScreen.moderators)
-
+            
             if context.viewState.ownPowerLevel.role != .creator {
                 ListRow(label: .default(title: L10n.screenRoomRolesAndPermissionsChangeMyRole,
                                         icon: \.edit),
@@ -65,7 +65,7 @@ struct RoomRolesAndPermissionsScreen: View {
                 .compoundListSectionHeader()
         }
     }
-
+    
     private var administratorOrOwnersDetails: ListRowDetails<Image> {
         if let administratorCount = context.viewState.administratorsAndOwnersCount {
             .title("\(administratorCount)")
@@ -73,7 +73,7 @@ struct RoomRolesAndPermissionsScreen: View {
             .isWaiting(true)
         }
     }
-
+    
     private var administratorDetails: ListRowDetails<Image> {
         if let administratorCount = context.viewState.administratorCount {
             .title("\(administratorCount)")
@@ -81,7 +81,7 @@ struct RoomRolesAndPermissionsScreen: View {
             .isWaiting(true)
         }
     }
-
+    
     private var moderatorDetails: ListRowDetails<Image> {
         if let moderatorCount = context.viewState.moderatorCount {
             .title("\(moderatorCount)")
@@ -89,7 +89,7 @@ struct RoomRolesAndPermissionsScreen: View {
             .isWaiting(true)
         }
     }
-
+    
     private var permissionsSection: some View {
         Section {
             ListRow(label: .default(title: L10n.screenRoomRolesAndPermissionsPermissionsHeader,
@@ -102,7 +102,7 @@ struct RoomRolesAndPermissionsScreen: View {
                     .disabled(context.viewState.permissions == nil)
         }
     }
-
+    
     private var resetSection: some View {
         Section {
             ListRow(label: .default(title: L10n.screenRoomRolesAndPermissionsReset,
@@ -121,18 +121,18 @@ struct RoomRolesAndPermissionsScreen_Previews: PreviewProvider, TestablePreview 
     static let viewModel = RoomRolesAndPermissionsScreenViewModel(initialPermissions: RoomPermissions(powerLevels: .mock),
                                                                   roomProxy: JoinedRoomProxyMock(.init(members: .allMembersAsAdmin)),
                                                                   userIndicatorController: UserIndicatorControllerMock(),
-                                                                  analytics: ServiceLocator.shared.analytics)
-
+                                                                  analytics: AnalyticsServiceMock.default())
+    
     static let creatorViewModel = RoomRolesAndPermissionsScreenViewModel(initialPermissions: RoomPermissions(powerLevels: .mock),
                                                                          roomProxy: JoinedRoomProxyMock(.init(members: .allMembersAsCreator)),
                                                                          userIndicatorController: UserIndicatorControllerMock(),
-                                                                         analytics: ServiceLocator.shared.analytics)
+                                                                         analytics: AnalyticsServiceMock.default())
     static var previews: some View {
         ElementNavigationStack {
             RoomRolesAndPermissionsScreen(context: viewModel.context)
         }
         .previewDisplayName("Admin")
-
+        
         ElementNavigationStack {
             RoomRolesAndPermissionsScreen(context: creatorViewModel.context)
         }

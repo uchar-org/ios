@@ -207,7 +207,7 @@ struct AuthenticationStartScreen_Previews: PreviewProvider, TestablePreview {
                                                   },
                                                   isBugReportServiceEnabled: true,
                                                   appMediator: AppMediatorMock(),
-                                                  appSettings: ServiceLocator.shared.settings,
+                                                  appSettings: AppSettings(),
                                                   mediaProvider: MediaProviderMock(configuration: .init()),
                                                   userIndicatorController: UserIndicatorControllerMock())
     }

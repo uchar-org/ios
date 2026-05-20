@@ -259,15 +259,17 @@ struct RoomScreen_Previews: PreviewProvider, TestablePreview {
                                                       successor: hasSuccessor ? .init(roomId: UUID().uuidString, reason: nil) : nil,
                                                       powerLevelsConfiguration: .init(canUserSendMessage: canSendMessage)))
         let roomViewModel = RoomScreenViewModel.mock(roomProxyMock: roomProxyMock)
+
+        let appSettings = AppSettings()
         let timelineViewModel = TimelineViewModel(roomProxy: roomProxyMock,
                                                   timelineController: MockTimelineController(),
                                                   userSession: UserSessionMock(.init()),
                                                   mediaPlayerProvider: MediaPlayerProviderMock(),
-                                                  userIndicatorController: ServiceLocator.shared.userIndicatorController,
+                                                  userIndicatorController: UserIndicatorControllerMock.default,
                                                   appMediator: AppMediatorMock.default,
-                                                  appSettings: ServiceLocator.shared.settings,
-                                                  analyticsService: ServiceLocator.shared.analytics,
-                                                  emojiProvider: EmojiProvider(appSettings: ServiceLocator.shared.settings),
+                                                  appSettings: appSettings,
+                                                  analyticsService: AnalyticsServiceMock.default(),
+                                                  emojiProvider: EmojiProvider(appSettings: appSettings),
                                                   linkMetadataProvider: LinkMetadataProvider(),
                                                   timelineControllerFactory: TimelineControllerFactoryMock(.init()))
 

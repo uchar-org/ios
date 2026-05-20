@@ -22,6 +22,11 @@ struct RoomDetailsScreen: View {
             
             aboutSection
             
+            // The invitation flow is different for DMs
+            if context.viewState.dmRecipientInfo != nil {
+                inviteToNewRoomSection
+            }
+            
             configurationSection
             
             if context.viewState.dmRecipientInfo == nil {
@@ -163,6 +168,13 @@ struct RoomDetailsScreen: View {
                     })
                     .accessibilityIdentifier(A11yIdentifiers.roomDetailsScreen.pollsHistory)
         }
+    }
+    
+    private var inviteToNewRoomSection: some View {
+        ListRow(label: .default(title: L10n.actionInvite, icon: \.userAdd),
+                kind: .navigationLink {
+                    context.send(viewAction: .processTapInvite)
+                })
     }
     
     private var configurationSection: some View {
@@ -405,14 +417,14 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
         notificationSettingsProxyMockConfiguration.roomMode.isDefault = false
         
         let notificationSettingsProxy = NotificationSettingsProxyMock(with: notificationSettingsProxyMockConfiguration)
-        
+
         return .init(roomProxy: roomProxy,
                      userSession: UserSessionMock(.init()),
-                     analyticsService: ServiceLocator.shared.analytics,
-                     userIndicatorController: ServiceLocator.shared.userIndicatorController,
+                     analyticsService: AnalyticsServiceMock.default(),
+                     userIndicatorController: UserIndicatorControllerMock.default,
                      notificationSettingsProxy: notificationSettingsProxy,
                      attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
-                     appSettings: ServiceLocator.shared.settings)
+                     appSettings: AppSettings())
     }
     
     private static func makeSimpleRoomViewModel() -> RoomDetailsScreenViewModel {
@@ -433,14 +445,14 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
                                                   joinRule: .knock))
         
         let notificationSettingsProxy = NotificationSettingsProxyMock(with: .init())
-        
+
         return .init(roomProxy: roomProxy,
                      userSession: UserSessionMock(.init()),
-                     analyticsService: ServiceLocator.shared.analytics,
-                     userIndicatorController: ServiceLocator.shared.userIndicatorController,
+                     analyticsService: AnalyticsServiceMock.default(),
+                     userIndicatorController: UserIndicatorControllerMock.default,
                      notificationSettingsProxy: notificationSettingsProxy,
                      attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
-                     appSettings: ServiceLocator.shared.settings)
+                     appSettings: AppSettings())
     }
     
     private static func makeDMViewModel(verificationState: UserIdentityVerificationState) -> RoomDetailsScreenViewModel {
@@ -471,13 +483,13 @@ struct RoomDetailsScreen_Previews: PreviewProvider, TestablePreview {
         }
         
         let notificationSettingsProxy = NotificationSettingsProxyMock(with: .init())
-        
+
         return .init(roomProxy: roomProxy,
                      userSession: UserSessionMock(.init(clientProxy: clientProxyMock)),
-                     analyticsService: ServiceLocator.shared.analytics,
-                     userIndicatorController: ServiceLocator.shared.userIndicatorController,
+                     analyticsService: AnalyticsServiceMock.default(),
+                     userIndicatorController: UserIndicatorControllerMock.default,
                      notificationSettingsProxy: notificationSettingsProxy,
                      attributedStringBuilder: AttributedStringBuilder(mentionBuilder: MentionBuilder()),
-                     appSettings: ServiceLocator.shared.settings)
+                     appSettings: AppSettings())
     }
 }

@@ -235,7 +235,7 @@ class JoinRoomScreenViewModel: JoinRoomScreenViewModelType, JoinRoomScreenViewMo
         if case .space(let spaceServiceRoom) = source {
             switch spaceServiceRoom.state {
             case .invited:
-                state.mode = .invited(isDM: spaceServiceRoom.isDirect == true && spaceServiceRoom.joinedMembersCount == 1)
+                state.mode = .invited(isDM: spaceServiceRoom.isDM == true)
             case .knocked:
                 state.mode = .knocked
             case .banned:

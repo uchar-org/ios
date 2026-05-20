@@ -11,47 +11,45 @@ import SwiftUI
 
 typealias PinnedEventsTimelineScreenViewModelType = StateStoreViewModel<PinnedEventsTimelineScreenViewState, PinnedEventsTimelineScreenViewAction>
 
-class PinnedEventsTimelineScreenViewModel: PinnedEventsTimelineScreenViewModelType,
-    PinnedEventsTimelineScreenViewModelProtocol {
+class PinnedEventsTimelineScreenViewModel: PinnedEventsTimelineScreenViewModelType, PinnedEventsTimelineScreenViewModelProtocol {
     private let roomProxy: JoinedRoomProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let appSettings: AppSettings
-    private let analyticsService: AnalyticsService
-
-    private let actionsSubject: PassthroughSubject<PinnedEventsTimelineScreenViewModelAction, Never> =
-        .init()
+    private let analyticsService: AnalyticsServiceProtocol
+    
+    private let actionsSubject: PassthroughSubject<PinnedEventsTimelineScreenViewModelAction, Never> = .init()
     var actionsPublisher: AnyPublisher<PinnedEventsTimelineScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
+    
     init(roomProxy: JoinedRoomProxyProtocol,
          userIndicatorController: UserIndicatorControllerProtocol,
          appSettings: AppSettings,
-         analyticsService: AnalyticsService) {
+         analyticsService: AnalyticsServiceProtocol) {
         self.roomProxy = roomProxy
         self.userIndicatorController = userIndicatorController
         self.appSettings = appSettings
         self.analyticsService = analyticsService
         super.init(initialViewState: PinnedEventsTimelineScreenViewState())
     }
-
+    
     // MARK: - Public
-
+    
     override func process(viewAction: PinnedEventsTimelineScreenViewAction) {
         MXLog.info("View model: received view action: \(viewAction)")
-
+        
         switch viewAction {
         case .close:
             analyticsService.trackInteraction(name: .PinnedMessageBannerCloseListButton)
             actionsSubject.send(.dismiss)
         }
     }
-
+    
     func stop() {
         // Work around QLPreviewController dismissal issues, see the InteractiveQuickLookModifier.
         state.bindings.mediaPreviewViewModel = nil
     }
-
+    
     func displayMediaPreview(_ mediaPreviewViewModel: TimelineMediaPreviewViewModel) {
         mediaPreviewViewModel.actions.sink { [weak self] action in
             guard let self else { return }
@@ -72,19 +70,18 @@ class PinnedEventsTimelineScreenViewModel: PinnedEventsTimelineScreenViewModelTy
             }
         }
         .store(in: &cancellables)
-
+        
         state.bindings.mediaPreviewViewModel = mediaPreviewViewModel
     }
-
+    
     private func viewInRoomTimeline(eventID: String) async {
         switch await roomProxy.loadOrFetchEventDetails(for: eventID) {
         case .success(let event):
-            let threadRootEventID: String? =
-                if appSettings.threadsEnabled {
-                    event.threadRootEventId()
-                } else {
-                    nil
-                }
+            let threadRootEventID: String? = if appSettings.threadsEnabled {
+                event.threadRootEventId()
+            } else {
+                nil
+            }
             actionsSubject.send(.viewInRoomTimeline(eventID: eventID, threadRootEventID: threadRootEventID))
         case .failure:
             userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))

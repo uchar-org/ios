@@ -12,7 +12,7 @@ import SwiftUI
 struct PinnedEventsTimelineScreen: View {
     @ObservedObject var context: PinnedEventsTimelineScreenViewModel.Context
     @ObservedObject var timelineContext: TimelineViewModel.Context
-
+    
     private var title: String {
         let pinnedEventIDs = timelineContext.viewState.pinnedEventIDs
         guard !pinnedEventIDs.isEmpty else {
@@ -20,7 +20,7 @@ struct PinnedEventsTimelineScreen: View {
         }
         return L10n.screenPinnedTimelineScreenTitle(pinnedEventIDs.count)
     }
-
+    
     var body: some View {
         content
             .navigationTitle(title)
@@ -30,7 +30,7 @@ struct PinnedEventsTimelineScreen: View {
             .interactiveDismissDisabled()
             .timelineMediaPreview(viewModel: $context.mediaPreviewViewModel)
     }
-
+    
     @ViewBuilder
     private var content: some View {
         if timelineContext.viewState.pinnedEventIDs.isEmpty {
@@ -52,7 +52,7 @@ struct PinnedEventsTimelineScreen: View {
             TimelineView(timelineContext: timelineContext)
         }
     }
-
+    
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
@@ -69,24 +69,26 @@ struct PinnedEventsTimelineScreen_Previews: PreviewProvider, TestablePreview {
     static let viewModel = PinnedEventsTimelineScreenViewModel(roomProxy: JoinedRoomProxyMock(.init()),
                                                                userIndicatorController: UserIndicatorControllerMock(),
                                                                appSettings: AppSettings(),
-                                                               analyticsService: ServiceLocator.shared.analytics)
-
+                                                               analyticsService: AnalyticsServiceMock.default())
+    
     static let emptyTimelineViewModel: TimelineViewModel = {
         let timelineController = MockTimelineController(timelineKind: .pinned)
         timelineController.timelineItems = []
+        
+        let appSettings = AppSettings()
         return TimelineViewModel(roomProxy: JoinedRoomProxyMock(.init(name: "Preview room")),
                                  timelineController: timelineController,
                                  userSession: UserSessionMock(.init()),
                                  mediaPlayerProvider: MediaPlayerProviderMock(),
                                  userIndicatorController: UserIndicatorControllerMock(),
                                  appMediator: AppMediatorMock.default,
-                                 appSettings: ServiceLocator.shared.settings,
-                                 analyticsService: ServiceLocator.shared.analytics,
-                                 emojiProvider: EmojiProvider(appSettings: ServiceLocator.shared.settings),
+                                 appSettings: appSettings,
+                                 analyticsService: AnalyticsServiceMock.default(),
+                                 emojiProvider: EmojiProvider(appSettings: appSettings),
                                  linkMetadataProvider: LinkMetadataProvider(),
                                  timelineControllerFactory: TimelineControllerFactoryMock(.init()))
     }()
-
+        
     static var previews: some View {
         ElementNavigationStack {
             PinnedEventsTimelineScreen(context: viewModel.context, timelineContext: emptyTimelineViewModel.context)

@@ -11,19 +11,17 @@ import SwiftUI
 
 typealias RoomMembersListScreenViewModelType = StateStoreViewModel<RoomMembersListScreenViewState, RoomMembersListScreenViewAction>
 
-class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
-    RoomMembersListScreenViewModelProtocol {
+class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType, RoomMembersListScreenViewModelProtocol {
     private let userSession: UserSessionProtocol
     private let roomProxy: JoinedRoomProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
-    private let analytics: AnalyticsService
-
+    private let analytics: AnalyticsServiceProtocol
+    
     private var members: [RoomMemberProxyProtocol] = []
     private var currentUserProxy: RoomMemberProxyProtocol?
-
-    private var actionsSubject: PassthroughSubject<RoomMembersListScreenViewModelAction, Never> =
-        .init()
-
+    
+    private var actionsSubject: PassthroughSubject<RoomMembersListScreenViewModelAction, Never> = .init()
+    
     var actions: AnyPublisher<RoomMembersListScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
@@ -32,21 +30,21 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
          userSession: UserSessionProtocol,
          roomProxy: JoinedRoomProxyProtocol,
          userIndicatorController: UserIndicatorControllerProtocol,
-         analytics: AnalyticsService) {
+         analytics: AnalyticsServiceProtocol) {
         self.userSession = userSession
         self.roomProxy = roomProxy
         self.userIndicatorController = userIndicatorController
         self.analytics = analytics
-
+        
         super.init(initialViewState: .init(joinedMembersCount: roomProxy.infoPublisher.value.joinedMembersCount,
                                            bindings: .init(mode: initialMode)),
                    mediaProvider: userSession.mediaProvider)
-
+        
         setupMembers()
     }
-
+    
     // MARK: - Public
-
+    
     override func process(viewAction: RoomMembersListScreenViewAction) {
         switch viewAction {
         case .selectMember(let member):
@@ -55,21 +53,21 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
             actionsSubject.send(.invite)
         }
     }
-
+    
     func stop() {
         hideLoadingIndicator(Self.setupMembersLoadingIndicatorIdentifier)
         hideLoadingIndicator(Self.updateStateLoadingIndicatorIdentifier)
     }
-
+    
     // MARK: - Members
-
+    
     private func setupMembers() {
         Task {
             showLoadingIndicator(Self.setupMembersLoadingIndicatorIdentifier)
             await roomProxy.updateMembers()
             hideLoadingIndicator(Self.setupMembersLoadingIndicatorIdentifier)
         }
-
+        
         roomProxy.membersPublisher
             .combineLatest(roomProxy.identityStatusChangesPublisher)
             .filter { !$0.0.isEmpty }
@@ -78,12 +76,12 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
                 self?.updateState(members: members)
             }
             .store(in: &cancellables)
-
+        
         roomProxy.timeline.timelineItemProvider.membershipChangePublisher.sink { [roomProxy] _ in
             Task { await roomProxy.updateMembers() }
         }
         .store(in: &cancellables)
-
+        
         roomProxy.infoPublisher
             .map(\.powerLevels)
             .removeDuplicates { $0?.userPowerLevels == $1?.userPowerLevels }
@@ -92,20 +90,20 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
             }
             .store(in: &cancellables)
     }
-
+    
     private func updateState(members: [RoomMemberProxyProtocol]) {
         Task {
             showLoadingIndicator(Self.updateStateLoadingIndicatorIdentifier)
-
+            
             defer {
                 hideLoadingIndicator(Self.updateStateLoadingIndicatorIdentifier)
             }
-
+            
             let members = members.sorted()
             let roomMembersDetails = await buildMembersDetails(members: members)
             self.members = members
             self.currentUserProxy = members.first { $0.userID == roomProxy.ownUserID }
-
+            
             var newBindings = state.bindings
             if roomMembersDetails.bannedMembers.count == 0 {
                 newBindings.mode = .members
@@ -115,7 +113,7 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
                                invitedMembers: roomMembersDetails.invitedMembers,
                                bannedMembers: roomMembersDetails.bannedMembers,
                                bindings: newBindings)
-
+            
             if let powerLevels = roomProxy.infoPublisher.value.powerLevels {
                 self.state.canInviteUsers = powerLevels.canOwnUserInvite()
                 self.state.canKickUsers = powerLevels.canOwnUserKick()
@@ -123,22 +121,22 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
             }
         }
     }
-
+    
     private func buildMembersDetails(members: [RoomMemberProxyProtocol]) async -> RoomMembersDetails {
         await Task.detached { [userSession, roomProxy] in
             // accessing RoomMember's properties is very slow. We need to do it in a background thread.
             var invitedMembers: [RoomMemberListScreenEntry] = .init()
             var joinedMembers: [RoomMemberListScreenEntry] = .init()
             var bannedMembers: [RoomMemberListScreenEntry] = .init()
-
+            
             for member in members {
                 var verificationState: UserIdentityVerificationState = .notVerified
                 if roomProxy.infoPublisher.value.isEncrypted, // We don't care about identity statuses on non-encrypted rooms
-                   case .success(let userIdentity) = await userSession.clientProxy.userIdentity(for: member.userID, fallBackToServer: false),
+                   case let .success(userIdentity) = await userSession.clientProxy.userIdentity(for: member.userID, fallBackToServer: false),
                    let userIdentity {
                     verificationState = userIdentity.verificationState
                 }
-
+                
                 switch member.membership {
                 case .invite:
                     invitedMembers.append(.init(member: .init(withProxy: member), verificationState: verificationState))
@@ -150,22 +148,20 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
                     continue
                 }
             }
-
+            
             return .init(invitedMembers: invitedMembers,
                          joinedMembers: joinedMembers,
-                         bannedMembers: bannedMembers.sorted {
-                             $0.member.id.localizedStandardCompare($1.member.id) == .orderedAscending
-                         }) // Re-sort ignoring display name.
+                         bannedMembers: bannedMembers.sorted { $0.member.id.localizedStandardCompare($1.member.id) == .orderedAscending }) // Re-sort ignoring display name.
         }
         .value
     }
-
+    
     private func selectMember(_ member: RoomMemberDetails) {
         guard currentUserProxy?.userID != member.id else {
             showMemberDetails(member)
             return
         }
-
+        
         let manageMemberViewModel = ManageRoomMemberSheetViewModel(memberDetails: .memberDetails(roomMember: member),
                                                                    permissions: .init(canKick: state.canKickUsers,
                                                                                       canBan: state.canBanUsers,
@@ -187,7 +183,7 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
         .store(in: &cancellables)
         state.bindings.manageMemeberViewModel = manageMemberViewModel
     }
-
+    
     private func showMemberDetails(_ member: RoomMemberDetails) {
         guard let member = members.first(where: { $0.userID == member.id }) else {
             MXLog.error("Selected member \(member.id) not found")
@@ -195,14 +191,12 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
         }
         actionsSubject.send(.selectMember(member))
     }
-
+    
     // MARK: - Indicators
-
-    private static let setupMembersLoadingIndicatorIdentifier =
-        "\(RoomMembersListScreenViewModel.self)-SetupMembers"
-    private static let updateStateLoadingIndicatorIdentifier =
-        "\(RoomMembersListScreenViewModel.self)-UpdateState"
-
+    
+    private static let setupMembersLoadingIndicatorIdentifier = "\(RoomMembersListScreenViewModel.self)-SetupMembers"
+    private static let updateStateLoadingIndicatorIdentifier = "\(RoomMembersListScreenViewModel.self)-UpdateState"
+    
     private func showLoadingIndicator(_ identifier: String) {
         userIndicatorController.submitIndicator(UserIndicator(id: identifier,
                                                               type: .modal(progress: .indeterminate, interactiveDismissDisabled: false, allowsInteraction: true),
@@ -210,22 +204,22 @@ class RoomMembersListScreenViewModel: RoomMembersListScreenViewModelType,
                                                               persistent: true),
                                                 delay: .milliseconds(200))
     }
-
+    
     private func hideLoadingIndicator(_ identifier: String) {
         userIndicatorController.retractIndicatorWithId(identifier)
     }
-
+    
     private func showManageMemberIndicator(title: String) {
         userIndicatorController.submitIndicator(UserIndicator(id: title,
                                                               type: .toast(progress: .indeterminate),
                                                               title: title,
                                                               persistent: true))
     }
-
+    
     private func hideManageMemberIndicator(title: String) {
         userIndicatorController.retractIndicatorWithId(title)
     }
-
+    
     private func showManageMemberFailure(title: String) {
         userIndicatorController.retractIndicatorWithId(title)
         userIndicatorController.submitIndicator(UserIndicator(title: L10n.commonFailed, iconName: "xmark"))

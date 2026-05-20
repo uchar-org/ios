@@ -305,8 +305,8 @@ struct RoomMembersListScreenViewModelTests {
 
         viewModel = RoomMembersListScreenViewModel(userSession: UserSessionMock(.init()),
                                                    roomProxy: roomProxy,
-                                                   userIndicatorController: ServiceLocator.shared.userIndicatorController,
-                                                   analytics: ServiceLocator.shared.analytics)
+                                                   userIndicatorController: UserIndicatorControllerMock.default,
+                                                   analytics: AnalyticsServiceMock.default())
 
         let context = viewModel.context
 
@@ -329,7 +329,7 @@ struct RoomMembersListScreenViewModelTests {
         roomProxy = JoinedRoomProxyMock(.init(name: "test", members: members))
         viewModel = RoomMembersListScreenViewModel(userSession: UserSessionMock(.init()),
                                                    roomProxy: roomProxy,
-                                                   userIndicatorController: ServiceLocator.shared.userIndicatorController,
-                                                   analytics: ServiceLocator.shared.analytics)
+                                                   userIndicatorController: UserIndicatorControllerMock.default,
+                                                   analytics: AnalyticsServiceMock.default())
     }
 }

@@ -126,6 +126,6 @@ struct RoomChangePermissionsScreenViewModelTests {
                                                          ownPowerLevel: ownPowerLevel,
                                                          roomProxy: roomProxy,
                                                          userIndicatorController: UserIndicatorControllerMock(),
-                                                         analytics: ServiceLocator.shared.analytics)
+                                                         analytics: AnalyticsServiceMock.default())
     }
 }

@@ -11,68 +11,64 @@ import SwiftUI
 
 typealias AdvancedSettingsScreenViewModelType = StateStoreViewModelV2<AdvancedSettingsScreenViewState, AdvancedSettingsScreenViewAction>
 
-class AdvancedSettingsScreenViewModel: AdvancedSettingsScreenViewModelType,
-    AdvancedSettingsScreenViewModelProtocol {
-    private let analytics: AnalyticsService
+class AdvancedSettingsScreenViewModel: AdvancedSettingsScreenViewModelType, AdvancedSettingsScreenViewModelProtocol {
+    private let analytics: AnalyticsServiceProtocol
     private let clientProxy: ClientProxyProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
-
+    
     private var timelineMediaVisibilityTask: Task<Void, Never>?
     private var hideInviteAvatarsTask: Task<Void, Never>?
-
+    
     init(advancedSettings: AdvancedSettingsProtocol,
-         analytics: AnalyticsService,
+         analytics: AnalyticsServiceProtocol,
          clientProxy: ClientProxyProtocol,
          userIndicatorController: UserIndicatorControllerProtocol) {
         self.analytics = analytics
         self.clientProxy = clientProxy
         self.userIndicatorController = userIndicatorController
-
+        
         let state = AdvancedSettingsScreenViewState(timelineMediaVisibility: clientProxy.timelineMediaVisibilityPublisher.value,
                                                     hideInviteAvatars: clientProxy.hideInviteAvatarsPublisher.value,
                                                     bindings: .init(advancedSettings: advancedSettings))
         super.init(initialViewState: state)
-
+        
         clientProxy.timelineMediaVisibilityPublisher
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .weakAssign(to: \.state.timelineMediaVisibility, on: self)
             .store(in: &cancellables)
-
+        
         clientProxy.hideInviteAvatarsPublisher
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .weakAssign(to: \.state.hideInviteAvatars, on: self)
             .store(in: &cancellables)
     }
-
+    
     override func process(viewAction: AdvancedSettingsScreenViewAction) {
         switch viewAction {
         case .optimizeMediaUploadsChanged:
             // Note: Using a view action here as sinking the AppSettings publisher tracks the initial value.
-            analytics.trackInteraction(name: state.bindings.optimizeMediaUploads
-                ? .MobileSettingsOptimizeMediaUploadsEnabled : .MobileSettingsOptimizeMediaUploadsDisabled)
-        case .updateHideInviteAvatars(let value):
+            analytics.trackInteraction(name: state.bindings.optimizeMediaUploads ? .MobileSettingsOptimizeMediaUploadsEnabled : .MobileSettingsOptimizeMediaUploadsDisabled)
+        case let .updateHideInviteAvatars(value):
             hideInviteAvatarsTask = Task { [weak self] in await self?.updateHideInviteAvatars(value) }
-        case .updateTimelineMediaVisibility(let value):
-            timelineMediaVisibilityTask = Task { [weak self] in
-                await self?.updateTimelineMediaVisibility(value)
-            }
+        case let .updateTimelineMediaVisibility(value):
+            timelineMediaVisibilityTask = Task { [weak self] in await self?.updateTimelineMediaVisibility(value) }
         }
     }
-
+    
     private func updateTimelineMediaVisibility(_ value: TimelineMediaVisibility) async {
         defer {
             timelineMediaVisibilityTask = nil
             state.isWaitingTimelineMediaVisibility = false
         }
-
+        
         let previousState = state.timelineMediaVisibility
         state.isWaitingTimelineMediaVisibility = true
         state.timelineMediaVisibility = value
         // If the other value is updating wait also for it to finish
         await hideInviteAvatarsTask?.value
-
+        
         switch await clientProxy.setTimelineMediaVisibility(value) {
         case .success:
             break
@@ -81,19 +77,19 @@ class AdvancedSettingsScreenViewModel: AdvancedSettingsScreenViewModelType,
             userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
         }
     }
-
+    
     private func updateHideInviteAvatars(_ value: Bool) async {
         defer {
             hideInviteAvatarsTask = nil
             state.isWaitingHideInviteAvatars = false
         }
-
+        
         let previousState = state.hideInviteAvatars
         state.isWaitingHideInviteAvatars = true
         state.hideInviteAvatars = value
         // If the other value is updating wait also for it to finish
         await timelineMediaVisibilityTask?.value
-
+        
         switch await clientProxy.setHideInviteAvatars(value) {
         case .success:
             break

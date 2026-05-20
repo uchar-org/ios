@@ -14,7 +14,7 @@ typealias RoomDetailsScreenViewModelType = StateStoreViewModelV2<RoomDetailsScre
 class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScreenViewModelProtocol {
     private let roomProxy: JoinedRoomProxyProtocol
     private let userSession: UserSessionProtocol
-    private let analyticsService: AnalyticsService
+    private let analyticsService: AnalyticsServiceProtocol
     private let userIndicatorController: UserIndicatorControllerProtocol
     private let notificationSettingsProxy: NotificationSettingsProxyProtocol
     private let attributedStringBuilder: AttributedStringBuilderProtocol
@@ -46,7 +46,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
     
     init(roomProxy: JoinedRoomProxyProtocol,
          userSession: UserSessionProtocol,
-         analyticsService: AnalyticsService,
+         analyticsService: AnalyticsServiceProtocol,
          userIndicatorController: UserIndicatorControllerProtocol,
          notificationSettingsProxy: NotificationSettingsProxyProtocol,
          attributedStringBuilder: AttributedStringBuilderProtocol,
@@ -110,7 +110,11 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         case .processTapPeople:
             actionsSubject.send(.requestMemberDetailsPresentation)
         case .processTapInvite:
-            actionsSubject.send(.requestInvitePeoplePresentation)
+            if let dmRecipient = state.dmRecipientInfo {
+                actionsSubject.send(.requestInviteToNewRoomPresentation(selectedInvitee: .init(member: dmRecipient.member)))
+            } else {
+                actionsSubject.send(.requestInvitePeoplePresentation)
+            }
         case .processTapLeave:
             processTapToLeave()
         case .confirmLeave:
@@ -172,12 +176,12 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         
         guard state.joinedMembersCount > 1 else {
             state.bindings.leaveRoomAlertItem = LeaveRoomAlertItem(roomID: roomProxy.id,
-                                                                   isDM: roomProxy.isDirectOneToOneRoom,
+                                                                   isDM: roomProxy.infoPublisher.value.isDM,
                                                                    state: roomProxy.infoPublisher.value.isPrivate ?? true ? .empty : .public)
             return
         }
         
-        if !roomProxy.isDirectOneToOneRoom, state.accountOwner?.role.isOwner == true {
+        if !roomProxy.infoPublisher.value.isDM, state.accountOwner?.role.isOwner == true {
             var isLastOwner = true
             for member in roomProxy.membersPublisher.value where member.userID != roomProxy.ownUserID && member.membership == .join {
                 if member.role.isOwner {
@@ -199,7 +203,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
         }
         
         state.bindings.leaveRoomAlertItem = LeaveRoomAlertItem(roomID: roomProxy.id,
-                                                               isDM: roomProxy.isDirectOneToOneRoom,
+                                                               isDM: roomProxy.infoPublisher.value.isDM,
                                                                state: roomProxy.infoPublisher.value.isPrivate ?? true ? .private : .public)
     }
     
@@ -307,7 +311,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
                     self.state.accountOwner = .init(withProxy: accountOwner)
                 }
                 
-                guard roomProxy.isDirectOneToOneRoom else {
+                guard roomProxy.infoPublisher.value.isDM else {
                     return
                 }
                 
@@ -328,7 +332,7 @@ class RoomDetailsScreenViewModel: RoomDetailsScreenViewModelType, RoomDetailsScr
             return
         }
         
-        if roomProxy.isDirectOneToOneRoom {
+        if roomProxy.infoPublisher.value.isDM {
             if var dmRecipientInfo = state.dmRecipientInfo {
                 if case let .success(userIdentity) = await userSession.clientProxy.userIdentity(for: dmRecipientInfo.member.id, fallBackToServer: true) {
                     dmRecipientInfo.verificationState = userIdentity?.verificationState

@@ -191,6 +191,7 @@ extension RoomInfoProxyMock {
             configuration.members.filter { $0.membership == .join || $0.membership == .invite }.count
         invitedMembersCount = configuration.members.filter { $0.membership == .invite }.count
         joinedMembersCount = configuration.members.filter { $0.membership == .join }.count
+        isDM = isDirect && activeMembersCount <= 2
         highlightCount = 0
         notificationCount = 0
         cachedUserDefinedNotificationMode = .allMessages

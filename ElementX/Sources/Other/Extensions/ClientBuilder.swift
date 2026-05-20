@@ -29,41 +29,38 @@ extension ClientBuilder {
                                          timeout: requestTimeout,
                                          maxConcurrentRequests: nil,
                                          maxRetryTime: maxRequestRetryTime))
-
-        builder =
-            switch slidingSync {
-            case .restored: builder
-            case .discover: builder.slidingSyncVersionBuilder(versionBuilder: .discoverNative)
-            }
-
+            .dmRoomDefinition(dmRoomDefinition: .twoMembers)
+        
+        builder = switch slidingSync {
+        case .restored: builder
+        case .discover: builder.slidingSyncVersionBuilder(versionBuilder: .discoverNative)
+        }
+        
         if setupEncryption {
-            builder =
-                builder
-                    .autoEnableCrossSigning(autoEnableCrossSigning: true)
-                    .backupDownloadStrategy(backupDownloadStrategy: .afterDecryptionFailure)
-                    .enableShareHistoryOnInvite(enableShareHistoryOnInvite: true)
-                    .autoEnableBackups(autoEnableBackups: true)
+            builder = builder
+                .autoEnableCrossSigning(autoEnableCrossSigning: true)
+                .backupDownloadStrategy(backupDownloadStrategy: .afterDecryptionFailure)
+                .enableShareHistoryOnInvite(enableShareHistoryOnInvite: true)
+                .autoEnableBackups(autoEnableBackups: true)
         }
 
         // Set recipient strategy and trust requirement even if `setupEncryption` is false to ensure messages
         // from insecure devices aren't displayed in push notifications.
         // See https://github.com/element-hq/element-x-ios/issues/4702.
         if enableOnlySignedDeviceIsolationMode {
-            builder =
-                builder
-                    .roomKeyRecipientStrategy(strategy: .identityBasedStrategy)
-                    .decryptionSettings(decryptionSettings: .init(senderDeviceTrustRequirement: .crossSignedOrLegacy))
+            builder = builder
+                .roomKeyRecipientStrategy(strategy: .identityBasedStrategy)
+                .decryptionSettings(decryptionSettings: .init(senderDeviceTrustRequirement: .crossSignedOrLegacy))
         } else {
-            builder =
-                builder
-                    .roomKeyRecipientStrategy(strategy: .errorOnVerifiedUserProblem)
-                    .decryptionSettings(decryptionSettings: .init(senderDeviceTrustRequirement: .untrusted))
+            builder = builder
+                .roomKeyRecipientStrategy(strategy: .errorOnVerifiedUserProblem)
+                .decryptionSettings(decryptionSettings: .init(senderDeviceTrustRequirement: .untrusted))
         }
-
+        
         if let httpProxy {
             builder = builder.proxy(url: httpProxy)
         }
-
+        
         return appHooks.clientBuilderHook.configure(builder)
     }
 }

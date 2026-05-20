@@ -11,27 +11,27 @@ import SwiftUI
 
 typealias DeveloperOptionsScreenViewModelType = StateStoreViewModelV2<DeveloperOptionsScreenViewState, DeveloperOptionsScreenViewAction>
 
-class DeveloperOptionsScreenViewModel: DeveloperOptionsScreenViewModelType,
-    DeveloperOptionsScreenViewModelProtocol {
-    private var actionsSubject: PassthroughSubject<DeveloperOptionsScreenViewModelAction, Never> =
-        .init()
-
+class DeveloperOptionsScreenViewModel: DeveloperOptionsScreenViewModelType, DeveloperOptionsScreenViewModelProtocol {
+    private var actionsSubject: PassthroughSubject<DeveloperOptionsScreenViewModelAction, Never> = .init()
+    
     var actions: AnyPublisher<DeveloperOptionsScreenViewModelAction, Never> {
         actionsSubject.eraseToAnyPublisher()
     }
-
-    init(developerOptions: DeveloperOptionsProtocol, elementCallBaseURL: URL, appHooks: AppHooks,
-         clientProxy: ClientProxyProtocol?) {
+    
+    private let clientProxy: ClientProxyProtocol?
+    
+    init(developerOptions: DeveloperOptionsProtocol, elementCallBaseURL: URL, appHooks: AppHooks, clientProxy: ClientProxyProtocol?) {
+        self.clientProxy = clientProxy
         super.init(initialViewState: .init(elementCallBaseURL: elementCallBaseURL,
                                            appHooks: appHooks,
                                            shouldShowClearCache: clientProxy != nil,
                                            isPresentedModally: clientProxy == nil,
                                            bindings: .init(developerOptions: developerOptions)))
-
+        
         Task {
-            if case .success(let sizes) = await clientProxy?.storeSizes() {
+            if case let .success(sizes) = await clientProxy?.storeSizes() {
                 let formatter = ByteCountFormatStyle(style: .file)
-
+                
                 var components = [DeveloperOptionsScreenViewState.StoreSize]()
                 if let cryptoStore = sizes.cryptoStore {
                     components.append(.init(name: "CryptoStore", size: formatter.format(Int64(cryptoStore))))
@@ -48,16 +48,20 @@ class DeveloperOptionsScreenViewModel: DeveloperOptionsScreenViewModelType,
                 if let logsSize = try? FileManager.default.sizeForDirectory(at: .appGroupLogsDirectory) {
                     components.append(.init(name: "Log Files", size: formatter.format(Int64(logsSize))))
                 }
-
+            
                 state.storeSizes = components
             }
         }
     }
-
+    
     override func process(viewAction: DeveloperOptionsScreenViewAction) {
         switch viewAction {
         case .clearCache:
             actionsSubject.send(.clearCache)
+        case .markAllRoomsAsRead:
+            Task.detached {
+                await self.clientProxy?.markAllRoomsAsRead()
+            }
         }
     }
 }
